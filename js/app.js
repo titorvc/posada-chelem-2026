@@ -20,13 +20,13 @@ const CATALOG_KEYS = {
 };
 
 const PART_LABELS = {
-  face:    { title: "Diseños de Cabeza",    pri: "Chasis Principal", sec: "Sombra / Textura" },
-  eyes:    { title: "Diseños de Ojos",      pri: "Luz / Lentes",     sec: "Marco / Visor" },
-  mouth:   { title: "Diseños de Boca",      pri: "Luz / Dientes",    sec: "Base de Boca" },
-  top:     { title: "Diseños de Antena",    pri: "Punta / Foco",     sec: "Base / Mástil" },
-  sides:   { title: "Diseños Laterales",    pri: "Módulo Lateral",   sec: "Cables / Detalle" },
-  texture: { title: "Textura de Chasis",    pri: "Color de Textura", sec: "Color Chasis" },
-  bg:      { title: "Estilo de Fondo",      pri: "Fondo Principal",  sec: "Fondo Secundario" }
+  face:    { title: "Diseños de Cabeza",    pri: "Color Principal",   sec: "Sombra y Detalle" },
+  eyes:    { title: "Diseños de Ojos",      pri: "Mirada",            sec: "Marco y Gafas" },
+  mouth:   { title: "Diseños de Boca",      pri: "Sonrisa",           sec: "Contorno" },
+  top:     { title: "Detalle Superior",     pri: "Elemento Superior", sec: "Base" },
+  sides:   { title: "Diseños Laterales",    pri: "Laterales",         sec: "Conectores" },
+  texture: { title: "Patrón y Acabado",     pri: "Color del Patrón",  sec: "Fondo del Patrón" },
+  bg:      { title: "Estilo de Fondo",      pri: "Fondo Primario",    sec: "Fondo Secundario" }
 };
 
 const QUICK_HSL_SWATCHES = [
@@ -901,8 +901,8 @@ function renderTransportSection() {
         <div>
           ${
             isMine
-              ? `<button type="button" class="btn btn-sm" onclick="retireCar(${car.id})">Retirar</button>`
-              : `<button type="button" class="btn btn-ocean btn-sm" onclick="showToast('Lugar solicitado con ${car.driver}')">Pedir lugar</button>`
+              ? `<button type="button" class="btn btn-secondary btn-sm" onclick="retireCar(${car.id})">Retirar</button>`
+              : `<button type="button" class="btn btn-pusio btn-sm" onclick="showToast('Lugar solicitado con ${car.driver}')">Pedir lugar</button>`
           }
         </div>
       </div>
@@ -1022,14 +1022,14 @@ function setupEventListeners() {
     triggerCanvasPop();
     saveState();
     renderAll();
-    showToast("Robot mezclado con nuevas piezas Bottts");
+    showToast("Personaje mezclado con nuevas piezas");
   };
 
   document.getElementById("btnSaveRobotStudio").onclick = () => {
     if (!requireAuth()) return;
     saveState();
     renderAll();
-    showToast(`Robot guardado en el perfil de ${currentUser.name}`);
+    showToast(`Personaje guardado en el perfil de ${currentUser.name}`);
   };
 
   document.getElementById("btnConfirmPassenger").onclick = () => {

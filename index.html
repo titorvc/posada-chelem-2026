@@ -98,16 +98,15 @@
         </div>
 
         <button type="button" class="btn btn-pusio" onclick="switchTab('tabPusio')">
-          <svg class="robot-btn-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <line x1="18" y1="2" x2="18" y2="8" stroke="#FFD166" stroke-width="2.5" stroke-linecap="round"/>
-            <circle cx="18" cy="3" r="2.5" fill="#06D6A0"/>
-            <rect x="3" y="13" width="4" height="10" rx="2" fill="#FFD166"/>
-            <rect x="29" y="13" width="4" height="10" rx="2" fill="#FFD166"/>
-            <rect x="6" y="8" width="24" height="22" rx="7" fill="#FFFFFF"/>
-            <rect x="10" y="13" width="16" height="7" rx="3.5" fill="#111214"/>
-            <circle cx="14.5" cy="16.5" r="2" fill="#00F5D4"/>
-            <circle cx="21.5" cy="16.5" r="2" fill="#FFD166"/>
-            <rect x="13" y="23.5" width="10" height="2.5" rx="1.25" fill="#0284C7"/>
+          <svg class="robot-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="4" y="8" width="16" height="12" rx="3"></rect>
+            <circle cx="9" cy="13" r="1.2" fill="currentColor"></circle>
+            <circle cx="15" cy="13" r="1.2" fill="currentColor"></circle>
+            <path d="M9.5 17h5"></path>
+            <path d="M12 4v4"></path>
+            <circle cx="12" cy="3" r="1" fill="currentColor"></circle>
+            <path d="M2 13v2"></path>
+            <path d="M22 13v2"></path>
           </svg>
           <span>Proponer con pus.io</span>
         </button>
@@ -150,22 +149,22 @@
     </section>
 
     <!-- ====================================================================
-         PESTAÑA 3: ESTUDIO MODERNO DE PERSONAJE (DISEÑOS BOTTTS + RUEDA DE HUES)
+         PESTAÑA 3: ESTUDIO DE PERSONAJE & AVATAR BOTTTS
          ==================================================================== -->
     <section id="tabRobot" class="tab-panel">
       <div class="view-header">
         <div>
           <h2 class="view-title">Estudio de <em>personaje</em></h2>
-          <p class="view-subtitle">Personaliza cada pieza de tu robot y ajusta su color principal y de detalle con el círculo de matiz.</p>
+          <p class="view-subtitle">Personaliza cada parte de tu personaje y ajusta sus tonos con la paleta circular.</p>
         </div>
         <div style="display:flex; gap:8px;">
-          <button type="button" id="btnRandomRobot" class="btn btn-amber btn-sm">Mezclar al azar</button>
+          <button type="button" id="btnRandomRobot" class="btn btn-secondary btn-sm">Mezclar al azar</button>
           <button type="button" id="btnSaveRobotStudio" class="btn btn-pusio btn-sm">Guardar cambios</button>
         </div>
       </div>
 
       <div class="studio-modern-grid">
-        <!-- Columna Izquierda: Vista Previa del Robot -->
+        <!-- Columna Izquierda: Vista Previa del Personaje -->
         <div class="studio-stage-card">
           <div id="studioCanvasWrap" class="studio-avatar-frame"></div>
 
@@ -175,33 +174,33 @@
           </div>
 
           <p id="studioAuthHint" style="font-size:0.75rem; color:var(--ink-muted);">
-            Personalizando tu robot activo.
+            Personalizando tu personaje activo.
           </p>
         </div>
 
-        <!-- Columna Derecha: Selector de Piezas Bottts + Inspector de Color con Círculo de Hue -->
+        <!-- Columna Derecha: Selector de Piezas + Selector de Color -->
         <div class="studio-controls-card">
           <div id="anatomyTabs" class="anatomy-pills">
             <button type="button" class="anatomy-pill active" data-part="face">Cabeza (6)</button>
             <button type="button" class="anatomy-pill" data-part="eyes">Ojos (14)</button>
             <button type="button" class="anatomy-pill" data-part="mouth">Boca (10)</button>
-            <button type="button" class="anatomy-pill" data-part="top">Antena (10)</button>
+            <button type="button" class="anatomy-pill" data-part="top">Superior (10)</button>
             <button type="button" class="anatomy-pill" data-part="sides">Laterales (8)</button>
             <button type="button" class="anatomy-pill" data-part="texture">Textura (9)</button>
             <button type="button" class="anatomy-pill" data-part="bg">Fondo (6)</button>
           </div>
 
           <div class="studio-split-body">
-            <!-- Cuadrícula de Diseños Bottts -->
+            <!-- Cuadrícula de Diseños -->
             <div>
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                 <span id="activePartTitle" style="font-size:0.8rem; font-weight:700; color:var(--ink-secondary);">Diseños de Cabeza</span>
-                <span style="font-family:var(--font-mono); font-size:0.68rem; color:var(--ink-muted);">Toca para equipar</span>
+                <span style="font-family:var(--font-mono); font-size:0.68rem; color:var(--ink-muted);">Elige una variante</span>
               </div>
               <div id="shapesGrid" class="bottts-shapes-grid"></div>
             </div>
 
-            <!-- Inspector de Color con Rueda de Hue Unificada + Switch Primario/Secundario -->
+            <!-- Inspector de Color con Círculo y Switch Primario/Secundario -->
             <div class="color-inspector-panel">
               <div class="channel-switcher">
                 <button type="button" id="btnChannelPri" class="channel-btn active">
@@ -251,7 +250,7 @@
           <h2 class="view-title">¿Quiénes <em>vamos</em>?</h2>
           <p class="view-subtitle">Lista de amigos confirmados. Cada perfil está protegido por el correo y PIN de su dueño.</p>
         </div>
-        <button type="button" class="btn btn-amber btn-sm" onclick="switchTab('tabRobot')">Ir a personalizar mi robot</button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="switchTab('tabRobot')">Personalizar mi personaje</button>
       </div>
 
       <div id="whosGoingGrid" class="friends-grid"></div>
