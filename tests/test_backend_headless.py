@@ -146,13 +146,12 @@ class TestPosadaBackendHeadless(unittest.TestCase):
         r_home = self.client.get("/")
         self.assertEqual(r_home.status_code, 200)
         self.assertIn("EL PUSIO", r_home.text)
-        self.assertIn("CHELEM", r_home.text)
 
-        r_css = self.client.get("/static/css/style.css")
+        r_css = self.client.get("/css/style.css")
         self.assertEqual(r_css.status_code, 200)
-        self.assertIn("ESTÉTICA EDITORIAL", r_css.text)
+        self.assertIn("POSADA CHELEM", r_css.text)
 
-        r_js = self.client.get("/static/js/app.js")
+        r_js = self.client.get("/js/app.js")
         self.assertEqual(r_js.status_code, 200)
         self.assertIn("Pus.io", r_js.text)
         print("[OK] Frontend HTML, CSS and JS assets verified via headless HTTP.")

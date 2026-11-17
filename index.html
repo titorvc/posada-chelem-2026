@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Posada 2026 // El Pusio en Chelem</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="Posada Chelem 2026 // El Pusio">
+  <meta property="og:description" content="Planeador interactivo de la posada anual en la casa de playa de Reyvell.">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a href="#" class="brand-link">
+        <div class="brand-badge">🌴</div>
+        <div class="brand-title">EL PUSIO <span>'26</span></div>
+      </a>
+
+      <div class="nav-actions">
+        <button id="btnOpenAvatarModal" class="btn btn-secondary btn-sm" title="Crear o personalizar mi robotito">
+          🤖 Mi Robot
+        </button>
+        <div id="btnChangeUser" class="user-pill" title="Cambiar amigo conectado">
+          <img id="navUserAvatar" class="user-pill-avatar" src="" alt="Avatar">
+          <span id="navUserName" class="user-pill-name">Titor</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="hero-pill">
+        <span>★ Sábado 19 de Diciembre 2026</span>
+        <span>•</span>
+        <span>Chelem, Yucatán</span>
+      </div>
+
+      <h1 class="hero-title">
+        POSADA 2026 <br>
+        <span class="gradient-text">EL PUSIO EN LA PLAYA</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        Armando el plan entre todos para la casa de Reyvell. Vota opciones, coordina el viaje y crea tu robotito personalizado.
+      </p>
+
+      <!-- Countdown -->
+      <div class="countdown-box">
+        <div class="cd-unit">
+          <div id="cdDays" class="cd-num">--</div>
+          <div class="cd-label">Días</div>
+        </div>
+        <div class="cd-unit">
+          <div id="cdHours" class="cd-num">--</div>
+          <div class="cd-label">Horas</div>
+        </div>
+        <div class="cd-unit">
+          <div id="cdMins" class="cd-num">--</div>
+          <div class="cd-label">Minutos</div>
+        </div>
+        <div class="cd-unit">
+          <div id="cdSecs" class="cd-num">--</div>
+          <div class="cd-label">Segundos</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 1: La Banda (Amigos Confirmados) -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2 class="section-title">👥 La Banda</h2>
+          <p class="section-desc">Solo nosotros. Cada quien con su robotito característico.</p>
+        </div>
+      </div>
+
+      <div id="bandaGrid" class="banda-grid">
+        <!-- Generado dinámicamente con JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 2: Rutas & Carpools -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2 class="section-title">🚗 Rutas & Aventón a Chelem</h2>
+          <p class="section-desc">Coordinación de transporte para que nadie se quede en Mérida.</p>
+        </div>
+        <button id="btnOpenCarModal" class="btn btn-primary btn-sm">+ Ofrecer mi coche</button>
+      </div>
+
+      <div id="carsContainer">
+        <!-- Generado dinámicamente -->
+      </div>
+
+      <!-- Banner de Privilegios Oficiales para Conductores -->
+      <div class="privileges-card">
+        <div class="privileges-card-title">
+          <span>★</span>
+          <span>Privilegios Oficiales para quien lleve su coche a Chelem</span>
+        </div>
+        <div class="privileges-list">
+          <div class="privilege-item">
+            <span class="icon">⛽</span>
+            <div>
+              <h5>Gasolina Exenta</h5>
+              <p>Tus pasajeros cubren el 100% de la gasolina y viáticos del viaje.</p>
+            </div>
+          </div>
+          <div class="privilege-item">
+            <span class="icon">🎬</span>
+            <div>
+              <h5>Voto de Oro</h5>
+              <p>Prioridad de desempate en la película o serie que pongamos en la noche.</p>
+            </div>
+          </div>
+          <div class="privilege-item">
+            <span class="icon">🎮</span>
+            <div>
+              <h5>Siembra en Smash</h5>
+              <p>Eliges tu lugar o descanso inicial en el torneo de Super Smash Bros.</p>
+            </div>
+          </div>
+          <div class="privilege-item">
+            <span class="icon">⭐</span>
+            <div>
+              <h5>Insignia VIP</h5>
+              <p>Distintivo dorado de Conductor VIP en tu ficha y perfil oficial.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: Opciones para el Plan (Smash & Asado) -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2 class="section-title">✨ Opciones para el Plan</h2>
+          <p class="section-desc">Aún no hay nada definido. Vota por lo que más se te antoje o propón algo nuevo.</p>
+        </div>
+        <button id="btnOpenIdeaModal" class="btn btn-festive btn-sm">+ Proponer idea</button>
+      </div>
+
+      <div id="ideasGrid" class="ideas-grid">
+        <!-- Opciones generadas dinámicamente -->
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 4: Personalizador de Robotito -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2 class="section-title">🎨 Generador de Robotitos con Prompts</h2>
+          <p class="section-desc">Escribe cualquier frase o estilo para crear el avatar único de tu robot.</p>
+        </div>
+      </div>
+
+      <div class="avatar-creator-card">
+        <div class="avatar-preview-box">
+          <img id="avatarPreviewImg" class="avatar-preview-img" src="https://api.dicebear.com/7.x/bottts/svg?seed=titor" alt="Preview">
+        </div>
+        <div>
+          <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:12px;">
+            Escribe un prompt descriptivo (ej. <em>"robot gamer con audífonos"</em>, <em>"cyborg playero"</em>, <em>"robot navideño"</em>) y observa la transformación:
+          </p>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <input type="text" id="avatarPromptInput" class="avatar-prompt-input" style="flex:1; min-width:220px;" placeholder="Escribe tu prompt o apodo...">
+            <button class="btn btn-primary" onclick="applyCustomAvatar()">Guardar en mi perfil</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 5: Chat con Pus.io IA -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2 class="section-title">🤖 Pus.io (Anfitrión IA)</h2>
+          <p class="section-desc">Pregúntale sobre la fecha, la casa de Chelem o pídele recomendaciones.</p>
+        </div>
+      </div>
+
+      <div class="chat-container">
+        <div id="chatMessages" class="chat-messages">
+          <div class="chat-bubble bot">
+            ¡Qué pasó gente! Aquí Pus.io al servicio de la Posada 2026 en Chelem. Todo se está armando entre todos, así que voten las opciones y propongan lo que haga falta.
+          </div>
+        </div>
+        <form id="chatForm" class="chat-input-row">
+          <input type="text" id="chatInput" class="chat-input" placeholder="Escribe un mensaje a Pus.io..." autocomplete="off">
+          <button type="submit" class="btn btn-primary btn-sm">Enviar</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <p>Posada Chelem 2026 // El Pusio • Casa de Reyvell</p>
+      <p style="margin-top:4px; font-size:0.75rem; color:var(--text-dim);">Hecho con vibra costera y temática festiva contemporánea.</p>
+    </div>
+  </footer>
+
+  <!-- Modal: Cambiar Amigo -->
+  <div id="modalSwitchUser" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 class="modal-title">¿Quién eres?</h3>
+        <button class="modal-close" data-close="modalSwitchUser">&times;</button>
+      </div>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:16px;">Selecciona tu nombre para interactuar con tu perfil:</p>
+      <div id="userSwitchList">
+        <!-- Botones de usuarios -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Ofrecer Coche -->
+  <div id="modalCar" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 class="modal-title">🚗 Ofrecer mi Coche a Chelem</h3>
+        <button class="modal-close" data-close="modalCar">&times;</button>
+      </div>
+      <form id="carForm">
+        <div class="form-group">
+          <label for="inputCarModel">Modelo de Auto:</label>
+          <input type="text" id="inputCarModel" class="form-input" placeholder="Ej. Mazda 3 / Swift / Camioneta" required>
+        </div>
+        <div class="form-group">
+          <label for="inputCarSeats">Lugares disponibles:</label>
+          <select id="inputCarSeats" class="form-input" required>
+            <option value="2">2 lugares libres</option>
+            <option value="3" selected>3 lugares libres</option>
+            <option value="4">4 lugares libres</option>
+            <option value="5">5+ lugares libres</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="inputCarZone">Punto de salida en Mérida:</label>
+          <input type="text" id="inputCarZone" class="form-input" placeholder="Ej. Altabrisa / Periférico Norte / Caucel" required>
+        </div>
+        <div class="form-group">
+          <label for="inputCarTime">Hora estimada de salida:</label>
+          <input type="text" id="inputCarTime" class="form-input" placeholder="Ej. 15:00 hrs" required>
+        </div>
+        <div class="form-group">
+          <label for="inputCarNotes">Notas adicionales:</label>
+          <input type="text" id="inputCarNotes" class="form-input" placeholder="Ej. Espacio para hielera en cajuela">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;">Publicar auto & activar privilegios</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Proponer Idea -->
+  <div id="modalIdea" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 class="modal-title">✨ Proponer Opción o Dinámica</h3>
+        <button class="modal-close" data-close="modalIdea">&times;</button>
+      </div>
+      <form id="ideaForm">
+        <div class="form-group">
+          <label for="inputIdeaTitle">Título de la propuesta:</label>
+          <input type="text" id="inputIdeaTitle" class="form-input" placeholder="Ej. Torneo de Beer Pong / Proyección de pelis" required>
+        </div>
+        <div class="form-group">
+          <label for="inputIdeaCat">Categoría:</label>
+          <select id="inputIdeaCat" class="form-input" required>
+            <option value="Juegos & Retas">Juegos & Retas</option>
+            <option value="Comida">Comida & Snacks</option>
+            <option value="Bebidas">Bebidas & Barra</option>
+            <option value="Cine">Cine / Series</option>
+            <option value="Fiesta">Música & Playa</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="inputIdeaDesc">Descripción breve:</label>
+          <textarea id="inputIdeaDesc" class="form-input" rows="3" placeholder="Explica de qué trata..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-festive" style="width:100%; margin-top:10px;">Publicar propuesta</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Avatar Creator -->
+  <div id="modalAvatar" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 class="modal-title">🤖 Personalizar mi Robot</h3>
+        <button class="modal-close" data-close="modalAvatar">&times;</button>
+      </div>
+      <div style="text-align:center; margin-bottom:16px;">
+        <div class="avatar-preview-box" style="margin-bottom:12px;">
+          <img id="modalAvatarPreview" class="avatar-preview-img" src="" alt="Robot Preview">
+        </div>
+        <p style="font-size:0.85rem; color:var(--text-muted);">
+          Escribe un prompt descriptivo para moldear los rasgos de tu robot DiceBear:
+        </p>
+      </div>
+      <div class="form-group">
+        <input type="text" id="modalPromptInput" class="form-input" placeholder="Ej. robot playero con lentes de sol">
+      </div>
+      <button class="btn btn-primary" style="width:100%;" onclick="
+        const val = document.getElementById('modalPromptInput').value.trim();
+        if (val) {
+          document.getElementById('avatarPromptInput').value = val;
+          applyCustomAvatar();
+          closeModal('modalAvatar');
+        }
+      ">Guardar Robotito</button>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

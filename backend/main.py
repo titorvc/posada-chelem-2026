@@ -472,13 +472,22 @@ def api_chat(req: ChatRequest):
     return {"status": "ok", "reply": result.get("reply"), "suggested_action": result.get("suggested_action")}
 
 # Mount Static Files & Frontend
-FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend")
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if os.path.exists(os.path.join(ROOT_DIR, "css")):
+    app.mount("/css", StaticFiles(directory=os.path.join(ROOT_DIR, "css")), name="css")
+if os.path.exists(os.path.join(ROOT_DIR, "js")):
+    app.mount("/js", StaticFiles(directory=os.path.join(ROOT_DIR, "js")), name="js")
+
+FRONTEND_DIR = os.path.join(ROOT_DIR, "frontend")
 if os.path.exists(FRONTEND_DIR):
     app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
 @app.get("/")
 def serve_index():
+    root_index = os.path.join(ROOT_DIR, "index.html")
+    if os.path.exists(root_index):
+        return FileResponse(root_index)
     index_file = os.path.join(FRONTEND_DIR, "index.html")
     if os.path.exists(index_file):
         return FileResponse(index_file)
-    return {"status": "Backend running. Frontend folder pending initialization."}
+    return {"status": "Backend running."}
