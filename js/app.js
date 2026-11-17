@@ -186,20 +186,23 @@ function renderRobotSVG(robotCfg, overridePart = null, overrideShape = null) {
   return `<svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">${bgSvg}${sidesSvg}${topSvg}${faceSvg}${mouthSvg}${eyesSvg}</svg>`;
 }
 
-// ----------------- Contador Regresivo ----------------- //
+// ----------------- Contador y Metadatos ----------------- //
 function initCountdown() {
-  const el = document.getElementById("factsCountdown");
+  const el = document.getElementById("heroMetaText");
   function update() {
     const now = new Date().getTime();
     const diff = EVENT_DATE - now;
-    if (diff <= 0 || !el) return;
+    if (!el) return;
+    if (diff <= 0) {
+      el.innerHTML = "Chelem Puerto, Yucatán &bull; ¡Es hoy la Posada!";
+      return;
+    }
     const d = Math.floor(diff / (1000 * 60 * 60 * 24));
     const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    el.textContent = `Faltan ${d} días, ${h} hrs, ${m} min`;
+    el.innerHTML = `Chelem Puerto, Yucatán &bull; Sábado 19 Dic 2026 &bull; Faltan ${d} días (${h} hrs)`;
   }
   update();
-  setInterval(update, 15000);
+  setInterval(update, 60000);
 }
 
 // ----------------- Estado Local (v8 con Bottts Auténticos + HSL por Pieza) ----------------- //
@@ -240,7 +243,7 @@ function switchTab(tabId) {
 // ----------------- Renderizado General ----------------- //
 function renderAll() {
   renderSessionHeader();
-  renderFactsDashboard();
+  renderHeroStats();
   renderCollabBoard();
   renderRobotStudio();
   renderWhosGoing();
@@ -263,19 +266,14 @@ function renderSessionHeader() {
   }
 }
 
-function renderFactsDashboard() {
-  const attCountEl = document.getElementById("factAttendeesCount");
-  const progCountEl = document.getElementById("factProgressCount");
-  const progSubEl = document.getElementById("factProgressSub");
-
-  if (attCountEl) attCountEl.textContent = `${attendeesList.length} amigos`;
-  if (progCountEl) {
-    progCountEl.innerHTML = `${collaborations.length} ${collaborations.length === 1 ? 'plan' : 'planes'} &bull; ${carsList.length} ${carsList.length === 1 ? 'auto' : 'autos'}`;
-  }
-  if (progSubEl) {
+function renderHeroStats() {
+  const planesSub = document.getElementById("heroPlanesSub");
+  if (planesSub) {
     const totalTasks = collaborations.reduce((acc, c) => acc + c.items.length, 0);
     const coveredTasks = collaborations.reduce((acc, c) => acc + c.items.filter(i => i.claimedBy).length, 0);
-    progSubEl.textContent = totalTasks > 0 ? `${coveredTasks} de ${totalTasks} insumos cubiertos` : "Listo para proponer";
+    planesSub.textContent = collaborations.length > 0
+      ? `${collaborations.length} ${collaborations.length === 1 ? 'plan' : 'planes'} &bull; ${coveredTasks}/${totalTasks} insumos cubiertos`
+      : "0 planes activos &bull; Proponer el primero";
   }
 }
 
@@ -486,8 +484,78 @@ function triggerCanvasPop() {
 }
 
 // ==========================================================================
-// PLANES Y PROPUESTAS, PUS.IO, ASISTENTES Y TRANSPORTE
+// PLANES Y PROPUESTAS, CRECIMIENTO CON IA (PUS.IO) Y COLABORACIONES
 // ==========================================================================
+const SMART_GROWTH_SUGGESTIONS = {
+  pastor: [
+    "Cebollitas cambray asadas con salsa inglesa",
+    "Frijoles charros calientes en olla",
+    "Piña asada picada y limones extra",
+    "Refrescos de toronja y manzana fríos"
+  ],
+  asado: [
+    "Chorizo artesanal / Chistorra para picar",
+    "Queso provoleta / asadero para fundir",
+    "Chiles toreados con salsa de soya y limón",
+    "Bolsa extra de carbón e iniciador"
+  ],
+  hamburguesa: [
+    "Tocino ahumado crujiente",
+    "Papas a la francesa o gajo sazonadas",
+    "Queso cheddar fundido extra",
+    "Pepinillos dulces y salsa barbecue"
+  ],
+  ceviche: [
+    "Galletas saladas y tostadas horneadas extra",
+    "Clamato preparado con salsa inglesa y sal marina",
+    "Salsa picante habanera casera",
+    "Cervezas claras heladas para acompañar"
+  ],
+  smash: [
+    "Pausa técnica para pizzas a domicilio",
+    "Snacks salados para los espectadores",
+    "Bracket impreso o digital para el torneo",
+    "Extensión eléctrica de uso rudo y multicontacto"
+  ],
+  bebida: [
+    "Vasos térmicos con marcador indeleble",
+    "Hielo frappé extra para coctelería",
+    "Cítricos y menta fresca para escarchar",
+    "Garrafón de agua pura purificada"
+  ],
+  default: [
+    "Botanas y papas para la espera",
+    "Servilletas y platos desechables biodegradables",
+    "Bolsas de basura para recoger al final",
+    "Bolsa de hielo extra para hielera"
+  ]
+};
+
+let activeGrowPlanId = null;
+
+function toggleGrowPlan(collabId) {
+  if (!requireAuth()) return;
+  activeGrowPlanId = activeGrowPlanId === collabId ? null : collabId;
+  renderCollabBoard();
+}
+
+function addSuggestedItemToCollab(collabId, itemName) {
+  if (!requireAuth()) return;
+  const collab = collaborations.find(c => c.id === collabId);
+  if (!collab) return;
+
+  collab.items.push({
+    id: "item_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
+    name: itemName,
+    claimedBy: null,
+    claimedByEmail: null
+  });
+
+  saveState();
+  renderAll();
+  showToast(`Sumado a ${collab.title}: ${itemName}`);
+}
+
 function renderCollabBoard() {
   const container = document.getElementById("collabBoardContainer");
   const badgeCount = document.getElementById("badgePlanesCount");
@@ -500,9 +568,9 @@ function renderCollabBoard() {
       <div class="empty-board">
         <h3 class="empty-board-title">Aún no hay planes ni propuestas</h3>
         <p class="empty-board-desc">
-          Entra al chat con <strong>pus.io</strong> y escribe cualquier comida o actividad que quieras armar (por ejemplo: <em>"Quiero comer nachos de pastor"</em>) para desglosar los insumos y dividirnos entre varios.
+          Escribe arriba lo que quieras comer o hacer, o elige alguna de las ideas para que <strong>pus.io</strong> desglose los insumos y podamos irlos creciendo entre todos.
         </p>
-        <button type="button" class="btn btn-pusio" onclick="switchTab('tabPusio')">Ir a proponer con pus.io</button>
+        <button type="button" class="btn btn-pusio" onclick="switchTab('tabPusio')">Abrir chat pus.io</button>
       </div>
     `;
     return;
@@ -515,8 +583,32 @@ function renderCollabBoard() {
     const claimedCount = collab.items.filter(i => i.claimedBy).length;
     const totalCount = collab.items.length;
 
+    const lower = (collab.title + " " + collab.category).toLowerCase();
+    let catClass = "cat-other";
+    let growthKey = "default";
+
+    if (lower.includes("pastor") || lower.includes("taco") || lower.includes("taquiza")) {
+      catClass = "cat-food";
+      growthKey = "pastor";
+    } else if (lower.includes("asado") || lower.includes("carne") || lower.includes("parrillada")) {
+      catClass = "cat-food";
+      growthKey = "asado";
+    } else if (lower.includes("hamburguesa") || lower.includes("burger")) {
+      catClass = "cat-food";
+      growthKey = "hamburguesa";
+    } else if (lower.includes("ceviche") || lower.includes("aguachile") || lower.includes("marisco")) {
+      catClass = "cat-food";
+      growthKey = "ceviche";
+    } else if (lower.includes("smash") || lower.includes("mario") || lower.includes("juego") || lower.includes("torneo")) {
+      catClass = "cat-activity";
+      growthKey = "smash";
+    } else if (lower.includes("hielera") || lower.includes("bebida") || lower.includes("cerveza") || lower.includes("hielo")) {
+      catClass = "cat-drinks";
+      growthKey = "bebida";
+    }
+
     const card = document.createElement("div");
-    card.className = "collab-card";
+    card.className = `collab-card ${catClass}`;
 
     let itemsHtml = "";
     collab.items.forEach(item => {
@@ -541,6 +633,10 @@ function renderCollabBoard() {
       `;
     });
 
+    const isGrowing = activeGrowPlanId === collab.id;
+    const pool = SMART_GROWTH_SUGGESTIONS[growthKey] || SMART_GROWTH_SUGGESTIONS.default;
+    const available = pool.filter(p => !collab.items.some(i => i.name.toLowerCase() === p.toLowerCase())).slice(0, 3);
+
     card.innerHTML = `
       <div class="collab-card-head">
         <div>
@@ -550,7 +646,7 @@ function renderCollabBoard() {
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
           <span class="collab-progress-pill">${claimedCount}/${totalCount} cubiertos</span>
-          <button type="button" class="modal-close-btn" style="width:26px; height:26px; font-size:0.9rem;" onclick="deleteCollab(${collab.id})" title="Eliminar">&times;</button>
+          <button type="button" class="modal-close-btn" style="width:26px; height:26px; font-size:0.9rem;" onclick="deleteCollab(${collab.id})" title="Eliminar plan">&times;</button>
         </div>
       </div>
 
@@ -562,6 +658,29 @@ function renderCollabBoard() {
         <input type="text" class="add-subitem-input" placeholder="+ Agregar otro insumo a este plan..." required>
         <button type="submit" class="btn btn-sm">Sumar</button>
       </form>
+
+      <div class="ai-grow-bar">
+        <button type="button" class="ai-grow-trigger" onclick="toggleGrowPlan(${collab.id})">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+          <span>${isGrowing ? 'Ocultar sugerencias de IA' : 'Hacer crecer este plan con pus.io'}</span>
+        </button>
+        ${
+          isGrowing
+            ? `<div class="ai-grow-suggestions">
+                 <span style="font-size:0.75rem; color:var(--ink-secondary); font-weight:600;">Sugerencias para sumar con un toque:</span>
+                 ${
+                   available.length > 0
+                     ? available.map(sug => `
+                         <button type="button" class="ai-suggestion-chip" onclick="addSuggestedItemToCollab(${collab.id}, '${sug.replace(/'/g, "\\'")}')">
+                           <span>+</span> <span>${sug}</span>
+                         </button>
+                       `).join("")
+                     : `<span style="font-size:0.75rem; color:var(--ink-muted);">¡Plan completo con todas las sugerencias clave!</span>`
+                 }
+               </div>`
+            : ""
+        }
+      </div>
     `;
 
     list.appendChild(card);
@@ -852,7 +971,7 @@ function renderWhosGoing() {
   const grid = document.getElementById("whosGoingGrid");
   grid.innerHTML = "";
 
-  attendeesList.forEach(person => {
+  attendeesList.forEach((person, idx) => {
     const isMe = currentUser && currentUser.email.toLowerCase() === person.email.toLowerCase();
     const isVIP = person.puedo_dar_coche === 1;
 
@@ -863,9 +982,17 @@ function renderWhosGoing() {
     const tile = document.createElement("div");
     tile.className = `friend-tile ${isMe ? 'is-me' : ''}`;
 
+    // Animación orgánica desincronizada para cada robot (movimiento aleatorio)
+    const animTypes = ["anim-a", "anim-b", "anim-c"];
+    const animClass = animTypes[idx % 3];
+    const dur = (3.2 + ((idx * 1.37) % 1.6)).toFixed(2);
+    const del = (-((idx * 1.83) % 2.5)).toFixed(2);
+
     tile.innerHTML = `
       <div class="friend-tile-avatar">
-        ${renderRobotSVG(person.robot)}
+        <div class="bot-anim ${animClass}" style="--dur:${dur}s; --del:${del}s;">
+          ${renderRobotSVG(person.robot)}
+        </div>
       </div>
       <div>
         <div class="friend-tile-name">${person.name}</div>
@@ -1080,6 +1207,32 @@ function setupEventListeners() {
       input.value = "";
     }
   };
+
+  // Compositor rápido en pestaña de Planes y propuestas
+  const inlineForm = document.getElementById("inlineProposalForm");
+  if (inlineForm) {
+    inlineForm.onsubmit = (e) => {
+      e.preventDefault();
+      const input = document.getElementById("inlineProposalInput");
+      const val = input.value.trim();
+      if (val) {
+        handlePusioMessage(val);
+        input.value = "";
+        switchTab("tabPlanes");
+      }
+    };
+  }
+
+  // Chispas de ideas interactivas
+  document.querySelectorAll(".spark-chip").forEach(chip => {
+    chip.onclick = () => {
+      const prompt = chip.dataset.prompt;
+      if (prompt) {
+        handlePusioMessage(prompt);
+        switchTab("tabPlanes");
+      }
+    };
+  });
 
   document.querySelectorAll("[data-close]").forEach(btn => {
     btn.onclick = () => closeModal(btn.getAttribute("data-close"));

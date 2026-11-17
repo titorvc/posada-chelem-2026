@@ -27,40 +27,40 @@
     </div>
   </header>
 
-  <!-- HERO + DASHBOARD DE HECHOS CONFIRMADOS -->
-  <section class="hero-compact container">
+  <!-- HERO EDITORIAL LIMPIO CON TOQUES SUTILES DE COLOR -->
+  <section class="hero-clean container">
+    <div class="hero-meta-pill">
+      <span class="meta-dot"></span>
+      <span id="heroMetaText">Chelem Puerto, Yucatán &bull; Sábado 19 Dic 2026 &bull; Casa de Reyvell</span>
+    </div>
+
     <h1 class="hero-headline">
       Posada en <em>Chelem</em>
     </h1>
 
-    <!-- DASHBOARD: LO QUE SÍ ES UN HECHO -->
-    <div class="facts-dashboard">
-      <div class="facts-header">
-        <span class="facts-badge">Lo que sí es un hecho</span>
-        <span id="factsCountdown" class="facts-countdown">Faltan -- días, -- hrs, -- min</span>
-      </div>
-      <div class="facts-grid">
-        <div class="fact-tile">
-          <span class="fact-label">Fecha Oficial</span>
-          <div class="fact-value">Sábado 19 Dic</div>
-          <div class="fact-sub">Diciembre 2026</div>
-        </div>
-        <div class="fact-tile">
-          <span class="fact-label">Sede Confirmada</span>
-          <div class="fact-value">Casa de Reyvell</div>
-          <div class="fact-sub">Chelem, Yucatán</div>
-        </div>
-        <div class="fact-tile">
-          <span class="fact-label">Asistentes</span>
-          <div id="factAttendeesCount" class="fact-value">9 amigos</div>
-          <div class="fact-sub">Confirmados en lista</div>
-        </div>
-        <div class="fact-tile">
-          <span class="fact-label">Avance Grupal</span>
-          <div id="factProgressCount" class="fact-value">0 planes &bull; 0 autos</div>
-          <div id="factProgressSub" class="fact-sub">Listo para proponer</div>
-        </div>
-      </div>
+    <p class="hero-dek">
+      El punto de encuentro para organizar comida, juegos, autos y dinámicas entre todos con el asistente <strong>pus.io</strong>.
+    </p>
+
+    <!-- ACCESOS RÁPIDOS PARA INVITAR A CREAR CONTENIDO -->
+    <div class="hero-actions-deck">
+      <button type="button" class="hero-action-card card-teal" onclick="switchTab('tabPlanes')">
+        <span class="action-card-label">Colaboración</span>
+        <strong class="action-card-title">Planes y propuestas</strong>
+        <span class="action-card-sub" id="heroPlanesSub">0 planes activos &bull; Ver lista</span>
+      </button>
+
+      <button type="button" class="hero-action-card card-coral" onclick="switchTab('tabPusio')">
+        <span class="action-card-label">Asistente IA</span>
+        <strong class="action-card-title">Proponer con pus.io</strong>
+        <span class="action-card-sub">Escribe una idea y la IA la desglosa</span>
+      </button>
+
+      <button type="button" class="hero-action-card card-amber" onclick="switchTab('tabRobot')">
+        <span class="action-card-label">Identidad</span>
+        <strong class="action-card-title">Mi Personaje</strong>
+        <span class="action-card-sub">Personaliza tu robot animado</span>
+      </button>
     </div>
   </section>
 
@@ -94,7 +94,7 @@
       <div class="view-header">
         <div>
           <h2 class="view-title">Planes y <em>propuestas</em></h2>
-          <p class="view-subtitle">Cada comida o actividad propuesta se desglosa en insumos para dividirnos entre varios.</p>
+          <p class="view-subtitle">Cada comida o actividad se desglosa en insumos para dividirnos entre varios.</p>
         </div>
 
         <button type="button" class="btn btn-pusio" onclick="switchTab('tabPusio')">
@@ -108,8 +108,47 @@
             <path d="M2 13v2"></path>
             <path d="M22 13v2"></path>
           </svg>
-          <span>Proponer con pus.io</span>
+          <span>Abrir chat pus.io</span>
         </button>
+      </div>
+
+      <!-- COMPOSITOR RÁPIDO INTERACTIVO CON CHISPAS DE IDEAS -->
+      <div class="proposal-composer-card">
+        <div class="composer-header">
+          <div>
+            <h3 class="composer-title">¿Qué te gustaría armar en la posada?</h3>
+            <p class="composer-sub">Escribe cualquier comida o dinámica; la IA desglosará los insumos necesarios para dividirnos.</p>
+          </div>
+        </div>
+
+        <form id="inlineProposalForm" class="composer-input-row">
+          <input type="text" id="inlineProposalInput" class="composer-input" placeholder="Ej. Ceviche playero, Carne asada en la terraza, Torneo de Mario Kart..." autocomplete="off" required>
+          <button type="submit" class="btn btn-pusio">Desglosar con IA</button>
+        </form>
+
+        <div class="sparks-shelf">
+          <span class="sparks-label">Ideas para inspirarte:</span>
+          <button type="button" class="spark-chip" data-prompt="Quiero comer nachos de pastor">
+            <span class="spark-dot dot-coral"></span>
+            <span>Nachos de pastor</span>
+          </button>
+          <button type="button" class="spark-chip" data-prompt="Hacer hamburguesas al carbón">
+            <span class="spark-dot dot-amber"></span>
+            <span>Hamburguesas al carbón</span>
+          </button>
+          <button type="button" class="spark-chip" data-prompt="Preparar ceviche fresco frente al mar">
+            <span class="spark-dot dot-teal"></span>
+            <span>Ceviche frente al mar</span>
+          </button>
+          <button type="button" class="spark-chip" data-prompt="Organizar torneo de Super Smash Bros">
+            <span class="spark-dot dot-slate"></span>
+            <span>Torneo de Smash</span>
+          </button>
+          <button type="button" class="spark-chip" data-prompt="Llevar hieleras con hielo y bebidas">
+            <span class="spark-dot dot-pine"></span>
+            <span>Hieleras y bebidas</span>
+          </button>
+        </div>
       </div>
 
       <div id="collabBoardContainer"></div>
