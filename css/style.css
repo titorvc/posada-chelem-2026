@@ -1,44 +1,38 @@
 /* ==========================================================================
-   POSADA CHELEM 2026 — EDICIÓN GAMIFICADA & INTERACTIVA
+   POSADA CHELEM 2026 — EDICIÓN GAMIFICADA & TALLER VISUAL NATIVO
    Estilo: White Canvas + Tactile Playful Bento + Grandes Serifas Modernas
    Tipografía: Fraunces & Instrument Serif (Grandes Titulares) + Plus Jakarta Sans
-   Cero Emojis • 100% Vectorial, Colorido, Juguetón y Dinámico
+   Cero Emojis • Cero Prompts • Selector Visual Nativo de Piezas y Colores
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..700&family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
 
 :root {
-  /* Lienzo Blanco Luminoso y Cálido */
   --bg-page: #FFFFFF;
   --bg-soft: #F8F7F2;
   --bg-cream: #F2EFE6;
 
-  /* Tinta y Contornos Táctiles (Estilo Juego / Sticker) */
   --ink: #121316;
   --ink-soft: #4A4F55;
   --ink-muted: #7C828A;
   --border-thick: 2px solid #121316;
   --border-subtle: 1.5px solid #E2DFD5;
 
-  /* Sombras Táctiles 3D (Pop & Press) */
   --shadow-pop: 0 5px 0 #121316;
   --shadow-pop-sm: 0 3px 0 #121316;
   --shadow-pop-lg: 0 8px 0 #121316;
-  --shadow-float: 0 16px 36px rgba(18, 19, 22, 0.08);
 
-  /* Paleta Navideño-Playera Vibrante (No Corporativa) */
-  --berry: #FF4757;          /* Coral / Berry festivo */
+  --berry: #FF4757;
   --berry-bg: #FFE8EA;
-  --pine: #00A878;           /* Esmeralda / Pino tropical */
+  --pine: #00A878;
   --pine-bg: #E0F8F0;
-  --ocean: #0984E3;          /* Azul ola de Chelem */
+  --ocean: #0984E3;
   --ocean-bg: #E3F2FD;
-  --sun: #FFB142;            /* Sol de playa / Dorado */
+  --sun: #FFB142;
   --sun-bg: #FFF4E0;
-  --violet: #6C5CE7;         /* Acento arcade */
+  --violet: #6C5CE7;
   --violet-bg: #EFEFFD;
 
-  /* Tipografías */
   --font-display: 'Fraunces', 'Instrument Serif', Georgia, serif;
   --font-serif: 'Instrument Serif', Georgia, serif;
   --font-sans: 'Plus Jakarta Sans', -apple-system, sans-serif;
@@ -50,7 +44,6 @@
   --radius-pill: 9999px;
 
   --bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --smooth: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 *, *::before, *::after {
@@ -157,7 +150,6 @@ body {
   border: 1.5px solid var(--ink);
 }
 
-/* Pasos de la Misión en el HUD */
 .hud-steps {
   display: flex;
   align-items: center;
@@ -205,7 +197,6 @@ body {
   border-radius: 50%;
   border: 1.5px solid currentColor;
   display: inline-block;
-  position: relative;
 }
 
 .hud-step-pill.done .step-check {
@@ -242,7 +233,7 @@ body {
 }
 
 /* ==========================================================================
-   BOTONES JUGUETONES Y TÁCTILES (POP & PRESS)
+   BOTONES TÁCTILES (POP & PRESS)
    ========================================================================== */
 .btn {
   display: inline-flex;
@@ -274,25 +265,10 @@ body {
   box-shadow: 0 0 0 var(--ink);
 }
 
-.btn-berry {
-  background: var(--berry);
-  color: #FFFFFF;
-}
-
-.btn-pine {
-  background: var(--pine);
-  color: #FFFFFF;
-}
-
-.btn-sun {
-  background: var(--sun);
-  color: var(--ink);
-}
-
-.btn-ocean {
-  background: var(--ocean);
-  color: #FFFFFF;
-}
+.btn-berry { background: var(--berry); color: #FFFFFF; }
+.btn-pine  { background: var(--pine); color: #FFFFFF; }
+.btn-sun   { background: var(--sun); color: var(--ink); }
+.btn-ocean { background: var(--ocean); color: #FFFFFF; }
 
 .btn-sm {
   padding: 8px 16px;
@@ -300,7 +276,7 @@ body {
 }
 
 /* ==========================================================================
-   HERO JUGUETÓN CON SERIFA GIGANTE
+   HERO CON SERIFA GIGANTE
    ========================================================================== */
 .hero {
   padding: 64px 0 48px;
@@ -369,7 +345,6 @@ body {
   line-height: 1.25;
 }
 
-/* Countdown Juguetón */
 .countdown-row {
   display: inline-flex;
   gap: 14px;
@@ -414,7 +389,7 @@ body {
 }
 
 /* ==========================================================================
-   ESTRUCTURA DE PASOS / MISIONES (ORDEN COHERENTE)
+   PASOS DE LA MISIÓN
    ========================================================================== */
 .quest-step {
   margin: 56px 0;
@@ -423,7 +398,6 @@ body {
   border-radius: var(--radius-lg);
   padding: 40px;
   box-shadow: var(--shadow-pop-lg);
-  position: relative;
 }
 
 @media (max-width: 640px) {
@@ -495,23 +469,12 @@ body {
   font-size: 1.05rem;
   color: var(--ink-soft);
   margin-top: 8px;
-  max-width: 620px;
+  max-width: 650px;
 }
 
 /* ==========================================================================
-   PASO 1: ¿QUIÉNES VAMOS? + TALLER INTERACTIVO DE PERSONAJE (PARTES Y COLORES)
+   PASO 1: ¿QUIÉNES VAMOS? + TALLER VISUAL NATIVO DE PERSONAJE
    ========================================================================== */
-.whos-going-label {
-  font-family: var(--font-serif);
-  font-size: 2rem;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
 .friends-roster {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
@@ -530,7 +493,6 @@ body {
   cursor: pointer;
   box-shadow: var(--shadow-pop-sm);
   transition: all 0.2s var(--bounce);
-  position: relative;
 }
 
 .friend-card:hover {
@@ -592,22 +554,22 @@ body {
   color: #FFF;
 }
 
-/* Taller Interactivo de Personaje */
+/* Taller Visual Nativo (Sin Prompts, Sin Etiquetas Inventadas) */
 .character-workshop {
   background: var(--bg-soft);
   border: var(--border-thick);
   border-radius: var(--radius-lg);
   padding: 32px;
   display: grid;
-  grid-template-columns: 300px 1fr;
+  grid-template-columns: 310px 1fr;
   gap: 32px;
   align-items: start;
 }
 
-@media (max-width: 860px) {
+@media (max-width: 900px) {
   .character-workshop {
     grid-template-columns: 1fr;
-    padding: 22px;
+    padding: 20px;
   }
 }
 
@@ -616,25 +578,32 @@ body {
   flex-direction: column;
   align-items: center;
   text-align: center;
+  position: sticky;
+  top: 90px;
+}
+
+@media (max-width: 900px) {
+  .workshop-stage-col {
+    position: static;
+  }
 }
 
 .robot-pedestal {
-  width: 230px;
-  height: 230px;
-  border-radius: 36px;
+  width: 240px;
+  height: 240px;
+  border-radius: 38px;
   border: var(--border-thick);
   box-shadow: var(--shadow-pop);
-  padding: 20px;
+  padding: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 18px;
   transition: transform 0.35s var(--bounce), background-color 0.25s ease;
-  position: relative;
 }
 
 .robot-pedestal.pop-anim {
-  transform: scale(1.08) rotate(3deg);
+  transform: scale(1.07) rotate(3deg);
 }
 
 .robot-pedestal img {
@@ -645,7 +614,7 @@ body {
 
 .workshop-name-box {
   width: 100%;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .workshop-name-box label {
@@ -672,48 +641,146 @@ body {
   outline: none;
 }
 
-.workshop-controls-col {
+/* Pestañas de Categorías de Piezas */
+.workshop-tabs {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
 }
 
-.control-group {
+.part-tab-btn {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 9px 16px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--ink);
+  background: var(--bg-page);
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: 0 2px 0 var(--ink);
+  transition: all 0.15s var(--bounce);
+}
+
+.part-tab-btn:hover {
+  transform: translateY(-2px);
+  background: var(--sun-bg);
+}
+
+.part-tab-btn.active {
+  background: var(--ink);
+  color: var(--bg-page);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 0 var(--berry);
+}
+
+/* Panel Contenedor del Catálogo Visual */
+.workshop-catalog-panel {
+  background: var(--bg-page);
+  border: var(--border-thick);
+  border-radius: var(--radius-md);
+  padding: 22px;
+  box-shadow: var(--shadow-pop-sm);
+}
+
+/* Cuadrícula Visual de Piezas (Miniaturas SVG en vivo sin texto) */
+.visual-parts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 12px;
+}
+
+.visual-part-tile {
+  aspect-ratio: 1 / 1;
+  background: var(--bg-soft);
+  border: 2px solid #D5D0C5;
+  border-radius: 18px;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s var(--bounce);
+  position: relative;
+}
+
+.visual-part-tile:hover {
+  transform: scale(1.07);
+  border-color: var(--ink);
+  background: var(--bg-page);
+  box-shadow: var(--shadow-pop-sm);
+}
+
+.visual-part-tile.selected {
+  border-color: var(--ink);
+  background: var(--sun-bg);
+  box-shadow: 0 4px 0 var(--ink);
+  transform: scale(1.05);
+}
+
+.visual-part-tile img {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.tile-none-box {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+/* Sección de Colores y Ajustes Nativos */
+.colors-and-sliders-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+@media (max-width: 680px) {
+  .colors-and-sliders-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sub-control-box {
   background: var(--bg-page);
   border: 1.5px solid var(--ink);
   border-radius: var(--radius-md);
-  padding: 16px 20px;
-  box-shadow: 0 3px 0 rgba(18, 19, 22, 0.08);
+  padding: 16px;
 }
 
-.control-label {
+.sub-control-title {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
   color: var(--ink-soft);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-/* Selector de Colores (Swatches) */
 .color-swatches {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .color-swatch {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: 2px solid var(--ink);
   cursor: pointer;
   transition: transform 0.2s var(--bounce);
-  position: relative;
 }
 
 .color-swatch:hover {
@@ -721,92 +788,54 @@ body {
 }
 
 .color-swatch.selected {
-  transform: scale(1.2);
-  box-shadow: 0 0 0 3px var(--bg-page), 0 0 0 5px var(--ink);
+  transform: scale(1.18);
+  box-shadow: 0 0 0 2px var(--bg-page), 0 0 0 4px var(--ink);
 }
 
-/* Cuadrícula de Partes Seleccionables */
-.parts-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+.custom-color-picker {
+  width: 34px;
+  height: 34px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  background: none;
+}
+
+.custom-color-picker::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.custom-color-picker::-webkit-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+/* Controles de Transformación (Escala, Giro, Espejo) */
+.transform-controls {
+  display: flex;
+  flex-direction: column;
   gap: 12px;
 }
 
-.part-stepper {
-  background: var(--bg-soft);
-  border: 1.5px solid var(--ink);
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
+.slider-row {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  align-items: center;
+  gap: 12px;
 }
 
-.part-stepper-title {
+.slider-row span {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  text-transform: uppercase;
-  color: var(--ink-soft);
+  min-width: 70px;
 }
 
-.part-stepper-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.step-arrow {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  border: 1.5px solid var(--ink);
-  background: var(--bg-page);
-  font-weight: 800;
-  font-size: 0.95rem;
+.range-slider {
+  flex: 1;
+  accent-color: var(--berry);
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.15s var(--bounce), background 0.15s ease;
-}
-
-.step-arrow:hover {
-  background: var(--sun);
-  transform: scale(1.08);
-}
-
-.part-value-name {
-  font-family: var(--font-display);
-  font-size: 1.05rem;
-  font-weight: 600;
-  text-align: center;
-  flex: 1;
-}
-
-/* Prompt mágico opcional */
-.prompt-bar {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.prompt-input {
-  flex: 1;
-  min-width: 200px;
-  padding: 11px 16px;
-  border: 1.5px solid var(--ink);
-  border-radius: var(--radius-pill);
-  font-family: var(--font-sans);
-  font-size: 0.9rem;
-  background: var(--bg-soft);
-  outline: none;
-}
-
-.prompt-input:focus {
-  background: var(--bg-page);
-  box-shadow: 0 0 0 2px var(--ocean);
 }
 
 /* ==========================================================================
@@ -860,7 +889,6 @@ body {
   margin-bottom: 20px;
 }
 
-/* Privilegios coleccionables */
 .perks-strip {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -874,7 +902,6 @@ body {
   border-radius: var(--radius-md);
   padding: 18px;
   box-shadow: var(--shadow-pop-sm);
-  position: relative;
 }
 
 .perk-card:nth-child(1) { background: var(--sun-bg); }
@@ -908,7 +935,7 @@ body {
 }
 
 /* ==========================================================================
-   PASO 3: OPCIONES DEL PLAN (CARTAS DE JUEGO VOTABLES)
+   PASO 3: OPCIONES DEL PLAN
    ========================================================================== */
 .plan-deck {
   display: grid;
@@ -1198,7 +1225,6 @@ body {
   opacity: 1;
 }
 
-/* Confetti Canvas */
 #confettiCanvas {
   position: fixed;
   inset: 0;

@@ -1,135 +1,91 @@
 /**
- * POSADA CHELEM 2026 — CONTROLADOR GAMIFICADO & TALLER DE PERSONAJE
- * - Taller interactivo de robot con partes seleccionables y paleta de colores
- * - Sistema de misiones (Pasos 1 a 4) con puntos XP y confeti vectorial
- * - Asistente pus.io que forja tarjetas votables en vivo
+ * POSADA CHELEM 2026 — TALLER VISUAL NATIVO & EXPERIENCIA GAMIFICADA
+ * - Selección 100% visual de piezas mediante cuadrícula de miniaturas SVG en vivo
+ * - Sin prompts ni etiquetas inventadas: ves cada pieza y la tocas para equiparla
+ * - 19 colores de chasis + selector RGB libre, colores de fondo, espejo, zoom y giro
  * - Cero emojis
  */
 
 const EVENT_DATE = new Date("2026-12-19T15:00:00-06:00").getTime();
 
-// Catálogo oficial de piezas de DiceBear Bottts v7
-const ROBOT_PARTS = {
+// Catálogo completo de piezas nativas de DiceBear Bottts v7 (sin nombres inventados)
+const NATIVE_PARTS = {
   eyes: [
-    { id: "eva", label: "Eva Cyber" },
-    { id: "shade01", label: "Lentes de Sol" },
-    { id: "robocop", label: "Visor Robocop" },
-    { id: "happy", label: "Arco Feliz" },
-    { id: "glow", label: "Brillo Neón" },
-    { id: "sensor", label: "Sensor Óptico" },
-    { id: "roundFrame01", label: "Marco Redondo" },
-    { id: "roundFrame02", label: "Doble Lente" },
-    { id: "bulging", label: "Ojos Saltones" },
-    { id: "hearts", label: "Modo Fiesta" },
-    { id: "dizzy", label: "Mareado" },
-    { id: "frame1", label: "Visor Ancho" }
-  ],
-  top: [
-    { id: "radar", label: "Antena Radar" },
-    { id: "glowingBulb01", label: "Foco Brillante" },
-    { id: "horns", label: "Cuernos Arcade" },
-    { id: "lights", label: "Sirena Triple" },
-    { id: "pyramid", label: "Pirámide" },
-    { id: "antenna", label: "Antena Clásica" },
-    { id: "antennaCrooked", label: "Antena Doblada" },
-    { id: "bulb01", label: "Bulbo Retro" },
-    { id: "glowingBulb02", label: "Foco Solar" }
-  ],
-  mouth: [
-    { id: "smile01", label: "Sonrisa" },
-    { id: "smile02", label: "Gran Sonrisa" },
-    { id: "grill03", label: "Vocoder" },
-    { id: "bite", label: "Mordida" },
-    { id: "diagram", label: "Ondas de Audio" },
-    { id: "grill01", label: "Rejilla Clásica" },
-    { id: "grill02", label: "Rejilla Fina" },
-    { id: "square01", label: "Pixelada" },
-    { id: "square02", label: "Sintetizador" }
+    "eva", "shade01", "robocop", "happy", "glow", "sensor",
+    "roundFrame01", "roundFrame02", "bulging", "hearts", "dizzy",
+    "frame1", "frame2", "round"
   ],
   face: [
-    { id: "round01", label: "Clásico" },
-    { id: "round02", label: "Cápsula" },
-    { id: "square01", label: "Cuadrado Retro" },
-    { id: "square02", label: "Blindado" },
-    { id: "square03", label: "Compacto" },
-    { id: "square04", label: "Industrial" }
+    "round01", "round02", "square01", "square02", "square03", "square04"
+  ],
+  mouth: [
+    "smile01", "smile02", "grill03", "bite", "diagram",
+    "grill01", "grill02", "square01", "square02", "none"
+  ],
+  top: [
+    "radar", "glowingBulb01", "horns", "lights", "pyramid",
+    "antenna", "antennaCrooked", "bulb01", "glowingBulb02", "none"
   ],
   sides: [
-    { id: "cables01", label: "Cables" },
-    { id: "cables02", label: "Doble Cable" },
-    { id: "antenna01", label: "Antena Lateral" },
-    { id: "antenna02", label: "Transmisor" },
-    { id: "round", label: "Audífonos" },
-    { id: "square", label: "Bloques" },
-    { id: "squareAssymetric", label: "Asimétrico" }
+    "cables01", "cables02", "antenna01", "antenna02",
+    "round", "square", "squareAssymetric", "none"
   ],
   texture: [
-    { id: "none", label: "Limpio" },
-    { id: "circuits", label: "Circuitos" },
-    { id: "dots", label: "Puntos" },
-    { id: "camo01", label: "Camuflaje" },
-    { id: "grunge01", label: "Urbano" }
+    "none", "circuits", "dots", "camo01", "camo02",
+    "grunge01", "grunge02", "dirty01", "dirty02"
   ]
 };
 
-const CHASSIS_COLORS = [
-  { hex: "039be5", label: "Azul Chelem" },
-  { hex: "e53935", label: "Rojo Coral" },
-  { hex: "00897b", label: "Verde Pino" },
-  { hex: "ffb300", label: "Amarillo Sol" },
-  { hex: "fb8c00", label: "Naranja Playa" },
-  { hex: "8e24aa", label: "Morado Arcade" },
-  { hex: "00acc1", label: "Turquesa Mar" },
-  { hex: "d81b60", label: "Berry Festivo" },
-  { hex: "546e7a", label: "Acero Titanio" }
+// Los 19 colores nativos de chasis + opción libre RGB
+const CHASSIS_HEX_LIST = [
+  "039be5", "e53935", "00897b", "ffb300", "fb8c00",
+  "8e24aa", "00acc1", "d81b60", "43a047", "3949ab",
+  "1e88e5", "f4511e", "5e35b1", "7cb342", "fdd835",
+  "c0ca33", "546e7a", "6d4c41", "757575"
 ];
 
-const PEDESTAL_BG_COLORS = [
-  { hex: "#E3F2FD", label: "Cielo" },
-  { hex: "#FFE8EA", label: "Coral Suave" },
-  { hex: "#E0F8F0", label: "Menta" },
-  { hex: "#FFF4E0", label: "Arena" },
-  { hex: "#EFEFFD", label: "Lavanda" },
-  { hex: "#F2EFE6", label: "Crema" }
+// Paleta de fondos de pedestal + opción libre RGB
+const PEDESTAL_BG_LIST = [
+  "#E3F2FD", "#FFE8EA", "#E0F8F0", "#FFF4E0", "#EFEFFD",
+  "#F2EFE6", "#E0F7FA", "#FCE4EC", "#F1F8E9", "#FFFDE7"
 ];
 
-// Lista inicial de amigos con configuraciones distintas de piezas y colores
 const DEFAULT_ATTENDEES = [
   {
     id: 1, name: "Reyvell", travelMode: null, puedo_dar_coche: 0,
-    config: { baseColor: "ffb300", bgColor: "#FFF4E0", eyes: 1, top: 0, mouth: 1, face: 0, sides: 4, texture: 0 }
+    config: { baseColor: "ffb300", bgColor: "#FFF4E0", eyes: "shade01", face: "round01", mouth: "smile02", top: "radar", sides: "round", texture: "none", flip: false, scale: 100, rotate: 0 }
   },
   {
     id: 2, name: "Roberto", travelMode: null, puedo_dar_coche: 0,
-    config: { baseColor: "039be5", bgColor: "#E3F2FD", eyes: 0, top: 1, mouth: 0, face: 2, sides: 0, texture: 1 }
+    config: { baseColor: "039be5", bgColor: "#E3F2FD", eyes: "eva", face: "square01", mouth: "smile01", top: "glowingBulb01", sides: "cables01", texture: "circuits", flip: false, scale: 100, rotate: 0 }
   },
   {
     id: 3, name: "Daniel", travelMode: null, puedo_dar_coche: 0,
-    config: { baseColor: "00897b", bgColor: "#E0F8F0", eyes: 3, top: 3, mouth: 2, face: 1, sides: 2, texture: 0 }
+    config: { baseColor: "00897b", bgColor: "#E0F8F0", eyes: "happy", face: "round02", mouth: "grill03", top: "lights", sides: "antenna01", texture: "none", flip: false, scale: 100, rotate: 0 }
   },
   {
     id: 4, name: "Pinzón", travelMode: null, puedo_dar_coche: 0,
-    config: { baseColor: "e53935", bgColor: "#FFE8EA", eyes: 2, top: 2, mouth: 0, face: 3, sides: 1, texture: 0 }
+    config: { baseColor: "e53935", bgColor: "#FFE8EA", eyes: "robocop", face: "square02", mouth: "smile01", top: "horns", sides: "cables02", texture: "none", flip: false, scale: 100, rotate: 0 }
   },
   {
     id: 5, name: "Alejandro", travelMode: null, puedo_dar_coche: 0,
-    config: { baseColor: "8e24aa", bgColor: "#EFEFFD", eyes: 4, top: 4, mouth: 4, face: 0, sides: 4, texture: 2 }
+    config: { baseColor: "8e24aa", bgColor: "#EFEFFD", eyes: "glow", face: "round01", mouth: "diagram", top: "pyramid", sides: "round", texture: "dots", flip: false, scale: 100, rotate: 0 }
   },
   {
     id: 6, name: "Erik", travelMode: null, puedo_dar_coche: 0,
-    config: { baseColor: "fb8c00", bgColor: "#FFF4E0", eyes: 5, top: 5, mouth: 2, face: 4, sides: 0, texture: 0 }
+    config: { baseColor: "fb8c00", bgColor: "#FFF4E0", eyes: "sensor", face: "square03", mouth: "grill01", top: "antenna", sides: "cables01", texture: "none", flip: false, scale: 100, rotate: 0 }
   },
   {
     id: 7, name: "Iván", travelMode: null, puedo_dar_coche: 0,
-    config: { baseColor: "00acc1", bgColor: "#E3F2FD", eyes: 6, top: 0, mouth: 1, face: 2, sides: 3, texture: 1 }
+    config: { baseColor: "00acc1", bgColor: "#E0F7FA", eyes: "roundFrame01", face: "square01", mouth: "smile02", top: "radar", sides: "antenna02", texture: "circuits", flip: false, scale: 100, rotate: 0 }
   },
   {
     id: 8, name: "Francisco", travelMode: null, puedo_dar_coche: 0,
-    config: { baseColor: "d81b60", bgColor: "#FFE8EA", eyes: 1, top: 6, mouth: 3, face: 1, sides: 4, texture: 0 }
+    config: { baseColor: "d81b60", bgColor: "#FCE4EC", eyes: "frame1", face: "round02", mouth: "bite", top: "antennaCrooked", sides: "round", texture: "none", flip: false, scale: 100, rotate: 0 }
   },
   {
     id: 9, name: "Carlos", travelMode: null, puedo_dar_coche: 0,
-    config: { baseColor: "546e7a", bgColor: "#F2EFE6", eyes: 2, top: 1, mouth: 4, face: 5, sides: 1, texture: 1 }
+    config: { baseColor: "546e7a", bgColor: "#F2EFE6", eyes: "roundFrame02", face: "square04", mouth: "square01", top: "bulb01", sides: "square", texture: "dots", flip: false, scale: 100, rotate: 0 }
   }
 ];
 
@@ -153,6 +109,7 @@ const DEFAULT_PLAN_OPTIONS = [
 ];
 
 let currentUser = null;
+let activeCategory = "eyes";
 let attendeesList = [];
 let carsList = [];
 let planOptions = [];
@@ -167,34 +124,50 @@ document.addEventListener("DOMContentLoaded", () => {
   setupEventListeners();
 });
 
-// ----------------- URL Dinámica de DiceBear con Partes Seleccionables ----------------- //
-function buildRobotUrl(cfg) {
+// ----------------- Construcción Nativa de URL SVG ----------------- //
+function buildRobotUrl(cfg, overrideKey = null, overrideVal = null) {
   if (!cfg) return "https://api.dicebear.com/7.x/bottts/svg?seed=chelem";
-  const eyesId = ROBOT_PARTS.eyes[cfg.eyes % ROBOT_PARTS.eyes.length].id;
-  const topId = ROBOT_PARTS.top[cfg.top % ROBOT_PARTS.top.length].id;
-  const mouthId = ROBOT_PARTS.mouth[cfg.mouth % ROBOT_PARTS.mouth.length].id;
-  const faceId = ROBOT_PARTS.face[cfg.face % ROBOT_PARTS.face.length].id;
-  const sidesId = ROBOT_PARTS.sides[cfg.sides % ROBOT_PARTS.sides.length].id;
-  const texObj = ROBOT_PARTS.texture[cfg.texture % ROBOT_PARTS.texture.length];
+  const c = Object.assign({}, cfg);
+  if (overrideKey) c[overrideKey] = overrideVal;
 
+  const cleanHex = (c.baseColor || "039be5").replace("#", "");
   const params = new URLSearchParams({
-    baseColor: cfg.baseColor || "039be5",
-    eyes: eyesId,
-    top: topId,
-    mouth: mouthId,
-    face: faceId,
-    sides: sidesId,
-    mouthProbability: "100",
-    sidesProbability: "100",
-    topProbability: "100"
+    baseColor: cleanHex,
+    eyes: c.eyes || "eva",
+    face: c.face || "round01"
   });
 
-  if (texObj && texObj.id !== "none") {
-    params.set("texture", texObj.id);
+  if (c.mouth && c.mouth !== "none") {
+    params.set("mouth", c.mouth);
+    params.set("mouthProbability", "100");
+  } else {
+    params.set("mouthProbability", "0");
+  }
+
+  if (c.top && c.top !== "none") {
+    params.set("top", c.top);
+    params.set("topProbability", "100");
+  } else {
+    params.set("topProbability", "0");
+  }
+
+  if (c.sides && c.sides !== "none") {
+    params.set("sides", c.sides);
+    params.set("sidesProbability", "100");
+  } else {
+    params.set("sidesProbability", "0");
+  }
+
+  if (c.texture && c.texture !== "none") {
+    params.set("texture", c.texture);
     params.set("textureProbability", "100");
   } else {
     params.set("textureProbability", "0");
   }
+
+  if (c.flip) params.set("flip", "true");
+  if (c.scale && c.scale !== 100) params.set("scale", String(c.scale));
+  if (c.rotate && c.rotate !== 0) params.set("rotate", String(c.rotate));
 
   return `https://api.dicebear.com/7.x/bottts/svg?${params.toString()}`;
 }
@@ -226,24 +199,24 @@ function initCountdown() {
   setInterval(update, 1000);
 }
 
-// ----------------- Estado Local (v4 Gamificado) ----------------- //
+// ----------------- Estado Local (v5 Visual Nativo) ----------------- //
 function loadState() {
-  const savedAttendees = localStorage.getItem("posada_attendees_v4");
+  const savedAttendees = localStorage.getItem("posada_attendees_v5");
   attendeesList = savedAttendees ? JSON.parse(savedAttendees) : DEFAULT_ATTENDEES;
 
-  const savedCars = localStorage.getItem("posada_cars_v4");
+  const savedCars = localStorage.getItem("posada_cars_v5");
   carsList = savedCars ? JSON.parse(savedCars) : [];
 
-  const savedOptions = localStorage.getItem("posada_options_v4");
+  const savedOptions = localStorage.getItem("posada_options_v5");
   planOptions = savedOptions ? JSON.parse(savedOptions) : DEFAULT_PLAN_OPTIONS;
 
-  const savedVotes = localStorage.getItem("posada_votes_v4");
+  const savedVotes = localStorage.getItem("posada_votes_v5");
   if (savedVotes) userVotes = new Set(JSON.parse(savedVotes));
 
-  const savedMissions = localStorage.getItem("posada_missions_v4");
+  const savedMissions = localStorage.getItem("posada_missions_v5");
   if (savedMissions) missionState = JSON.parse(savedMissions);
 
-  const savedUser = localStorage.getItem("posada_user_v4");
+  const savedUser = localStorage.getItem("posada_user_v5");
   if (savedUser) {
     const parsed = JSON.parse(savedUser);
     currentUser = attendeesList.find(u => u.id === parsed.id) || attendeesList[1];
@@ -253,32 +226,31 @@ function loadState() {
 }
 
 function saveState() {
-  localStorage.setItem("posada_attendees_v4", JSON.stringify(attendeesList));
-  localStorage.setItem("posada_cars_v4", JSON.stringify(carsList));
-  localStorage.setItem("posada_options_v4", JSON.stringify(planOptions));
-  localStorage.setItem("posada_votes_v4", JSON.stringify(Array.from(userVotes)));
-  localStorage.setItem("posada_missions_v4", JSON.stringify(missionState));
+  localStorage.setItem("posada_attendees_v5", JSON.stringify(attendeesList));
+  localStorage.setItem("posada_cars_v5", JSON.stringify(carsList));
+  localStorage.setItem("posada_options_v5", JSON.stringify(planOptions));
+  localStorage.setItem("posada_votes_v5", JSON.stringify(Array.from(userVotes)));
+  localStorage.setItem("posada_missions_v5", JSON.stringify(missionState));
   if (currentUser) {
-    localStorage.setItem("posada_user_v4", JSON.stringify(currentUser));
+    localStorage.setItem("posada_user_v5", JSON.stringify(currentUser));
   }
 }
 
-// ----------------- Inicialización de Swatches de Color ----------------- //
+// ----------------- Paleta de Colores + Selector RGB Libre ----------------- //
 function initSwatches() {
   const chassisWrap = document.getElementById("chassisColorSwatches");
   const bgWrap = document.getElementById("bgColorSwatches");
 
   chassisWrap.innerHTML = "";
-  CHASSIS_COLORS.forEach(c => {
+  CHASSIS_HEX_LIST.forEach(hex => {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "color-swatch";
-    btn.style.backgroundColor = `#${c.hex}`;
-    btn.title = c.label;
-    btn.dataset.hex = c.hex;
+    btn.style.backgroundColor = `#${hex}`;
+    btn.dataset.hex = hex;
     btn.onclick = () => {
       if (!currentUser) return;
-      currentUser.config.baseColor = c.hex;
+      currentUser.config.baseColor = hex;
       triggerPedestalBounce();
       syncWorkshopUI();
       renderWhosGoing();
@@ -287,23 +259,51 @@ function initSwatches() {
     chassisWrap.appendChild(btn);
   });
 
+  // Selector libre RGB para el chasis
+  const customChassisInput = document.createElement("input");
+  customChassisInput.type = "color";
+  customChassisInput.className = "custom-color-picker";
+  customChassisInput.title = "Elegir cualquier color personalizado";
+  customChassisInput.value = "#039be5";
+  customChassisInput.addEventListener("input", (e) => {
+    if (!currentUser) return;
+    currentUser.config.baseColor = e.target.value.replace("#", "");
+    syncWorkshopUI();
+    renderWhosGoing();
+    renderUserHud();
+  });
+  chassisWrap.appendChild(customChassisInput);
+
   bgWrap.innerHTML = "";
-  PEDESTAL_BG_COLORS.forEach(bg => {
+  PEDESTAL_BG_LIST.forEach(bgHex => {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "color-swatch";
-    btn.style.backgroundColor = bg.hex;
-    btn.title = bg.label;
-    btn.dataset.bg = bg.hex;
+    btn.style.backgroundColor = bgHex;
+    btn.dataset.bg = bgHex;
     btn.onclick = () => {
       if (!currentUser) return;
-      currentUser.config.bgColor = bg.hex;
+      currentUser.config.bgColor = bgHex;
       triggerPedestalBounce();
       syncWorkshopUI();
       renderWhosGoing();
     };
     bgWrap.appendChild(btn);
   });
+
+  // Selector libre RGB para el fondo
+  const customBgInput = document.createElement("input");
+  customBgInput.type = "color";
+  customBgInput.className = "custom-color-picker";
+  customBgInput.title = "Elegir cualquier color de fondo";
+  customBgInput.value = "#E3F2FD";
+  customBgInput.addEventListener("input", (e) => {
+    if (!currentUser) return;
+    currentUser.config.bgColor = e.target.value;
+    syncWorkshopUI();
+    renderWhosGoing();
+  });
+  bgWrap.appendChild(customBgInput);
 }
 
 function triggerPedestalBounce() {
@@ -312,21 +312,7 @@ function triggerPedestalBounce() {
   ped.classList.remove("pop-anim");
   void ped.offsetWidth;
   ped.classList.add("pop-anim");
-  setTimeout(() => ped.classList.remove("pop-anim"), 360);
-}
-
-// ----------------- Cambiar Piezas del Robot (< / >) ----------------- //
-function cyclePart(partKey, delta) {
-  if (!currentUser || !ROBOT_PARTS[partKey]) return;
-  const list = ROBOT_PARTS[partKey];
-  const currentIdx = currentUser.config[partKey] || 0;
-  const nextIdx = (currentIdx + delta + list.length) % list.length;
-  currentUser.config[partKey] = nextIdx;
-
-  triggerPedestalBounce();
-  syncWorkshopUI();
-  renderWhosGoing();
-  renderUserHud();
+  setTimeout(() => ped.classList.remove("pop-anim"), 340);
 }
 
 // ----------------- Renderizado General ----------------- //
@@ -344,7 +330,6 @@ function renderUserHud() {
   document.getElementById("navUserAvatar").src = buildRobotUrl(currentUser.config);
   document.getElementById("navUserName").textContent = currentUser.name;
 
-  // Calcular XP y pasos completados
   let xp = 0;
   let completedCount = 0;
 
@@ -359,10 +344,7 @@ function renderUserHud() {
 
   ["step1", "step2", "step3", "step4"].forEach((k, idx) => {
     const pill = document.getElementById(`hudStep${idx + 1}`);
-    if (pill) {
-      if (missionState[k]) pill.classList.add("done");
-      else pill.classList.remove("done");
-    }
+    if (pill) pill.classList.toggle("done", Boolean(missionState[k]));
   });
 }
 
@@ -373,26 +355,16 @@ function syncWorkshopUI() {
   const previewImg = document.getElementById("avatarPreviewTarget");
   const pedestal = document.getElementById("robotPedestal");
   const nameInput = document.getElementById("nameEditField");
+  const sliderScale = document.getElementById("sliderScale");
+  const sliderRotate = document.getElementById("sliderRotate");
 
   if (previewImg) previewImg.src = buildRobotUrl(cfg);
   if (pedestal) pedestal.style.backgroundColor = cfg.bgColor || "#E3F2FD";
   if (nameInput && document.activeElement !== nameInput) {
     nameInput.value = currentUser.name;
   }
-
-  // Etiquetas de piezas actuales
-  Object.keys(ROBOT_PARTS).forEach(key => {
-    const lblEl = document.getElementById(`labelPart_${key}`);
-    if (lblEl) {
-      const idx = cfg[key] % ROBOT_PARTS[key].length;
-      lblEl.textContent = ROBOT_PARTS[key][idx].label;
-    }
-  });
-
-  // Etiqueta de color y estado activo en swatches
-  const colorObj = CHASSIS_COLORS.find(c => c.hex === cfg.baseColor) || CHASSIS_COLORS[0];
-  const colorLbl = document.getElementById("selectedColorLabel");
-  if (colorLbl) colorLbl.textContent = colorObj.label;
+  if (sliderScale) sliderScale.value = cfg.scale || 100;
+  if (sliderRotate) sliderRotate.value = cfg.rotate || 0;
 
   document.querySelectorAll("#chassisColorSwatches .color-swatch").forEach(btn => {
     btn.classList.toggle("selected", btn.dataset.hex === cfg.baseColor);
@@ -400,6 +372,42 @@ function syncWorkshopUI() {
 
   document.querySelectorAll("#bgColorSwatches .color-swatch").forEach(btn => {
     btn.classList.toggle("selected", btn.dataset.bg === cfg.bgColor);
+  });
+
+  renderVisualCatalogGrid();
+}
+
+// Renderiza la cuadrícula visual de miniaturas SVG para la categoría activa
+function renderVisualCatalogGrid() {
+  const grid = document.getElementById("visualPartsGrid");
+  if (!grid || !currentUser) return;
+  grid.innerHTML = "";
+
+  const cfg = currentUser.config;
+  const options = NATIVE_PARTS[activeCategory] || [];
+
+  options.forEach(partVal => {
+    const isSelected = cfg[activeCategory] === partVal;
+    const tile = document.createElement("button");
+    tile.type = "button";
+    tile.className = `visual-part-tile ${isSelected ? 'selected' : ''}`;
+
+    if (partVal === "none") {
+      tile.innerHTML = `<span class="tile-none-box">Sin pieza</span>`;
+    } else {
+      const thumbUrl = buildRobotUrl(cfg, activeCategory, partVal);
+      tile.innerHTML = `<img src="${thumbUrl}" alt="${partVal}" loading="lazy">`;
+    }
+
+    tile.onclick = () => {
+      cfg[activeCategory] = partVal;
+      triggerPedestalBounce();
+      syncWorkshopUI();
+      renderWhosGoing();
+      renderUserHud();
+    };
+
+    grid.appendChild(tile);
   });
 }
 
@@ -535,7 +543,6 @@ function renderPlanOptions() {
   });
 }
 
-// ----------------- Acciones de Juego ----------------- //
 function toggleVote(id) {
   const opt = planOptions.find(o => o.id === id);
   if (!opt) return;
@@ -568,55 +575,7 @@ function retireCar(id) {
   showToast("Coche retirado");
 }
 
-// Traducir un prompt en español a piezas reales del robot
-function applyPromptToRobot(promptText) {
-  if (!currentUser || !promptText) return;
-  const lower = promptText.toLowerCase();
-  const cfg = currentUser.config;
-
-  // Colores por palabra clave
-  if (lower.includes("rojo") || lower.includes("coral") || lower.includes("fuego")) cfg.baseColor = "e53935";
-  else if (lower.includes("azul") || lower.includes("mar") || lower.includes("playa") || lower.includes("surfer")) cfg.baseColor = "039be5";
-  else if (lower.includes("verde") || lower.includes("pino") || lower.includes("navid")) cfg.baseColor = "00897b";
-  else if (lower.includes("amarillo") || lower.includes("oro") || lower.includes("dorado") || lower.includes("sol")) cfg.baseColor = "ffb300";
-  else if (lower.includes("morado") || lower.includes("violeta") || lower.includes("cyber")) cfg.baseColor = "8e24aa";
-  else if (lower.includes("naranja")) cfg.baseColor = "fb8c00";
-  else if (lower.includes("rosa") || lower.includes("berry")) cfg.baseColor = "d81b60";
-
-  // Ojos por palabra clave
-  if (lower.includes("lente") || lower.includes("gafa") || lower.includes("sol") || lower.includes("cool")) cfg.eyes = 1;
-  else if (lower.includes("robocop") || lower.includes("laser") || lower.includes("láser")) cfg.eyes = 2;
-  else if (lower.includes("feliz") || lower.includes("alegre")) cfg.eyes = 3;
-  else if (lower.includes("neon") || lower.includes("neón") || lower.includes("brill")) cfg.eyes = 4;
-  else if (lower.includes("fiesta") || lower.includes("coraz")) cfg.eyes = 9;
-
-  // Tope / Antena
-  if (lower.includes("cuerno") || lower.includes("diablo") || lower.includes("rock")) cfg.top = 2;
-  else if (lower.includes("radar")) cfg.top = 0;
-  else if (lower.includes("foco") || lower.includes("idea") || lower.includes("luz")) cfg.top = 1;
-  else if (lower.includes("sirena") || lower.includes("polic")) cfg.top = 3;
-  else if (lower.includes("piramid") || lower.includes("pirámid")) cfg.top = 4;
-
-  // Si no coincidió con palabras específicas, usar hash determinístico del prompt para variar todas las piezas
-  let hash = 0;
-  for (let i = 0; i < lower.length; i++) {
-    hash = (hash * 31 + lower.charCodeAt(i)) % 10000;
-  }
-  if (!lower.includes("lente") && !lower.includes("robocop") && !lower.includes("feliz")) {
-    cfg.eyes = hash % ROBOT_PARTS.eyes.length;
-  }
-  cfg.mouth = (hash >> 2) % ROBOT_PARTS.mouth.length;
-  cfg.face = (hash >> 3) % ROBOT_PARTS.face.length;
-  cfg.sides = (hash >> 4) % ROBOT_PARTS.sides.length;
-
-  triggerPedestalBounce();
-  syncWorkshopUI();
-  renderWhosGoing();
-  renderUserHud();
-  showToast(`Prompt aplicado al robot de ${currentUser.name}`);
-}
-
-// ----------------- pus.io: Forjador Gamificado de Sugerencias ----------------- //
+// ----------------- pus.io: Forjador de Sugerencias ----------------- //
 function handlePusioSuggestion(rawText) {
   const text = rawText.trim();
   if (!text) return;
@@ -689,7 +648,7 @@ function addChatBubble(text, role) {
   win.scrollTop = win.scrollHeight;
 }
 
-// ----------------- Confeti Vectorial en Canvas ----------------- //
+// ----------------- Confeti Vectorial ----------------- //
 function launchConfetti() {
   const canvas = document.getElementById("confettiCanvas");
   if (!canvas) return;
@@ -735,7 +694,6 @@ function launchConfetti() {
   requestAnimationFrame(tick);
 }
 
-// ----------------- Notificación Toast ----------------- //
 function showToast(msg) {
   const toast = document.getElementById("toastNotice");
   if (!toast) return;
@@ -750,15 +708,55 @@ function setupEventListeners() {
   document.getElementById("btnUserChip").onclick = () => openModal("modalSwitchUser");
   document.getElementById("btnOpenCarModal").onclick = () => openModal("modalCar");
 
-  // Botón Tirar Dados (Robot al azar)
+  // Cambio de pestaña de categoría de piezas
+  document.querySelectorAll("#workshopTabs .part-tab-btn").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll("#workshopTabs .part-tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      activeCategory = btn.dataset.cat;
+      renderVisualCatalogGrid();
+    };
+  });
+
+  // Invertir orientación horizontal (flip)
+  document.getElementById("btnFlipRobot").onclick = () => {
+    if (!currentUser) return;
+    currentUser.config.flip = !currentUser.config.flip;
+    triggerPedestalBounce();
+    syncWorkshopUI();
+    renderWhosGoing();
+    renderUserHud();
+  };
+
+  // Sliders nativos de Zoom y Giro
+  document.getElementById("sliderScale").addEventListener("input", (e) => {
+    if (!currentUser) return;
+    currentUser.config.scale = parseInt(e.target.value, 10);
+    syncWorkshopUI();
+    renderWhosGoing();
+    renderUserHud();
+  });
+
+  document.getElementById("sliderRotate").addEventListener("input", (e) => {
+    if (!currentUser) return;
+    currentUser.config.rotate = parseInt(e.target.value, 10);
+    syncWorkshopUI();
+    renderWhosGoing();
+    renderUserHud();
+  });
+
+  // Combinación al azar
   document.getElementById("btnRandomRobot").onclick = () => {
     if (!currentUser) return;
     const cfg = currentUser.config;
-    cfg.baseColor = CHASSIS_COLORS[Math.floor(Math.random() * CHASSIS_COLORS.length)].hex;
-    cfg.bgColor = PEDESTAL_BG_COLORS[Math.floor(Math.random() * PEDESTAL_BG_COLORS.length)].hex;
-    Object.keys(ROBOT_PARTS).forEach(k => {
-      cfg[k] = Math.floor(Math.random() * ROBOT_PARTS[k].length);
+    cfg.baseColor = CHASSIS_HEX_LIST[Math.floor(Math.random() * CHASSIS_HEX_LIST.length)];
+    cfg.bgColor = PEDESTAL_BG_LIST[Math.floor(Math.random() * PEDESTAL_BG_LIST.length)];
+    Object.keys(NATIVE_PARTS).forEach(k => {
+      const list = NATIVE_PARTS[k];
+      cfg[k] = list[Math.floor(Math.random() * list.length)];
     });
+    cfg.rotate = 0;
+    cfg.scale = 100;
     triggerPedestalBounce();
     syncWorkshopUI();
     renderWhosGoing();
@@ -790,21 +788,7 @@ function setupEventListeners() {
     }
   });
 
-  // Aplicar prompt al robot
-  document.getElementById("btnApplyPrompt").onclick = () => {
-    const val = document.getElementById("avatarPromptField").value.trim();
-    if (val) applyPromptToRobot(val);
-  };
-
-  document.getElementById("avatarPromptField").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const val = e.target.value.trim();
-      if (val) applyPromptToRobot(val);
-    }
-  });
-
-  // Confirmar como pasajero (Paso 2)
+  // Confirmar como pasajero
   document.getElementById("btnConfirmPassenger").onclick = () => {
     if (!currentUser) return;
     currentUser.travelMode = "passenger";
@@ -817,7 +801,7 @@ function setupEventListeners() {
     showToast(`${currentUser.name} confirmado como pasajero (+100 XP)`);
   };
 
-  // Registrar coche (Paso 2 VIP)
+  // Registrar coche
   document.getElementById("carForm").onsubmit = (e) => {
     e.preventDefault();
     if (!currentUser) return;

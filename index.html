@@ -8,11 +8,11 @@
   <link rel="stylesheet" href="css/style.css">
 
   <meta property="og:title" content="Posada Chelem 2026">
-  <meta property="og:description" content="Arma tu personaje, confirma tu viaje y suma propuestas con pus.io para la posada en Chelem.">
+  <meta property="og:description" content="Arma tu personaje pieza por pieza, confirma tu viaje y suma propuestas con pus.io para la posada en Chelem.">
 </head>
 <body>
 
-  <!-- Lienzo de Confeti Vectorial al completar misiones -->
+  <!-- Lienzo de Confeti Vectorial -->
   <canvas id="confettiCanvas"></canvas>
 
   <!-- BARRA SUPERIOR GAMIFICADA (HUD DE PROGRESO) -->
@@ -68,7 +68,7 @@
     </h1>
 
     <p class="hero-subtitle">
-      Completa los 4 pasos de la página: personaliza las piezas de tu robot, define cómo viajas, vota las actividades y dile a <em>pus.io</em> qué falta agregar.
+      Completa los 4 pasos de la página: arma tu robot pieza por pieza, define cómo viajas, vota las actividades y dile a <em>pus.io</em> qué falta agregar.
     </p>
 
     <div class="countdown-row">
@@ -94,7 +94,7 @@
   <main class="container">
 
     <!-- ====================================================================
-         PASO 1: ¿QUIÉNES VAMOS? & TALLER DE PERSONAJE INTERACTIVO
+         PASO 1: ¿QUIÉNES VAMOS? & TALLER VISUAL NATIVO DE PERSONAJE
          ==================================================================== -->
     <section id="paso1" class="quest-step">
       <div class="quest-header">
@@ -105,7 +105,7 @@
           </div>
           <h2 class="quest-title">¿Quiénes <em>vamos</em>?</h2>
           <p class="quest-desc">
-            Selecciona tu tarjeta en la lista de abajo y usa el taller interactivo para cambiar tu nombre, elegir el color de tu robot y combinar sus piezas.
+            Selecciona tu carta de jugador abajo y usa el taller para elegir visualmente cada pieza, color, textura y posición de tu robot.
           </p>
         </div>
       </div>
@@ -115,7 +115,7 @@
         <!-- Generado por JS -->
       </div>
 
-      <!-- Taller Interactivo con Partes Seleccionables y Colores -->
+      <!-- Taller Visual Nativo (Sin Prompts, 100% Selección Directa de Piezas y Colores) -->
       <div class="character-workshop">
         <!-- Columna Izquierda: Pedestal del Robot -->
         <div class="workshop-stage-col">
@@ -124,118 +124,71 @@
           </div>
 
           <div class="workshop-name-box">
-            <label for="nameEditField">Tu nombre o apodo en la lista</label>
+            <label for="nameEditField">Tu nombre en la lista</label>
             <input type="text" id="nameEditField" class="workshop-name-input" placeholder="Tu nombre...">
           </div>
 
           <div style="display:flex; gap:8px; width:100%; justify-content:center; flex-wrap:wrap;">
-            <button type="button" id="btnRandomRobot" class="btn btn-sun btn-sm">Tirar dados (Azar)</button>
+            <button type="button" id="btnRandomRobot" class="btn btn-sun btn-sm">Combinación al azar</button>
             <button type="button" id="btnSaveCharacter" class="btn btn-pine btn-sm">Guardar personaje (+100 XP)</button>
           </div>
         </div>
 
-        <!-- Columna Derecha: Controles de Color, Piezas y Prompt -->
+        <!-- Columna Derecha: Catálogo Visual de Piezas + Paleta de Colores + Transformaciones -->
         <div class="workshop-controls-col">
 
-          <!-- 1. Color del Chasis -->
-          <div class="control-group">
-            <div class="control-label">
-              <span>Color principal del chasis</span>
-              <span id="selectedColorLabel">Azul Chelem</span>
+          <!-- Pestañas de Categorías -->
+          <div>
+            <div id="workshopTabs" class="workshop-tabs">
+              <button type="button" class="part-tab-btn active" data-cat="eyes">Ojos (14)</button>
+              <button type="button" class="part-tab-btn" data-cat="face">Cabeza (6)</button>
+              <button type="button" class="part-tab-btn" data-cat="mouth">Boca (10)</button>
+              <button type="button" class="part-tab-btn" data-cat="top">Parte Superior (10)</button>
+              <button type="button" class="part-tab-btn" data-cat="sides">Laterales (8)</button>
+              <button type="button" class="part-tab-btn" data-cat="texture">Textura (9)</button>
             </div>
-            <div id="chassisColorSwatches" class="color-swatches">
-              <!-- Swatches generados por JS -->
-            </div>
-          </div>
 
-          <!-- 2. Color de Fondo de Tarjeta -->
-          <div class="control-group">
-            <div class="control-label">
-              <span>Color de fondo del pedestal</span>
-            </div>
-            <div id="bgColorSwatches" class="color-swatches">
-              <!-- Swatches de fondo generados por JS -->
-            </div>
-          </div>
-
-          <!-- 3. Piezas Seleccionables del Robot -->
-          <div class="control-group">
-            <div class="control-label">
-              <span>Piezas ensamblables del robot</span>
-              <span>Usa las flechas para cambiar cada parte</span>
-            </div>
-            <div class="parts-grid">
-              <!-- Ojos / Visor -->
-              <div class="part-stepper">
-                <span class="part-stepper-title">Ojos / Visor</span>
-                <div class="part-stepper-row">
-                  <button type="button" class="step-arrow" onclick="cyclePart('eyes', -1)">&larr;</button>
-                  <span id="labelPart_eyes" class="part-value-name">Eva Cyber</span>
-                  <button type="button" class="step-arrow" onclick="cyclePart('eyes', 1)">&rarr;</button>
-                </div>
-              </div>
-
-              <!-- Antena / Tope -->
-              <div class="part-stepper">
-                <span class="part-stepper-title">Antena / Cabeza</span>
-                <div class="part-stepper-row">
-                  <button type="button" class="step-arrow" onclick="cyclePart('top', -1)">&larr;</button>
-                  <span id="labelPart_top" class="part-value-name">Radar</span>
-                  <button type="button" class="step-arrow" onclick="cyclePart('top', 1)">&rarr;</button>
-                </div>
-              </div>
-
-              <!-- Boca -->
-              <div class="part-stepper">
-                <span class="part-stepper-title">Boca / Expresión</span>
-                <div class="part-stepper-row">
-                  <button type="button" class="step-arrow" onclick="cyclePart('mouth', -1)">&larr;</button>
-                  <span id="labelPart_mouth" class="part-value-name">Sonrisa</span>
-                  <button type="button" class="step-arrow" onclick="cyclePart('mouth', 1)">&rarr;</button>
-                </div>
-              </div>
-
-              <!-- Forma de Cara -->
-              <div class="part-stepper">
-                <span class="part-stepper-title">Forma de Chasis</span>
-                <div class="part-stepper-row">
-                  <button type="button" class="step-arrow" onclick="cyclePart('face', -1)">&larr;</button>
-                  <span id="labelPart_face" class="part-value-name">Clásico</span>
-                  <button type="button" class="step-arrow" onclick="cyclePart('face', 1)">&rarr;</button>
-                </div>
-              </div>
-
-              <!-- Orejas / Laterales -->
-              <div class="part-stepper">
-                <span class="part-stepper-title">Laterales / Cables</span>
-                <div class="part-stepper-row">
-                  <button type="button" class="step-arrow" onclick="cyclePart('sides', -1)">&larr;</button>
-                  <span id="labelPart_sides" class="part-value-name">Cables</span>
-                  <button type="button" class="step-arrow" onclick="cyclePart('sides', 1)">&rarr;</button>
-                </div>
-              </div>
-
-              <!-- Textura -->
-              <div class="part-stepper">
-                <span class="part-stepper-title">Acabado / Textura</span>
-                <div class="part-stepper-row">
-                  <button type="button" class="step-arrow" onclick="cyclePart('texture', -1)">&larr;</button>
-                  <span id="labelPart_texture" class="part-value-name">Limpio</span>
-                  <button type="button" class="step-arrow" onclick="cyclePart('texture', 1)">&rarr;</button>
-                </div>
+            <!-- Cuadrícula Visual de Miniaturas SVG -->
+            <div class="workshop-catalog-panel">
+              <div id="visualPartsGrid" class="visual-parts-grid">
+                <!-- Miniaturas SVG generadas dinámicamente por JS -->
               </div>
             </div>
           </div>
 
-          <!-- 4. Prompt Libre -->
-          <div class="control-group">
-            <div class="control-label">
-              <span>O combínalo escribiendo un prompt</span>
-              <span>Ej. "lentes de sol rojo feliz con cuernos"</span>
+          <!-- Colores y Transformación Nativa -->
+          <div class="colors-and-sliders-row">
+            <!-- Color del Robot (19 tonos + selector libre RGB) -->
+            <div class="sub-control-box">
+              <div class="sub-control-title">
+                <span>Color del robot</span>
+                <span>Toca un tono o elige libre</span>
+              </div>
+              <div id="chassisColorSwatches" class="color-swatches">
+                <!-- Swatches + input color -->
+              </div>
             </div>
-            <div class="prompt-bar">
-              <input type="text" id="avatarPromptField" class="prompt-input" placeholder="Escribe cómo quieres tu robot y presiona Aplicar...">
-              <button type="button" id="btnApplyPrompt" class="btn btn-ocean btn-sm">Aplicar prompt</button>
+
+            <!-- Color de Fondo + Posición / Giro / Zoom -->
+            <div class="sub-control-box">
+              <div class="sub-control-title">
+                <span>Fondo y postura</span>
+                <button type="button" id="btnFlipRobot" class="btn btn-sm" style="padding:3px 10px; font-size:0.72rem;">Invertir lado</button>
+              </div>
+              <div id="bgColorSwatches" class="color-swatches" style="margin-bottom: 14px;">
+                <!-- Swatches de fondo + input color -->
+              </div>
+
+              <div class="transform-controls">
+                <div class="slider-row">
+                  <span>Zoom</span>
+                  <input type="range" id="sliderScale" class="range-slider" min="75" max="125" step="5" value="100">
+                </div>
+                <div class="slider-row">
+                  <span>Giro</span>
+                  <input type="range" id="sliderRotate" class="range-slider" min="-25" max="25" step="5" value="0">
+                </div>
+              </div>
             </div>
           </div>
 
