@@ -1,65 +1,93 @@
 /**
- * POSADA CHELEM 2026 — MOTOR SVG MODULAR POR PIEZA (HSL PRIMARIO/SECUNDARIO),
- * AUTENTICACIÓN ÚNICA CON PIN/CLAVE Y TABLERO DE PLANES Y PROPUESTAS
- * Cero Emojis
+ * POSADA CHELEM 2026 — MOTOR AUTÉNTICO BOTTTS CON COLOR PRIMARIO/SECUNDARIO POR PIEZA
+ * - Utiliza las ilustraciones vectoriales originales de Pablo Stanley (Bottts)
+ * - Cada pieza (Cabeza, Ojos, Boca, Antena, Laterales, Textura, Fondo) tiene su propio
+ *   Color Principal y Color Secundario controlados con Rueda de Hue + Saturación/Brillo
+ * - Autenticación única con PIN/Clave secreta y Tablero de Planes y Propuestas
+ * - Cero emojis
  */
 
 const EVENT_DATE = new Date("2026-12-19T15:00:00-06:00").getTime();
 
-// Nombres de las categorías anatómicas del robot
-const PART_META = {
-  head:  { label: "Cabeza y Chasis", priLabel: "Color principal (Cabeza)", secLabel: "Borde y panel (Cabeza)", count: 8 },
-  eyes:  { label: "Ojos y Visor",    priLabel: "Luz / Pupila (Ojos)",      secLabel: "Marco / Visor (Ojos)",   count: 8 },
-  mouth: { label: "Boca y Vocoder",  priLabel: "Luz / Dientes (Boca)",     secLabel: "Base de boca",           count: 8 },
-  top:   { label: "Antena Superior", priLabel: "Punta / Foco (Antena)",    secLabel: "Base / Mástil (Antena)", count: 8 },
-  ears:  { label: "Laterales",       priLabel: "Color principal (Lateral)",secLabel: "Detalle (Lateral)",      count: 8 },
-  bg:    { label: "Fondo y Patrón",  priLabel: "Color de fondo 1",         secLabel: "Color de patrón / fondo 2", count: 6 }
+const CATALOG_KEYS = {
+  face:    ["round01", "round02", "square01", "square02", "square03", "square04"],
+  eyes:    ["eva", "shade01", "robocop", "happy", "glow", "sensor", "roundFrame01", "roundFrame02", "bulging", "hearts", "dizzy", "frame1", "frame2", "round"],
+  mouth:   ["smile01", "smile02", "grill03", "bite", "diagram", "grill01", "grill02", "square01", "square02", "none"],
+  top:     ["radar", "glowingBulb01", "horns", "lights", "pyramid", "antenna", "antennaCrooked", "bulb01", "glowingBulb02", "none"],
+  sides:   ["cables01", "cables02", "antenna01", "antenna02", "round", "square", "squareAssymetric", "none"],
+  texture: ["none", "circuits", "dots", "camo01", "camo02", "grunge01", "grunge02", "dirty01", "dirty02"],
+  bg:      ["solid", "linear", "radial", "rings", "grid", "split"]
 };
 
-function makeDefaultRobot(hueBase, eyeShape, headShape, mouthShape, topShape) {
+const PART_LABELS = {
+  face:    { title: "Diseños de Cabeza",    pri: "Chasis Principal", sec: "Sombra / Textura" },
+  eyes:    { title: "Diseños de Ojos",      pri: "Luz / Lentes",     sec: "Marco / Visor" },
+  mouth:   { title: "Diseños de Boca",      pri: "Luz / Dientes",    sec: "Base de Boca" },
+  top:     { title: "Diseños de Antena",    pri: "Punta / Foco",     sec: "Base / Mástil" },
+  sides:   { title: "Diseños Laterales",    pri: "Módulo Lateral",   sec: "Cables / Detalle" },
+  texture: { title: "Textura de Chasis",    pri: "Color de Textura", sec: "Color Chasis" },
+  bg:      { title: "Estilo de Fondo",      pri: "Fondo Principal",  sec: "Fondo Secundario" }
+};
+
+const QUICK_HSL_SWATCHES = [
+  { h: 198, s: 90, l: 48 }, // Ocean Cyan
+  { h: 168, s: 85, l: 42 }, // Emerald Teal
+  { h: 350, s: 85, l: 58 }, // Coral Berry
+  { h: 38,  s: 95, l: 54 }, // Sunny Gold
+  { h: 262, s: 78, l: 58 }, // Electric Violet
+  { h: 18,  s: 90, l: 55 }, // Sunset Orange
+  { h: 145, s: 72, l: 45 }, // Nordic Pine
+  { h: 215, s: 25, l: 22 }, // Dark Slate
+  { h: 195, s: 75, l: 90 }, // Soft Sky
+  { h: 42,  s: 80, l: 92 }  // Warm Cream
+];
+
+function createBotConfig(hue, fIdx, eIdx, mIdx, tIdx, sIdx, txIdx = 0) {
   return {
-    head:  { shape: headShape % 8,  pri: { h: hueBase, s: 78, l: 54 }, sec: { h: (hueBase + 15) % 360, s: 70, l: 34 } },
-    eyes:  { shape: eyeShape % 8,   pri: { h: (hueBase + 160) % 360, s: 95, l: 62 }, sec: { h: 220, s: 28, l: 16 } },
-    mouth: { shape: mouthShape % 8, pri: { h: 48, s: 95, l: 62 }, sec: { h: 220, s: 28, l: 18 } },
-    top:   { shape: topShape % 8,   pri: { h: (hueBase + 120) % 360, s: 90, l: 58 }, sec: { h: 42, s: 88, l: 52 } },
-    ears:  { shape: (headShape + 1) % 8, pri: { h: 42, s: 90, l: 55 }, sec: { h: hueBase, s: 65, l: 38 } },
-    bg:    { shape: 1,              pri: { h: hueBase, s: 70, l: 92 }, sec: { h: (hueBase + 35) % 360, s: 65, l: 82 } }
+    face:    { shape: CATALOG_KEYS.face[fIdx % 6],       pri: { h: hue, s: 82, l: 52 }, sec: { h: (hue + 20) % 360, s: 75, l: 32 } },
+    eyes:    { shape: CATALOG_KEYS.eyes[eIdx % 14],      pri: { h: (hue + 150) % 360, s: 95, l: 60 }, sec: { h: 215, s: 30, l: 15 } },
+    mouth:   { shape: CATALOG_KEYS.mouth[mIdx % 9],      pri: { h: 165, s: 90, l: 62 }, sec: { h: 215, s: 28, l: 16 } },
+    top:     { shape: CATALOG_KEYS.top[tIdx % 9],        pri: { h: (hue + 45) % 360, s: 88, l: 56 }, sec: { h: 42, s: 92, l: 58 } },
+    sides:   { shape: CATALOG_KEYS.sides[sIdx % 7],      pri: { h: hue, s: 78, l: 48 }, sec: { h: 210, s: 32, l: 24 } },
+    texture: { shape: CATALOG_KEYS.texture[txIdx % 9],   pri: { h: (hue + 180) % 360, s: 80, l: 75 }, sec: { h: hue, s: 82, l: 52 } },
+    bg:      { shape: "linear",                          pri: { h: hue, s: 68, l: 92 }, sec: { h: (hue + 35) % 360, s: 65, l: 83 } }
   };
 }
 
 const DEFAULT_ATTENDEES = [
-  { id: 1, name: "Reyvell",   email: "reyvelljk87@gmail.com",          pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: makeDefaultRobot(38,  1, 0, 0, 1) },
-  { id: 2, name: "Roberto",   email: "titorvc08@gmail.com",            pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: makeDefaultRobot(198, 0, 1, 1, 0) },
-  { id: 3, name: "Daniel",    email: "danielitoestabonito16@gmail.com",pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: makeDefaultRobot(158, 3, 2, 2, 2) },
-  { id: 4, name: "Pinzón",    email: "mendoza.lpinzon@gmail.com",      pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: makeDefaultRobot(352, 5, 3, 0, 3) },
-  { id: 5, name: "Alejandro", email: "alejandroaltamiranopuc@gmail.com",pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: makeDefaultRobot(268, 2, 4, 4, 4) },
-  { id: 6, name: "Erik",      email: "joserikb@gmail.com",             pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: makeDefaultRobot(24,  4, 5, 3, 5) },
-  { id: 7, name: "Iván",      email: "ivan.raygosa@gmail.com",         pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: makeDefaultRobot(182, 6, 1, 1, 1) },
-  { id: 8, name: "Francisco", email: "fjvc091002@gmail.com",           pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: makeDefaultRobot(330, 1, 6, 5, 6) },
-  { id: 9, name: "Carlos",    email: "cplus.lat@gmail.com",            pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: makeDefaultRobot(215, 7, 7, 2, 0) }
+  { id: 1, name: "Reyvell",   email: "reyvelljk87@gmail.com",          pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(38,  0, 1, 1, 0, 4, 0) },
+  { id: 2, name: "Roberto",   email: "titorvc08@gmail.com",            pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(198, 2, 0, 0, 1, 0, 1) },
+  { id: 3, name: "Daniel",    email: "danielitoestabonito16@gmail.com",pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(162, 1, 3, 2, 3, 2, 0) },
+  { id: 4, name: "Pinzón",    email: "mendoza.lpinzon@gmail.com",      pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(350, 3, 2, 0, 2, 1, 0) },
+  { id: 5, name: "Alejandro", email: "alejandroaltamiranopuc@gmail.com",pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(265, 0, 4, 4, 4, 4, 2) },
+  { id: 6, name: "Erik",      email: "joserikb@gmail.com",             pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(22,  4, 5, 5, 5, 0, 0) },
+  { id: 7, name: "Iván",      email: "ivan.raygosa@gmail.com",         pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(184, 2, 6, 1, 0, 3, 1) },
+  { id: 8, name: "Francisco", email: "fjvc091002@gmail.com",           pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(332, 1, 11, 3, 6, 4, 0) },
+  { id: 9, name: "Carlos",    email: "cplus.lat@gmail.com",            pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(212, 5, 7, 7, 7, 5, 2) }
 ];
 
 let currentUser = null;
-let activePart = "head";
+let activePart = "face";
+let activeColorChannel = "pri"; // "pri" o "sec"
 let attendeesList = [];
 let carsList = [];
 let collaborations = [];
+let uidCounter = 1;
 
 document.addEventListener("DOMContentLoaded", () => {
   initCountdown();
   loadState();
+  initQuickSwatches();
   renderAll();
   setupEventListeners();
-  setupHueWheelInteractions();
+  setupModernHueWheel();
 });
 
-// ----------------- Utilidades de Color HSL ----------------- //
 function hslStr(c) {
   if (!c) return "hsl(200, 80%, 50%)";
   return `hsl(${Math.round(c.h)}, ${Math.round(c.s)}%, ${Math.round(c.l)}%)`;
 }
 
-// Hash simple determinístico para proteger el PIN de cada correo
 function computePinHash(email, pin) {
   const str = `${email.toLowerCase().trim()}::posada2026::${pin.trim()}`;
   let h1 = 0xdeadbeef ^ str.length;
@@ -75,238 +103,128 @@ function computePinHash(email, pin) {
 }
 
 // ==========================================================================
-// RENDERIZADOR MODULAR SVG DEL ROBOT (CADA PIEZA CON COLOR PRIMARIO Y SECUNDARIO)
+// ENSAMBLADOR SVG AUTÉNTICO DE BOTTTS CON COLORES INDEPENDIENTES POR CAPA
 // ==========================================================================
 function renderRobotSVG(robotCfg, overridePart = null, overrideShape = null) {
-  const r = JSON.parse(JSON.stringify(robotCfg || makeDefaultRobot(200, 0, 0, 0, 0)));
-  if (overridePart !== null && overrideShape !== null) {
+  const lib = window.BOTTTS_LIBRARY;
+  if (!lib) return `<svg viewBox="0 0 180 180"></svg>`;
+
+  const r = JSON.parse(JSON.stringify(robotCfg || createBotConfig(200, 0, 0, 0, 0, 0)));
+  if (overridePart && overrideShape !== null) {
     r[overridePart].shape = overrideShape;
   }
 
+  const uid = "u" + (uidCounter++);
+
+  // 1. Fondo personalizado
   const bgPri = hslStr(r.bg.pri);
   const bgSec = hslStr(r.bg.sec);
-  const headPri = hslStr(r.head.pri);
-  const headSec = hslStr(r.head.sec);
-  const eyePri = hslStr(r.eyes.pri);
-  const eyeSec = hslStr(r.eyes.sec);
-  const mouthPri = hslStr(r.mouth.pri);
-  const mouthSec = hslStr(r.mouth.sec);
-  const topPri = hslStr(r.top.pri);
-  const topSec = hslStr(r.top.sec);
-  const earPri = hslStr(r.ears.pri);
-  const earSec = hslStr(r.ears.sec);
-
-  const uid = "r" + Math.floor(Math.random() * 1000000);
-
-  // 1. Capa de Fondo
-  let bgLayer = `<rect width="160" height="160" fill="${bgPri}"/>`;
-  if (r.bg.shape === 1) {
-    bgLayer = `
-      <defs><linearGradient id="g_${uid}" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="${bgPri}"/><stop offset="100%" stop-color="${bgSec}"/>
-      </linearGradient></defs>
-      <rect width="160" height="160" fill="url(#g_${uid})"/>`;
-  } else if (r.bg.shape === 2) {
-    bgLayer = `<rect width="160" height="160" fill="${bgPri}"/><circle cx="80" cy="85" r="62" fill="${bgSec}"/>`;
-  } else if (r.bg.shape === 3) {
-    bgLayer = `<rect width="160" height="160" fill="${bgPri}"/><circle cx="80" cy="85" r="66" fill="none" stroke="${bgSec}" stroke-width="10"/><circle cx="80" cy="85" r="46" fill="none" stroke="${bgSec}" stroke-width="6"/>`;
-  } else if (r.bg.shape === 4) {
-    bgLayer = `<rect width="160" height="160" fill="${bgPri}"/><path d="M0 40 H160 M0 80 H160 M0 120 H160 M40 0 V160 M80 0 V160 M120 0 V160" stroke="${bgSec}" stroke-width="2"/>`;
-  } else if (r.bg.shape === 5) {
-    bgLayer = `<rect width="160" height="160" fill="${bgPri}"/><polygon points="0,160 160,0 160,160" fill="${bgSec}"/>`;
+  let bgSvg = `<rect width="180" height="180" fill="${bgPri}"/>`;
+  if (r.bg.shape === "linear") {
+    bgSvg = `<defs><linearGradient id="bg_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${bgPri}"/><stop offset="100%" stop-color="${bgSec}"/></linearGradient></defs><rect width="180" height="180" fill="url(#bg_${uid})"/>`;
+  } else if (r.bg.shape === "radial") {
+    bgSvg = `<rect width="180" height="180" fill="${bgPri}"/><circle cx="90" cy="95" r="68" fill="${bgSec}"/>`;
+  } else if (r.bg.shape === "rings") {
+    bgSvg = `<rect width="180" height="180" fill="${bgPri}"/><circle cx="90" cy="95" r="72" fill="none" stroke="${bgSec}" stroke-width="10"/><circle cx="90" cy="95" r="50" fill="none" stroke="${bgSec}" stroke-width="6"/>`;
+  } else if (r.bg.shape === "grid") {
+    bgSvg = `<rect width="180" height="180" fill="${bgPri}"/><path d="M0 45 H180 M0 90 H180 M0 135 H180 M45 0 V180 M90 0 V180 M135 0 V180" stroke="${bgSec}" stroke-width="2.5"/>`;
+  } else if (r.bg.shape === "split") {
+    bgSvg = `<rect width="180" height="180" fill="${bgPri}"/><polygon points="0,180 180,0 180,180" fill="${bgSec}"/>`;
   }
 
-  // 2. Capa de Laterales / Orejas
-  let earsLayer = "";
-  switch (r.ears.shape % 8) {
-    case 0: // Audífonos
-      earsLayer = `<rect x="14" y="68" width="16" height="38" rx="8" fill="${earPri}" stroke="#141517" stroke-width="3"/><rect x="130" y="68" width="16" height="38" rx="8" fill="${earPri}" stroke="#141517" stroke-width="3"/><rect x="18" y="75" width="6" height="24" rx="3" fill="${earSec}"/><rect x="136" y="75" width="6" height="24" rx="3" fill="${earSec}"/>`;
-      break;
-    case 1: // Bobinas
-      earsLayer = `<rect x="12" y="72" width="18" height="10" rx="4" fill="${earPri}" stroke="#141517" stroke-width="2.5"/><rect x="12" y="88" width="18" height="10" rx="4" fill="${earSec}" stroke="#141517" stroke-width="2.5"/><rect x="130" y="72" width="18" height="10" rx="4" fill="${earPri}" stroke="#141517" stroke-width="2.5"/><rect x="130" y="88" width="18" height="10" rx="4" fill="${earSec}" stroke="#141517" stroke-width="2.5"/>`;
-      break;
-    case 2: // Cables curvos
-      earsLayer = `<path d="M28 72 C8 72, 8 104, 28 104" fill="none" stroke="${earPri}" stroke-width="6" stroke-linecap="round"/><path d="M132 72 C152 72, 152 104, 132 104" fill="none" stroke="${earPri}" stroke-width="6" stroke-linecap="round"/><circle cx="14" cy="88" r="5" fill="${earSec}" stroke="#141517" stroke-width="2"/><circle cx="146" cy="88" r="5" fill="${earSec}" stroke="#141517" stroke-width="2"/>`;
-      break;
-    case 3: // Aletas mecha
-      earsLayer = `<polygon points="28,65 8,55 14,105 28,100" fill="${earPri}" stroke="#141517" stroke-width="3"/><polygon points="132,65 152,55 146,105 132,100" fill="${earPri}" stroke="#141517" stroke-width="3"/><circle cx="18" cy="82" r="4" fill="${earSec}"/><circle cx="142" cy="82" r="4" fill="${earSec}"/>`;
-      break;
-    case 4: // Pernos industriales
-      earsLayer = `<rect x="16" y="78" width="14" height="18" fill="${earSec}" stroke="#141517" stroke-width="3"/><circle cx="14" cy="87" r="7" fill="${earPri}" stroke="#141517" stroke-width="3"/><rect x="130" y="78" width="14" height="18" fill="${earSec}" stroke="#141517" stroke-width="3"/><circle cx="146" cy="87" r="7" fill="${earPri}" stroke="#141517" stroke-width="3"/>`;
-      break;
-    case 5: // Antenas laterales
-      earsLayer = `<line x1="20" y1="88" x2="20" y2="50" stroke="${earSec}" stroke-width="4" stroke-linecap="round"/><circle cx="20" cy="48" r="6" fill="${earPri}" stroke="#141517" stroke-width="2.5"/><line x1="140" y1="88" x2="140" y2="50" stroke="${earSec}" stroke-width="4" stroke-linecap="round"/><circle cx="140" cy="48" r="6" fill="${earPri}" stroke="#141517" stroke-width="2.5"/>`;
-      break;
-    case 6: // Bloques dobles
-      earsLayer = `<rect x="15" y="64" width="14" height="44" rx="3" fill="${earSec}" stroke="#141517" stroke-width="3"/><rect x="19" y="72" width="6" height="28" fill="${earPri}"/><rect x="131" y="64" width="14" height="44" rx="3" fill="${earSec}" stroke="#141517" stroke-width="3"/><rect x="135" y="72" width="6" height="28" fill="${earPri}"/>`;
-      break;
-    case 7: // Sin laterales
-      earsLayer = "";
-      break;
+  // 2. Laterales (sides)
+  let sidesSvg = "";
+  if (r.sides.shape && r.sides.shape !== "none" && lib.sides[r.sides.shape]) {
+    sidesSvg = lib.sides[r.sides.shape]
+      .replace(/\{\{UID\}\}/g, uid)
+      .replace(/\{\{PRI\}\}/g, hslStr(r.sides.pri))
+      .replace(/\{\{SEC\}\}/g, hslStr(r.sides.sec));
   }
 
-  // 3. Capa de Antena / Parte Superior
-  let topLayer = "";
-  switch (r.top.shape % 8) {
-    case 0: // Antena clásica con esfera
-      topLayer = `<rect x="74" y="20" width="12" height="26" rx="4" fill="${topSec}" stroke="#141517" stroke-width="3"/><circle cx="80" cy="18" r="10" fill="${topPri}" stroke="#141517" stroke-width="3"/>`;
-      break;
-    case 1: // Radar parabólico
-      topLayer = `<rect x="76" y="26" width="8" height="20" fill="${topSec}" stroke="#141517" stroke-width="3"/><path d="M56 26 A24 20 0 0 1 104 26 Z" fill="${topPri}" stroke="#141517" stroke-width="3"/><circle cx="80" cy="14" r="5" fill="${topSec}" stroke="#141517" stroke-width="2.5"/>`;
-      break;
-    case 2: // Cuernos cyber
-      topLayer = `<path d="M46 46 L34 18 L64 42 Z" fill="${topPri}" stroke="#141517" stroke-width="3" stroke-linejoin="round"/><path d="M114 46 L126 18 L96 42 Z" fill="${topPri}" stroke="#141517" stroke-width="3" stroke-linejoin="round"/><circle cx="80" cy="38" r="6" fill="${topSec}" stroke="#141517" stroke-width="2.5"/>`;
-      break;
-    case 3: // Bombilla brillante
-      topLayer = `<rect x="68" y="34" width="24" height="10" rx="3" fill="${topSec}" stroke="#141517" stroke-width="3"/><path d="M64 34 C60 14, 100 14, 96 34 Z" fill="${topPri}" stroke="#141517" stroke-width="3"/>`;
-      break;
-    case 4: // Doble antena
-      topLayer = `<line x1="58" y1="44" x2="48" y2="18" stroke="${topSec}" stroke-width="4" stroke-linecap="round"/><circle cx="48" cy="18" r="7" fill="${topPri}" stroke="#141517" stroke-width="2.5"/><line x1="102" y1="44" x2="112" y2="18" stroke="${topSec}" stroke-width="4" stroke-linecap="round"/><circle cx="112" cy="18" r="7" fill="${topPri}" stroke="#141517" stroke-width="2.5"/>`;
-      break;
-    case 5: // Pirámide / Cresta
-      topLayer = `<polygon points="52,44 80,14 108,44" fill="${topPri}" stroke="#141517" stroke-width="3" stroke-linejoin="round"/><polygon points="66,44 80,24 94,44" fill="${topSec}"/>`;
-      break;
-    case 6: // Sirena triple
-      topLayer = `<rect x="48" y="30" width="64" height="14" rx="7" fill="${topSec}" stroke="#141517" stroke-width="3"/><circle cx="62" cy="37" r="4.5" fill="${topPri}"/><circle cx="80" cy="37" r="4.5" fill="#FFFFFF"/><circle cx="98" cy="37" r="4.5" fill="${topPri}"/>`;
-      break;
-    case 7: // Sin antena
-      topLayer = "";
-      break;
+  // 3. Antena (top)
+  let topSvg = "";
+  if (r.top.shape && r.top.shape !== "none" && lib.top[r.top.shape]) {
+    topSvg = lib.top[r.top.shape]
+      .replace(/\{\{UID\}\}/g, uid)
+      .replace(/\{\{PRI\}\}/g, hslStr(r.top.pri))
+      .replace(/\{\{SEC\}\}/g, hslStr(r.top.sec));
   }
 
-  // 4. Capa de Cabeza / Chasis (Primario = Cuerpo, Secundario = Panel/Bisel)
-  let headLayer = "";
-  switch (r.head.shape % 8) {
-    case 0: // Redondeada moderna
-      headLayer = `<rect x="26" y="42" width="108" height="92" rx="26" fill="${headPri}" stroke="#141517" stroke-width="3.5"/><rect x="34" y="50" width="92" height="76" rx="20" fill="none" stroke="${headSec}" stroke-width="4"/>`;
-      break;
-    case 1: // Cuadrada Retro con remaches
-      headLayer = `<rect x="26" y="42" width="108" height="92" rx="10" fill="${headPri}" stroke="#141517" stroke-width="3.5"/><rect x="34" y="48" width="92" height="12" rx="4" fill="${headSec}"/><circle cx="35" cy="124" r="3" fill="${headSec}"/><circle cx="125" cy="124" r="3" fill="${headSec}"/>`;
-      break;
-    case 2: // Cápsula / Domo
-      headLayer = `<path d="M28 84 C28 36, 132 36, 132 84 L132 122 C132 132, 28 132, 28 122 Z" fill="${headPri}" stroke="#141517" stroke-width="3.5"/><path d="M38 118 L122 118" stroke="${headSec}" stroke-width="6" stroke-linecap="round"/>`;
-      break;
-    case 3: // Octagonal / Blindado
-      headLayer = `<polygon points="44,42 116,42 134,60 134,116 116,134 44,134 26,116 26,60" fill="${headPri}" stroke="#141517" stroke-width="3.5" stroke-linejoin="round"/><polygon points="50,50 110,50 124,64 124,110 110,124 50,124 36,110 36,64" fill="none" stroke="${headSec}" stroke-width="3.5"/>`;
-      break;
-    case 4: // TV Clásica con marco interno
-      headLayer = `<rect x="24" y="42" width="112" height="92" rx="18" fill="${headSec}" stroke="#141517" stroke-width="3.5"/><rect x="33" y="50" width="94" height="76" rx="12" fill="${headPri}" stroke="#141517" stroke-width="2.5"/>`;
-      break;
-    case 5: // Compacto ancho
-      headLayer = `<rect x="22" y="48" width="116" height="82" rx="28" fill="${headPri}" stroke="#141517" stroke-width="3.5"/><path d="M44 56 H116" stroke="${headSec}" stroke-width="5" stroke-linecap="round"/>`;
-      break;
-    case 6: // Trapezoidal Mecha
-      headLayer = `<polygon points="36,42 124,42 136,132 24,132" fill="${headPri}" stroke="#141517" stroke-width="3.5" stroke-linejoin="round"/><rect x="44" y="49" width="72" height="8" rx="4" fill="${headSec}"/>`;
-      break;
-    case 7: // Cilíndrico con franja
-      headLayer = `<rect x="30" y="40" width="100" height="96" rx="22" fill="${headPri}" stroke="#141517" stroke-width="3.5"/><rect x="30" y="114" width="100" height="14" fill="${headSec}"/>`;
-      break;
+  // 4. Textura dentro de Cabeza (texture)
+  let texSvg = "";
+  const texKey = r.texture ? r.texture.shape : "none";
+  if (texKey && texKey !== "none" && lib.texture[texKey]) {
+    const texColor = activePart === "texture" ? hslStr(r.texture.pri) : hslStr(r.face.sec);
+    texSvg = lib.texture[texKey]
+      .replace(/\{\{UID\}\}/g, uid)
+      .replace(/\{\{SEC\}\}/g, texColor);
   }
 
-  // 5. Capa de Ojos / Visor (Primario = Luz/Pupila, Secundario = Marco/Fondo de visor)
-  let eyesLayer = "";
-  switch (r.eyes.shape % 8) {
-    case 0: // Visor Eva con dos ojos luminosos
-      eyesLayer = `<rect x="38" y="62" width="84" height="30" rx="15" fill="${eyeSec}" stroke="#141517" stroke-width="3"/><ellipse cx="60" cy="77" rx="10" ry="7" fill="${eyePri}"/><ellipse cx="100" cy="77" rx="10" ry="7" fill="${eyePri}"/>`;
-      break;
-    case 1: // Lentes de sol playeros
-      eyesLayer = `<path d="M32 68 H128" stroke="#141517" stroke-width="4"/><rect x="38" y="62" width="38" height="26" rx="6" fill="${eyeSec}" stroke="#141517" stroke-width="3"/><rect x="84" y="62" width="38" height="26" rx="6" fill="${eyeSec}" stroke="#141517" stroke-width="3"/><line x1="44" y1="68" x2="56" y2="82" stroke="${eyePri}" stroke-width="4" stroke-linecap="round"/><line x1="90" y1="68" x2="102" y2="82" stroke="${eyePri}" stroke-width="4" stroke-linecap="round"/>`;
-      break;
-    case 2: // Ojos redondos dobles con anillos
-      eyesLayer = `<circle cx="58" cy="76" r="15" fill="${eyeSec}" stroke="#141517" stroke-width="3"/><circle cx="58" cy="76" r="8" fill="${eyePri}"/><circle cx="55" cy="73" r="2.5" fill="#FFFFFF"/><circle cx="102" cy="76" r="15" fill="${eyeSec}" stroke="#141517" stroke-width="3"/><circle cx="102" cy="76" r="8" fill="${eyePri}"/><circle cx="99" cy="73" r="2.5" fill="#FFFFFF"/>`;
-      break;
-    case 3: // Arco feliz
-      eyesLayer = `<rect x="38" y="62" width="84" height="30" rx="12" fill="${eyeSec}" stroke="#141517" stroke-width="3"/><path d="M50 82 Q60 66 70 82" fill="none" stroke="${eyePri}" stroke-width="5" stroke-linecap="round"/><path d="M90 82 Q100 66 110 82" fill="none" stroke="${eyePri}" stroke-width="5" stroke-linecap="round"/>`;
-      break;
-    case 4: // Visor Robocop láser
-      eyesLayer = `<rect x="34" y="66" width="92" height="20" rx="6" fill="${eyeSec}" stroke="#141517" stroke-width="3"/><rect x="42" y="72" width="76" height="8" rx="4" fill="${eyePri}"/>`;
-      break;
-    case 5: // Cíclope central grande
-      eyesLayer = `<rect x="44" y="60" width="72" height="32" rx="16" fill="${eyeSec}" stroke="#141517" stroke-width="3"/><circle cx="80" cy="76" r="12" fill="${eyePri}" stroke="#141517" stroke-width="2"/><circle cx="76" cy="72" r="3.5" fill="#FFFFFF"/>`;
-      break;
-    case 6: // Pantallas cuadradas independientes
-      eyesLayer = `<rect x="42" y="62" width="32" height="28" rx="6" fill="${eyeSec}" stroke="#141517" stroke-width="3"/><rect x="50" y="68" width="16" height="16" rx="3" fill="${eyePri}"/><rect x="86" y="62" width="32" height="28" rx="6" fill="${eyeSec}" stroke="#141517" stroke-width="3"/><rect x="94" y="68" width="16" height="16" rx="3" fill="${eyePri}"/>`;
-      break;
-    case 7: // Ojos guiño / estrella
-      eyesLayer = `<rect x="38" y="62" width="84" height="30" rx="14" fill="${eyeSec}" stroke="#141517" stroke-width="3"/><circle cx="58" cy="77" r="8" fill="${eyePri}"/><path d="M92 77 H110 M101 68 V86" stroke="${eyePri}" stroke-width="4.5" stroke-linecap="round"/>`;
-      break;
+  // 5. Cabeza (face)
+  const faceKey = lib.face[r.face.shape] ? r.face.shape : "round01";
+  const faceSvg = lib.face[faceKey]
+    .replace(/\{\{UID\}\}/g, uid)
+    .replace(/\{\{PRI\}\}/g, hslStr(r.face.pri))
+    .replace(/\{\{TEXTURE\}\}/g, texSvg);
+
+  // 6. Boca (mouth)
+  let mouthSvg = "";
+  if (r.mouth.shape && r.mouth.shape !== "none" && lib.mouth[r.mouth.shape]) {
+    mouthSvg = lib.mouth[r.mouth.shape]
+      .replace(/\{\{UID\}\}/g, uid)
+      .replace(/\{\{PRI\}\}/g, hslStr(r.mouth.pri))
+      .replace(/\{\{SEC\}\}/g, hslStr(r.mouth.sec));
   }
 
-  // 6. Capa de Boca / Expresión (Primario = Luz/Dientes, Secundario = Fondo de boca)
-  let mouthLayer = "";
-  switch (r.mouth.shape % 8) {
-    case 0: // Sonrisa limpia
-      mouthLayer = `<path d="M58 106 Q80 122 102 106" fill="none" stroke="${mouthSec}" stroke-width="6" stroke-linecap="round"/><path d="M60 106 Q80 120 100 106" fill="none" stroke="${mouthPri}" stroke-width="3" stroke-linecap="round"/>`;
-      break;
-    case 1: // Vocoder / Ecualizador luminoso
-      mouthLayer = `<rect x="48" y="100" width="64" height="20" rx="8" fill="${mouthSec}" stroke="#141517" stroke-width="2.5"/><rect x="56" y="106" width="6" height="8" rx="2" fill="${mouthPri}"/><rect x="66" y="103" width="6" height="14" rx="2" fill="${mouthPri}"/><rect x="77" y="105" width="6" height="10" rx="2" fill="${mouthPri}"/><rect x="88" y="103" width="6" height="14" rx="2" fill="${mouthPri}"/><rect x="98" y="106" width="6" height="8" rx="2" fill="${mouthPri}"/>`;
-      break;
-    case 2: // Gran sonrisa con dientes
-      mouthLayer = `<path d="M52 102 H108 A12 12 0 0 1 96 120 H64 A12 12 0 0 1 52 102 Z" fill="${mouthPri}" stroke="#141517" stroke-width="3"/><line x1="70" y1="102" x2="70" y2="120" stroke="${mouthSec}" stroke-width="2.5"/><line x1="90" y1="102" x2="90" y2="120" stroke="${mouthSec}" stroke-width="2.5"/>`;
-      break;
-    case 3: // Onda de sintetizador
-      mouthLayer = `<rect x="48" y="100" width="64" height="18" rx="6" fill="${mouthSec}" stroke="#141517" stroke-width="2.5"/><path d="M54 109 L64 103 L74 115 L86 103 L96 115 L106 109" fill="none" stroke="${mouthPri}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
-      break;
-    case 4: // Rejilla clásica
-      mouthLayer = `<rect x="52" y="102" width="56" height="16" rx="4" fill="${mouthPri}" stroke="#141517" stroke-width="2.5"/><line x1="66" y1="102" x2="66" y2="118" stroke="${mouthSec}" stroke-width="3"/><line x1="80" y1="102" x2="80" y2="118" stroke="${mouthSec}" stroke-width="3"/><line x1="94" y1="102" x2="94" y2="118" stroke="${mouthSec}" stroke-width="3"/>`;
-      break;
-    case 5: // Cápsula LED minimal
-      mouthLayer = `<rect x="62" y="105" width="36" height="10" rx="5" fill="${mouthPri}" stroke="${mouthSec}" stroke-width="3"/>`;
-      break;
-    case 6: // Sonrisa pícara lateral
-      mouthLayer = `<path d="M56 110 Q82 118 104 102" fill="none" stroke="#141517" stroke-width="4" stroke-linecap="round"/><polygon points="90,106 102,103 98,116" fill="${mouthPri}" stroke="#141517" stroke-width="2"/>`;
-      break;
-    case 7: // Tres luces de estado
-      mouthLayer = `<circle cx="64" cy="110" r="5" fill="${mouthPri}" stroke="${mouthSec}" stroke-width="2.5"/><circle cx="80" cy="110" r="5" fill="${mouthPri}" stroke="${mouthSec}" stroke-width="2.5"/><circle cx="96" cy="110" r="5" fill="${mouthPri}" stroke="${mouthSec}" stroke-width="2.5"/>`;
-      break;
-  }
+  // 7. Ojos (eyes)
+  const eyesKey = lib.eyes[r.eyes.shape] ? r.eyes.shape : "eva";
+  const eyesSvg = lib.eyes[eyesKey]
+    .replace(/\{\{UID\}\}/g, uid)
+    .replace(/\{\{PRI\}\}/g, hslStr(r.eyes.pri))
+    .replace(/\{\{SEC\}\}/g, hslStr(r.eyes.sec));
 
-  return `<svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">${bgLayer}${earsLayer}${topLayer}${headLayer}${eyesLayer}${mouthLayer}</svg>`;
+  return `<svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">${bgSvg}${sidesSvg}${topSvg}${faceSvg}${mouthSvg}${eyesSvg}</svg>`;
 }
 
 // ----------------- Contador Regresivo ----------------- //
 function initCountdown() {
   const el = document.getElementById("factsCountdown");
-
   function update() {
     const now = new Date().getTime();
     const diff = EVENT_DATE - now;
     if (diff <= 0 || !el) return;
-
     const d = Math.floor(diff / (1000 * 60 * 60 * 24));
     const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
     el.textContent = `Faltan ${d} días, ${h} hrs, ${m} min`;
   }
-
   update();
   setInterval(update, 15000);
 }
 
-// ----------------- Estado Local (v7 con PIN y Robot Modular HSL) ----------------- //
+// ----------------- Estado Local (v8 con Bottts Auténticos + HSL por Pieza) ----------------- //
 function loadState() {
-  const savedAttendees = localStorage.getItem("posada_attendees_v7");
+  const savedAttendees = localStorage.getItem("posada_attendees_v8");
   attendeesList = savedAttendees ? JSON.parse(savedAttendees) : DEFAULT_ATTENDEES;
 
-  const savedCars = localStorage.getItem("posada_cars_v7");
+  const savedCars = localStorage.getItem("posada_cars_v8");
   carsList = savedCars ? JSON.parse(savedCars) : [];
 
-  const savedCollabs = localStorage.getItem("posada_collabs_v7");
+  const savedCollabs = localStorage.getItem("posada_collabs_v8");
   collaborations = savedCollabs ? JSON.parse(savedCollabs) : [];
 
-  const savedSessionEmail = localStorage.getItem("posada_active_email_v7");
+  const savedSessionEmail = localStorage.getItem("posada_active_email_v8");
   if (savedSessionEmail) {
     currentUser = attendeesList.find(u => u.email.toLowerCase() === savedSessionEmail.toLowerCase()) || null;
   }
 }
 
 function saveState() {
-  localStorage.setItem("posada_attendees_v7", JSON.stringify(attendeesList));
-  localStorage.setItem("posada_cars_v7", JSON.stringify(carsList));
-  localStorage.setItem("posada_collabs_v7", JSON.stringify(collaborations));
+  localStorage.setItem("posada_attendees_v8", JSON.stringify(attendeesList));
+  localStorage.setItem("posada_cars_v8", JSON.stringify(carsList));
+  localStorage.setItem("posada_collabs_v8", JSON.stringify(collaborations));
   if (currentUser) {
-    localStorage.setItem("posada_active_email_v7", currentUser.email);
+    localStorage.setItem("posada_active_email_v8", currentUser.email);
   }
 }
 
@@ -339,7 +257,7 @@ function renderSessionHeader() {
     nameEl.textContent = currentUser.name;
     statusEl.textContent = "Sesión verificada";
   } else {
-    avatarWrap.innerHTML = renderRobotSVG(makeDefaultRobot(190, 0, 0, 0, 0));
+    avatarWrap.innerHTML = renderRobotSVG(createBotConfig(198, 0, 0, 0, 0, 0));
     nameEl.textContent = "Iniciar sesión";
     statusEl.textContent = "Toca para identificarte";
   }
@@ -357,11 +275,219 @@ function renderFactsDashboard() {
   if (progSubEl) {
     const totalTasks = collaborations.reduce((acc, c) => acc + c.items.length, 0);
     const coveredTasks = collaborations.reduce((acc, c) => acc + c.items.filter(i => i.claimedBy).length, 0);
-    progSubEl.textContent = totalTasks > 0 ? `${coveredTasks} de ${totalTasks} insumos cubiertos` : "Sin pendientes aún";
+    progSubEl.textContent = totalTasks > 0 ? `${coveredTasks} de ${totalTasks} insumos cubiertos` : "Listo para proponer";
   }
 }
 
-// ----------------- 1. PESTAÑA: PLANES Y PROPUESTAS ----------------- //
+// ==========================================================================
+// ESTUDIO MODERNO DE PERSONAJE (BOTTTS + RUEDA DE HUES UNIFICADA)
+// ==========================================================================
+function getEditingRobot() {
+  if (currentUser) return currentUser.robot;
+  return attendeesList[1].robot;
+}
+
+function initQuickSwatches() {
+  const row = document.getElementById("quickSwatchesRow");
+  if (!row) return;
+  row.innerHTML = "";
+
+  QUICK_HSL_SWATCHES.forEach(sw => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "mini-swatch";
+    btn.style.backgroundColor = hslStr(sw);
+    btn.onclick = () => {
+      if (!requireAuth()) return;
+      const r = getEditingRobot();
+      r[activePart][activeColorChannel] = { h: sw.h, s: sw.s, l: sw.l };
+      if (activePart === "texture") {
+        r.face.sec = { h: sw.h, s: sw.s, l: sw.l };
+      }
+      saveState();
+      renderRobotStudio();
+      renderSessionHeader();
+      renderWhosGoing();
+    };
+    row.appendChild(btn);
+  });
+}
+
+function renderRobotStudio() {
+  const r = getEditingRobot();
+  const canvasWrap = document.getElementById("studioCanvasWrap");
+  const nameInput = document.getElementById("studioNameInput");
+  const hintEl = document.getElementById("studioAuthHint");
+
+  if (canvasWrap) canvasWrap.innerHTML = renderRobotSVG(r);
+  if (nameInput && document.activeElement !== nameInput) {
+    nameInput.value = currentUser ? currentUser.name : "";
+    nameInput.disabled = !currentUser;
+    nameInput.placeholder = currentUser ? "Tu nombre..." : "Inicia sesión para editar";
+  }
+  if (hintEl) {
+    hintEl.textContent = currentUser
+      ? `Editando el robot de ${currentUser.name} (${currentUser.email})`
+      : "Vista previa libre. Inicia sesión arriba para guardar en tu perfil.";
+  }
+
+  const meta = PART_LABELS[activePart];
+  document.getElementById("activePartTitle").textContent = meta.title;
+  document.getElementById("lblChannelPri").textContent = meta.pri;
+  document.getElementById("lblChannelSec").textContent = meta.sec;
+
+  // Puntos de color en el selector de canal Primario / Secundario
+  document.getElementById("dotChannelPri").style.backgroundColor = hslStr(r[activePart].pri);
+  document.getElementById("dotChannelSec").style.backgroundColor = hslStr(r[activePart].sec);
+
+  document.getElementById("btnChannelPri").classList.toggle("active", activeColorChannel === "pri");
+  document.getElementById("btnChannelSec").classList.toggle("active", activeColorChannel === "sec");
+
+  // Cuadrícula de diseños Bottts de la pieza activa
+  const shapesGrid = document.getElementById("shapesGrid");
+  shapesGrid.innerHTML = "";
+  const keys = CATALOG_KEYS[activePart] || [];
+
+  keys.forEach(shapeKey => {
+    const isSel = r[activePart].shape === shapeKey;
+    const tile = document.createElement("button");
+    tile.type = "button";
+    tile.className = `shape-tile ${isSel ? 'selected' : ''}`;
+
+    if (shapeKey === "none") {
+      tile.innerHTML = `<span class="shape-none-label">Sin pieza</span>`;
+    } else {
+      tile.innerHTML = renderRobotSVG(r, activePart, shapeKey);
+    }
+
+    tile.onclick = () => {
+      if (!requireAuth()) return;
+      r[activePart].shape = shapeKey;
+      triggerCanvasPop();
+      saveState();
+      renderAll();
+    };
+    shapesGrid.appendChild(tile);
+  });
+
+  // Sincronizar el Círculo de Hue y los Sliders con el canal activo (Primario o Secundario)
+  const activeHsl = r[activePart][activeColorChannel];
+  syncWheelAndSliders(activeHsl);
+}
+
+function syncWheelAndSliders(hslObj) {
+  const centerSwatch = document.getElementById("activeColorCenterSwatch");
+  const thumb = document.getElementById("hueThumb");
+  const sSat = document.getElementById("sliderSat");
+  const sLight = document.getElementById("sliderLight");
+
+  if (centerSwatch) centerSwatch.style.backgroundColor = hslStr(hslObj);
+
+  // Posicionar el indicador circular (#hueThumb) sobre el anillo de 136px (radio medio = 52px)
+  if (thumb) {
+    const rad = ((hslObj.h - 90) * Math.PI) / 180;
+    const radius = 52;
+    const x = 68 + radius * Math.cos(rad);
+    const y = 68 + radius * Math.sin(rad);
+    thumb.style.left = `${x}px`;
+    thumb.style.top = `${y}px`;
+    thumb.style.backgroundColor = `hsl(${hslObj.h}, 90%, 55%)`;
+  }
+
+  document.getElementById("valSat").textContent = `${Math.round(hslObj.s)}%`;
+  document.getElementById("valLight").textContent = `${Math.round(hslObj.l)}%`;
+
+  if (sSat) {
+    sSat.value = hslObj.s;
+    sSat.style.background = `linear-gradient(90deg, hsl(${hslObj.h}, 0%, ${hslObj.l}%), hsl(${hslObj.h}, 100%, ${hslObj.l}%))`;
+  }
+  if (sLight) {
+    sLight.value = hslObj.l;
+    sLight.style.background = `linear-gradient(90deg, hsl(${hslObj.h}, ${hslObj.s}%, 12%), hsl(${hslObj.h}, ${hslObj.s}%, 50%), hsl(${hslObj.h}, ${hslObj.s}%, 92%))`;
+  }
+}
+
+function setupModernHueWheel() {
+  const wheel = document.getElementById("interactiveHueWheel");
+  if (!wheel) return;
+
+  let dragging = false;
+
+  function updateHueFromPointer(e) {
+    if (!requireAuth()) return;
+    const rect = wheel.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    let angle = Math.atan2(clientY - cy, clientX - cx) * (180 / Math.PI) + 90;
+    if (angle < 0) angle += 360;
+
+    const r = getEditingRobot();
+    r[activePart][activeColorChannel].h = Math.round(angle) % 360;
+    if (activePart === "texture") {
+      r.face.sec.h = r.texture.pri.h;
+    }
+    saveState();
+    renderRobotStudio();
+    renderSessionHeader();
+    renderWhosGoing();
+  }
+
+  wheel.addEventListener("mousedown", (e) => { dragging = true; updateHueFromPointer(e); });
+  window.addEventListener("mousemove", (e) => { if (dragging) updateHueFromPointer(e); });
+  window.addEventListener("mouseup", () => { dragging = false; });
+
+  wheel.addEventListener("touchstart", (e) => { e.preventDefault(); updateHueFromPointer(e); }, { passive: false });
+  wheel.addEventListener("touchmove", (e) => { e.preventDefault(); updateHueFromPointer(e); }, { passive: false });
+
+  // Botones de cambio entre Color Principal y Color Secundario
+  document.getElementById("btnChannelPri").onclick = () => {
+    activeColorChannel = "pri";
+    renderRobotStudio();
+  };
+  document.getElementById("btnChannelSec").onclick = () => {
+    activeColorChannel = "sec";
+    renderRobotStudio();
+  };
+
+  // Sliders de Saturación y Brillo
+  document.getElementById("sliderSat").addEventListener("input", (e) => {
+    if (!requireAuth()) return;
+    const r = getEditingRobot();
+    r[activePart][activeColorChannel].s = Number(e.target.value);
+    if (activePart === "texture") r.face.sec.s = r.texture.pri.s;
+    saveState();
+    renderRobotStudio();
+    renderSessionHeader();
+    renderWhosGoing();
+  });
+
+  document.getElementById("sliderLight").addEventListener("input", (e) => {
+    if (!requireAuth()) return;
+    const r = getEditingRobot();
+    r[activePart][activeColorChannel].l = Number(e.target.value);
+    if (activePart === "texture") r.face.sec.l = r.texture.pri.l;
+    saveState();
+    renderRobotStudio();
+    renderSessionHeader();
+    renderWhosGoing();
+  });
+}
+
+function triggerCanvasPop() {
+  const wrap = document.getElementById("studioCanvasWrap");
+  if (!wrap) return;
+  wrap.classList.remove("pop");
+  void wrap.offsetWidth;
+  wrap.classList.add("pop");
+  setTimeout(() => wrap.classList.remove("pop"), 240);
+}
+
+// ==========================================================================
+// PLANES Y PROPUESTAS, PUS.IO, ASISTENTES Y TRANSPORTE
+// ==========================================================================
 function renderCollabBoard() {
   const container = document.getElementById("collabBoardContainer");
   const badgeCount = document.getElementById("badgePlanesCount");
@@ -512,7 +638,6 @@ function deleteCollab(collabId) {
   showToast("Plan eliminado");
 }
 
-// ----------------- 2. PESTAÑA: PUS.IO DESGLOSADOR ----------------- //
 function handlePusioMessage(rawText) {
   if (!requireAuth()) return;
   const text = rawText.trim();
@@ -723,154 +848,6 @@ function appendChatMsg(text, role) {
   area.scrollTop = area.scrollHeight;
 }
 
-// ==========================================================================
-// 3. PESTAÑA: ESTUDIO COMPLETO DE ROBOT (POR APARTADO + CÍRCULOS DE HUES)
-// ==========================================================================
-function getEditingRobot() {
-  if (currentUser) return currentUser.robot;
-  return attendeesList[1].robot;
-}
-
-function renderRobotStudio() {
-  const r = getEditingRobot();
-  const canvasWrap = document.getElementById("studioCanvasWrap");
-  const nameInput = document.getElementById("studioNameInput");
-  const hintEl = document.getElementById("studioAuthHint");
-
-  if (canvasWrap) canvasWrap.innerHTML = renderRobotSVG(r);
-  if (nameInput && document.activeElement !== nameInput) {
-    nameInput.value = currentUser ? currentUser.name : "";
-    nameInput.disabled = !currentUser;
-    nameInput.placeholder = currentUser ? "Tu nombre..." : "Inicia sesión para editar tu nombre";
-  }
-  if (hintEl) {
-    hintEl.textContent = currentUser
-      ? `Personalizando el perfil verificado de ${currentUser.name} (${currentUser.email})`
-      : "Inicia sesión arriba para guardar los cambios en tu perfil personal.";
-  }
-
-  const meta = PART_META[activePart];
-  document.getElementById("activePartTitle").textContent = `Diseños de ${meta.label}`;
-  document.getElementById("primaryColorLabel").textContent = meta.priLabel;
-  document.getElementById("secondaryColorLabel").textContent = meta.secLabel;
-
-  // Renderizar miniaturas de formas de la pieza activa
-  const shapesGrid = document.getElementById("shapesGrid");
-  shapesGrid.innerHTML = "";
-  for (let i = 0; i < meta.count; i++) {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = `shape-tile ${r[activePart].shape === i ? 'selected' : ''}`;
-    btn.innerHTML = renderRobotSVG(r, activePart, i);
-    btn.onclick = () => {
-      if (!requireAuth()) return;
-      r[activePart].shape = i;
-      triggerCanvasPop();
-      saveState();
-      renderAll();
-    };
-    shapesGrid.appendChild(btn);
-  }
-
-  // Sincronizar controles HSL Primario y Secundario de la pieza activa
-  syncHslControls("Pri", r[activePart].pri);
-  syncHslControls("Sec", r[activePart].sec);
-}
-
-function syncHslControls(prefix, hslObj) {
-  const isPri = prefix === "Pri";
-  const dot = document.getElementById(isPri ? "primaryColorDot" : "secondaryColorDot");
-  const inner = document.getElementById(isPri ? "primaryHueInner" : "secondaryHueInner");
-
-  const cStr = hslStr(hslObj);
-  if (dot) dot.style.backgroundColor = cStr;
-  if (inner) inner.style.backgroundColor = cStr;
-
-  document.getElementById(`val${prefix}H`).textContent = `${Math.round(hslObj.h)}°`;
-  document.getElementById(`val${prefix}S`).textContent = `${Math.round(hslObj.s)}%`;
-  document.getElementById(`val${prefix}L`).textContent = `${Math.round(hslObj.l)}%`;
-
-  const sH = document.getElementById(`slider${prefix}H`);
-  const sS = document.getElementById(`slider${prefix}S`);
-  const sL = document.getElementById(`slider${prefix}L`);
-
-  if (sH) sH.value = hslObj.h;
-  if (sS) {
-    sS.value = hslObj.s;
-    sS.style.background = `linear-gradient(90deg, hsl(${hslObj.h}, 0%, ${hslObj.l}%), hsl(${hslObj.h}, 100%, ${hslObj.l}%))`;
-  }
-  if (sL) {
-    sL.value = hslObj.l;
-    sL.style.background = `linear-gradient(90deg, hsl(${hslObj.h}, ${hslObj.s}%, 15%), hsl(${hslObj.h}, ${hslObj.s}%, 50%), hsl(${hslObj.h}, ${hslObj.s}%, 90%))`;
-  }
-}
-
-function setupHueWheelInteractions() {
-  bindHueWheel("primaryHueWheel", "pri");
-  bindHueWheel("secondaryHueWheel", "sec");
-
-  ["Pri", "Sec"].forEach(prefix => {
-    const key = prefix.toLowerCase();
-    ["H", "S", "L"].forEach(channel => {
-      const slider = document.getElementById(`slider${prefix}${channel}`);
-      if (slider) {
-        slider.addEventListener("input", (e) => {
-          if (!requireAuth()) return;
-          const r = getEditingRobot();
-          r[activePart][key][channel.toLowerCase()] = Number(e.target.value);
-          saveState();
-          renderRobotStudio();
-          renderSessionHeader();
-          renderWhosGoing();
-        });
-      }
-    });
-  });
-}
-
-function bindHueWheel(elementId, colorSlot) {
-  const wheel = document.getElementById(elementId);
-  if (!wheel) return;
-
-  let dragging = false;
-
-  function pickHueFromEvent(e) {
-    if (!requireAuth()) return;
-    const rect = wheel.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-    let angle = Math.atan2(clientY - cy, clientX - cx) * (180 / Math.PI) + 90;
-    if (angle < 0) angle += 360;
-
-    const r = getEditingRobot();
-    r[activePart][colorSlot].h = Math.round(angle) % 360;
-    saveState();
-    renderRobotStudio();
-    renderSessionHeader();
-    renderWhosGoing();
-  }
-
-  wheel.addEventListener("mousedown", (e) => { dragging = true; pickHueFromEvent(e); });
-  window.addEventListener("mousemove", (e) => { if (dragging) pickHueFromEvent(e); });
-  window.addEventListener("mouseup", () => { dragging = false; });
-
-  wheel.addEventListener("touchstart", (e) => { e.preventDefault(); pickHueFromEvent(e); }, { passive: false });
-  wheel.addEventListener("touchmove", (e) => { e.preventDefault(); pickHueFromEvent(e); }, { passive: false });
-}
-
-function triggerCanvasPop() {
-  const wrap = document.getElementById("studioCanvasWrap");
-  if (!wrap) return;
-  wrap.classList.remove("pop");
-  void wrap.offsetWidth;
-  wrap.classList.add("pop");
-  setTimeout(() => wrap.classList.remove("pop"), 260);
-}
-
-// ----------------- 4. PESTAÑA: ¿QUIÉNES VAMOS? (SIN SUPLANTACIÓN) ----------------- //
 function renderWhosGoing() {
   const grid = document.getElementById("whosGoingGrid");
   grid.innerHTML = "";
@@ -900,7 +877,6 @@ function renderWhosGoing() {
   });
 }
 
-// ----------------- 5. PESTAÑA: TRANSPORTE ----------------- //
 function renderTransportSection() {
   const container = document.getElementById("carsContainer");
   container.innerHTML = "";
@@ -946,7 +922,6 @@ function retireCar(id) {
   showToast("Coche retirado");
 }
 
-// ----------------- Event Listeners & Login Único con PIN ----------------- //
 function setupEventListeners() {
   document.querySelectorAll(".tab-trigger").forEach(btn => {
     btn.onclick = () => switchTab(btn.dataset.tab);
@@ -966,7 +941,6 @@ function setupEventListeners() {
     openModal("modalCar");
   };
 
-  // Autenticación única protegida por PIN / Contraseña secreta
   document.getElementById("secureAuthForm").onsubmit = (e) => {
     e.preventDefault();
     const emailVal = document.getElementById("authInputEmail").value.trim().toLowerCase();
@@ -980,17 +954,16 @@ function setupEventListeners() {
     let existing = attendeesList.find(u => u.email.toLowerCase() === emailVal);
 
     if (existing) {
-      // Si ya tiene un PIN registrado, verificar que coincida exactamente
       if (existing.pinHash && existing.pinHash !== candidateHash) {
         errEl.textContent = "Clave o PIN incorrecto para este correo. Nadie puede entrar a una cuenta ajena.";
         errEl.style.display = "block";
         return;
       }
-      // Si aún no tenía PIN reclamado, queda bloqueado con su nuevo PIN
       existing.pinHash = candidateHash;
       existing.name = nameVal;
       currentUser = existing;
     } else {
+      const rndHue = Math.floor(Math.random() * 360);
       const newUser = {
         id: Date.now(),
         name: nameVal,
@@ -998,7 +971,7 @@ function setupEventListeners() {
         pinHash: candidateHash,
         travelMode: null,
         puedo_dar_coche: 0,
-        robot: makeDefaultRobot(Math.floor(Math.random() * 360), 0, 0, 0, 0)
+        robot: createBotConfig(rndHue, 0, 0, 0, 0, 0)
       };
       attendeesList.push(newUser);
       currentUser = newUser;
@@ -1013,16 +986,15 @@ function setupEventListeners() {
   };
 
   // Pestañas de anatomía del robot
-  document.querySelectorAll("#anatomyTabs .anatomy-tab").forEach(btn => {
+  document.querySelectorAll("#anatomyTabs .anatomy-pill").forEach(btn => {
     btn.onclick = () => {
-      document.querySelectorAll("#anatomyTabs .anatomy-tab").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll("#anatomyTabs .anatomy-pill").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
       activePart = btn.dataset.part;
       renderRobotStudio();
     };
   });
 
-  // Edición de nombre en estudio
   document.getElementById("studioNameInput").addEventListener("input", (e) => {
     if (!currentUser) return;
     const v = e.target.value.trim();
@@ -1034,19 +1006,23 @@ function setupEventListeners() {
     }
   });
 
-  // Robot al azar
+  // Mezclar al azar con diseños Bottts reales
   document.getElementById("btnRandomRobot").onclick = () => {
     if (!requireAuth()) return;
-    const r = currentUser.robot;
-    Object.keys(PART_META).forEach(part => {
-      r[part].shape = Math.floor(Math.random() * PART_META[part].count);
-      r[part].pri = { h: Math.floor(Math.random() * 360), s: 65 + Math.floor(Math.random() * 30), l: 45 + Math.floor(Math.random() * 35) };
-      r[part].sec = { h: Math.floor(Math.random() * 360), s: 60 + Math.floor(Math.random() * 35), l: 25 + Math.floor(Math.random() * 45) };
-    });
+    const hue = Math.floor(Math.random() * 360);
+    currentUser.robot = createBotConfig(
+      hue,
+      Math.floor(Math.random() * 6),
+      Math.floor(Math.random() * 14),
+      Math.floor(Math.random() * 9),
+      Math.floor(Math.random() * 9),
+      Math.floor(Math.random() * 7),
+      Math.floor(Math.random() * 4)
+    );
     triggerCanvasPop();
     saveState();
     renderAll();
-    showToast("Colores y piezas mezclados al azar");
+    showToast("Robot mezclado con nuevas piezas Bottts");
   };
 
   document.getElementById("btnSaveRobotStudio").onclick = () => {
@@ -1056,7 +1032,6 @@ function setupEventListeners() {
     showToast(`Robot guardado en el perfil de ${currentUser.name}`);
   };
 
-  // Confirmar pasajero
   document.getElementById("btnConfirmPassenger").onclick = () => {
     if (!requireAuth()) return;
     currentUser.travelMode = "passenger";
@@ -1066,7 +1041,6 @@ function setupEventListeners() {
     showToast(`${currentUser.name} confirmado como pasajero`);
   };
 
-  // Registrar coche
   document.getElementById("carForm").onsubmit = (e) => {
     e.preventDefault();
     if (!requireAuth()) return;
@@ -1090,7 +1064,6 @@ function setupEventListeners() {
     showToast(`Coche registrado para ${currentUser.name}`);
   };
 
-  // Ejemplos rápidos de pus.io
   document.querySelectorAll(".example-pill").forEach(btn => {
     btn.onclick = () => {
       const prompt = btn.dataset.prompt;
@@ -1098,7 +1071,6 @@ function setupEventListeners() {
     };
   });
 
-  // Formulario pus.io
   document.getElementById("pusioForm").onsubmit = (e) => {
     e.preventDefault();
     const input = document.getElementById("pusioInput");

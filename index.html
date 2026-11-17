@@ -33,7 +33,7 @@
       Posada en <em>Chelem</em>
     </h1>
 
-    <!-- 3. PEQUEÑO DASHBOARD: LO QUE SÍ ES UN HECHO -->
+    <!-- DASHBOARD: LO QUE SÍ ES UN HECHO -->
     <div class="facts-dashboard">
       <div class="facts-header">
         <span class="facts-badge">Lo que sí es un hecho</span>
@@ -88,7 +88,7 @@
     </div>
 
     <!-- ====================================================================
-         PESTAÑA 1: PLANES Y PROPUESTAS (ANTES PENDIENTES Y COLABORACIONES)
+         PESTAÑA 1: PLANES Y PROPUESTAS
          ==================================================================== -->
     <section id="tabPlanes" class="tab-panel active">
       <div class="view-header">
@@ -97,18 +97,17 @@
           <p class="view-subtitle">Cada comida o actividad propuesta se desglosa en insumos para dividirnos entre varios.</p>
         </div>
 
-        <!-- 1. Botón NO rojo con ícono de robotito colorido -->
         <button type="button" class="btn btn-pusio" onclick="switchTab('tabPusio')">
           <svg class="robot-btn-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <line x1="18" y1="2" x2="18" y2="8" stroke="#FFD166" stroke-width="2.5" stroke-linecap="round"/>
-            <circle cx="18" cy="3" r="2.5" fill="#FF6B6B"/>
-            <rect x="3" y="13" width="4" height="10" rx="2" fill="#FFD166" stroke="#141517" stroke-width="1.5"/>
-            <rect x="29" y="13" width="4" height="10" rx="2" fill="#FFD166" stroke="#141517" stroke-width="1.5"/>
-            <rect x="6" y="8" width="24" height="22" rx="6" fill="#FFFFFF" stroke="#141517" stroke-width="2"/>
-            <rect x="10" y="13" width="16" height="7" rx="3.5" fill="#141517"/>
+            <circle cx="18" cy="3" r="2.5" fill="#06D6A0"/>
+            <rect x="3" y="13" width="4" height="10" rx="2" fill="#FFD166"/>
+            <rect x="29" y="13" width="4" height="10" rx="2" fill="#FFD166"/>
+            <rect x="6" y="8" width="24" height="22" rx="7" fill="#FFFFFF"/>
+            <rect x="10" y="13" width="16" height="7" rx="3.5" fill="#111214"/>
             <circle cx="14.5" cy="16.5" r="2" fill="#00F5D4"/>
-            <circle cx="21.5" cy="16.5" r="2" fill="#FF6B6B"/>
-            <rect x="13" y="23.5" width="10" height="2.5" rx="1.25" fill="#00BBF9"/>
+            <circle cx="21.5" cy="16.5" r="2" fill="#FFD166"/>
+            <rect x="13" y="23.5" width="10" height="2.5" rx="1.25" fill="#0284C7"/>
           </svg>
           <span>Proponer con pus.io</span>
         </button>
@@ -151,113 +150,90 @@
     </section>
 
     <!-- ====================================================================
-         PESTAÑA 3: ESTUDIO COMPLETO DE ROBOT (POR PIEZA + CÍRCULOS DE HUES)
+         PESTAÑA 3: ESTUDIO MODERNO DE PERSONAJE (DISEÑOS BOTTTS + RUEDA DE HUES)
          ==================================================================== -->
     <section id="tabRobot" class="tab-panel">
       <div class="view-header">
         <div>
           <h2 class="view-title">Estudio de <em>personaje</em></h2>
-          <p class="view-subtitle">Elige cada apartado de tu robot (cabeza, ojos, boca, antena, laterales, fondo) y ajusta su color principal y secundario con los círculos de matiz (Hue).</p>
+          <p class="view-subtitle">Personaliza cada pieza de tu robot y ajusta su color principal y de detalle con el círculo de matiz.</p>
         </div>
         <div style="display:flex; gap:8px;">
           <button type="button" id="btnRandomRobot" class="btn btn-amber btn-sm">Mezclar al azar</button>
-          <button type="button" id="btnSaveRobotStudio" class="btn btn-pine btn-sm">Guardar en mi perfil</button>
+          <button type="button" id="btnSaveRobotStudio" class="btn btn-pusio btn-sm">Guardar cambios</button>
         </div>
       </div>
 
-      <div class="studio-workspace">
-        <!-- Columna Izquierda: Vista Previa Grande -->
-        <div class="studio-preview-col">
-          <div id="studioCanvasWrap" class="studio-canvas-wrap">
-            <!-- SVG Modular Renderizado en Vivo -->
-          </div>
+      <div class="studio-modern-grid">
+        <!-- Columna Izquierda: Vista Previa del Robot -->
+        <div class="studio-stage-card">
+          <div id="studioCanvasWrap" class="studio-avatar-frame"></div>
 
           <div class="form-item" style="text-align:left; margin-bottom:10px;">
             <label for="studioNameInput">Tu nombre en la lista</label>
             <input type="text" id="studioNameInput" class="form-ctrl" placeholder="Tu nombre...">
           </div>
 
-          <p id="studioAuthHint" style="font-size:0.76rem; color:var(--ink-muted);">
-            Editando el robot de tu sesión activa.
+          <p id="studioAuthHint" style="font-size:0.75rem; color:var(--ink-muted);">
+            Personalizando tu robot activo.
           </p>
         </div>
 
-        <!-- Columna Derecha: Anatomía por Apartado + Ruedas de Color Primario/Secundario -->
-        <div>
-          <!-- 1. Selección del Apartado del Robot -->
-          <div id="anatomyTabs" class="anatomy-tabs">
-            <button type="button" class="anatomy-tab active" data-part="head">Cabeza</button>
-            <button type="button" class="anatomy-tab" data-part="eyes">Ojos</button>
-            <button type="button" class="anatomy-tab" data-part="mouth">Boca</button>
-            <button type="button" class="anatomy-tab" data-part="top">Antena</button>
-            <button type="button" class="anatomy-tab" data-part="ears">Laterales</button>
-            <button type="button" class="anatomy-tab" data-part="bg">Fondo</button>
+        <!-- Columna Derecha: Selector de Piezas Bottts + Inspector de Color con Círculo de Hue -->
+        <div class="studio-controls-card">
+          <div id="anatomyTabs" class="anatomy-pills">
+            <button type="button" class="anatomy-pill active" data-part="face">Cabeza (6)</button>
+            <button type="button" class="anatomy-pill" data-part="eyes">Ojos (14)</button>
+            <button type="button" class="anatomy-pill" data-part="mouth">Boca (10)</button>
+            <button type="button" class="anatomy-pill" data-part="top">Antena (10)</button>
+            <button type="button" class="anatomy-pill" data-part="sides">Laterales (8)</button>
+            <button type="button" class="anatomy-pill" data-part="texture">Textura (9)</button>
+            <button type="button" class="anatomy-pill" data-part="bg">Fondo (6)</button>
           </div>
 
-          <!-- 2. Formas Visuales del Apartado Seleccionado -->
-          <div class="shapes-panel">
-            <div class="panel-label">
-              <span id="activePartTitle">Formas de Cabeza</span>
-              <span>Toca un diseño</span>
-            </div>
-            <div id="shapesGrid" class="shapes-grid">
-              <!-- Miniaturas SVG de cada forma -->
-            </div>
-          </div>
-
-          <!-- 3. Ruedas de Color (HUE) + Saturación y Brillo (Primario y Secundario de la pieza activa) -->
-          <div class="color-wheels-grid">
-            <!-- Color Primario de la pieza -->
-            <div class="hue-card">
-              <div class="hue-card-header">
-                <span id="primaryColorLabel" class="hue-card-title">Color principal (Cabeza)</span>
-                <span id="primaryColorDot" class="color-preview-dot"></span>
+          <div class="studio-split-body">
+            <!-- Cuadrícula de Diseños Bottts -->
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <span id="activePartTitle" style="font-size:0.8rem; font-weight:700; color:var(--ink-secondary);">Diseños de Cabeza</span>
+                <span style="font-family:var(--font-mono); font-size:0.68rem; color:var(--ink-muted);">Toca para equipar</span>
               </div>
-              <div class="hue-wheel-row">
-                <div id="primaryHueWheel" class="hue-ring-wrap" title="Arrastra o toca el círculo para elegir el tono">
-                  <div id="primaryHueInner" class="hue-ring-inner"></div>
-                </div>
-                <div class="hue-sliders-col">
-                  <div class="hsl-slider-group">
-                    <label><span>Matiz (Hue)</span><span id="valPriH">200°</span></label>
-                    <input type="range" id="sliderPriH" class="hsl-range hue-spectrum-bar" min="0" max="360" value="200">
-                  </div>
-                  <div class="hsl-slider-group">
-                    <label><span>Saturación</span><span id="valPriS">85%</span></label>
-                    <input type="range" id="sliderPriS" class="hsl-range" min="0" max="100" value="85">
-                  </div>
-                  <div class="hsl-slider-group">
-                    <label><span>Luz / Brillo</span><span id="valPriL">55%</span></label>
-                    <input type="range" id="sliderPriL" class="hsl-range" min="15" max="90" value="55">
-                  </div>
-                </div>
-              </div>
+              <div id="shapesGrid" class="bottts-shapes-grid"></div>
             </div>
 
-            <!-- Color Secundario / Detalle de la pieza -->
-            <div class="hue-card">
-              <div class="hue-card-header">
-                <span id="secondaryColorLabel" class="hue-card-title">Color secundario / Detalle</span>
-                <span id="secondaryColorDot" class="color-preview-dot"></span>
+            <!-- Inspector de Color con Rueda de Hue Unificada + Switch Primario/Secundario -->
+            <div class="color-inspector-panel">
+              <div class="channel-switcher">
+                <button type="button" id="btnChannelPri" class="channel-btn active">
+                  <span id="dotChannelPri" class="channel-dot"></span>
+                  <span id="lblChannelPri">Color Principal</span>
+                </button>
+                <button type="button" id="btnChannelSec" class="channel-btn">
+                  <span id="dotChannelSec" class="channel-dot"></span>
+                  <span id="lblChannelSec">Color Secundario</span>
+                </button>
               </div>
-              <div class="hue-wheel-row">
-                <div id="secondaryHueWheel" class="hue-ring-wrap" title="Arrastra o toca el círculo para elegir el tono secundario">
-                  <div id="secondaryHueInner" class="hue-ring-inner"></div>
-                </div>
-                <div class="hue-sliders-col">
-                  <div class="hsl-slider-group">
-                    <label><span>Matiz (Hue)</span><span id="valSecH">45°</span></label>
-                    <input type="range" id="sliderSecH" class="hsl-range hue-spectrum-bar" min="0" max="360" value="45">
-                  </div>
-                  <div class="hsl-slider-group">
-                    <label><span>Saturación</span><span id="valSecS">90%</span></label>
-                    <input type="range" id="sliderSecS" class="hsl-range" min="0" max="100" value="90">
-                  </div>
-                  <div class="hsl-slider-group">
-                    <label><span>Luz / Brillo</span><span id="valSecL">60%</span></label>
-                    <input type="range" id="sliderSecL" class="hsl-range" min="10" max="95" value="60">
+
+              <div class="wheel-stage">
+                <div id="interactiveHueWheel" class="hue-wheel-modern" title="Arrastra o toca en el círculo para cambiar el tono">
+                  <div id="hueThumb" class="hue-thumb"></div>
+                  <div class="hue-wheel-center">
+                    <div id="activeColorCenterSwatch" class="hue-wheel-swatch"></div>
                   </div>
                 </div>
+
+                <div class="sliders-stack">
+                  <div class="modern-slider-row">
+                    <label><span>Saturación</span><span id="valSat">85%</span></label>
+                    <input type="range" id="sliderSat" class="modern-range" min="0" max="100" value="85">
+                  </div>
+                  <div class="modern-slider-row">
+                    <label><span>Brillo / Luz</span><span id="valLight">55%</span></label>
+                    <input type="range" id="sliderLight" class="modern-range" min="12" max="92" value="55">
+                  </div>
+                </div>
+
+                <div id="quickSwatchesRow" class="quick-swatches-row"></div>
               </div>
             </div>
           </div>
@@ -406,6 +382,7 @@
 
   <div id="toastNotice" class="toast-notice">Guardado</div>
 
+  <script src="js/bottts_parts.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
