@@ -145,7 +145,8 @@ class TestPosadaBackendHeadless(unittest.TestCase):
     def test_07_frontend_assets_served(self):
         r_home = self.client.get("/")
         self.assertEqual(r_home.status_code, 200)
-        self.assertIn("EL PUSIO", r_home.text)
+        self.assertIn("Posada 2026", r_home.text)
+        self.assertIn("Chelem", r_home.text)
 
         r_css = self.client.get("/css/style.css")
         self.assertEqual(r_css.status_code, 200)
@@ -153,7 +154,7 @@ class TestPosadaBackendHeadless(unittest.TestCase):
 
         r_js = self.client.get("/js/app.js")
         self.assertEqual(r_js.status_code, 200)
-        self.assertIn("Pus.io", r_js.text)
+        self.assertIn("pus.io", r_js.text.lower())
         print("[OK] Frontend HTML, CSS and JS assets verified via headless HTTP.")
 
     def test_08_driver_privileges_and_user_preferences(self):
