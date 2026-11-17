@@ -145,7 +145,7 @@ class TestPosadaBackendHeadless(unittest.TestCase):
     def test_07_frontend_assets_served(self):
         r_home = self.client.get("/")
         self.assertEqual(r_home.status_code, 200)
-        self.assertIn("Posada 2026", r_home.text)
+        self.assertIn("Posada Chelem 2026", r_home.text)
         self.assertIn("Chelem", r_home.text)
 
         r_css = self.client.get("/css/style.css")

@@ -3,299 +3,441 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Posada 2026 — Chelem</title>
+  <title>Posada Chelem 2026</title>
 
   <link rel="stylesheet" href="css/style.css">
 
-  <!-- Open Graph -->
-  <meta property="og:title" content="Posada 2026 — Chelem">
-  <meta property="og:description" content="Planeación interactiva para la posada en Chelem.">
+  <meta property="og:title" content="Posada Chelem 2026">
+  <meta property="og:description" content="Arma tu personaje, confirma tu viaje y suma propuestas con pus.io para la posada en Chelem.">
 </head>
 <body>
 
-  <!-- Sutil iluminación ambiental sobre blanco -->
-  <div class="ambient-canvas"></div>
+  <!-- Lienzo de Confeti Vectorial al completar misiones -->
+  <canvas id="confettiCanvas"></canvas>
 
-  <!-- Navegación flotante -->
-  <header class="site-header">
-    <nav class="nav-bar">
-      <a href="#" class="brand">
-        <span class="brand-serif">Posada <em>Chelem</em></span>
-        <span class="brand-tag">19 Dic 2026</span>
-      </a>
-
-      <div class="nav-links">
-        <a href="#asistentes" class="nav-link">¿Quiénes vamos?</a>
-        <a href="#transporte" class="nav-link">Transporte</a>
-        <a href="#planSection" class="nav-link">El Plan</a>
-        <a href="#pusioSection" class="nav-link">pus.io</a>
-        <a href="#avatarSection" class="nav-link">Mi Robot</a>
-      </div>
-
-      <div class="nav-actions">
-        <div id="btnUserChip" class="user-chip" title="Cambiar o editar mi perfil">
-          <img id="navUserAvatar" class="user-chip-avatar" src="" alt="Avatar">
-          <span id="navUserName" class="user-chip-label">Roberto</span>
-          <span class="user-chip-hint">Cambiar</span>
+  <!-- BARRA SUPERIOR GAMIFICADA (HUD DE PROGRESO) -->
+  <header class="mission-hud">
+    <div class="hud-inner">
+      <div id="btnUserChip" class="hud-player" title="Cambiar de jugador">
+        <img id="navUserAvatar" class="hud-avatar" src="" alt="Avatar">
+        <div>
+          <div id="navUserName" class="hud-player-name">Roberto</div>
         </div>
+        <span id="hudXpBadge" class="hud-xp-badge">0 XP</span>
       </div>
-    </nav>
+
+      <nav class="hud-steps">
+        <a href="#paso1" id="hudStep1" class="hud-step-pill">
+          <span class="step-check"></span>
+          <span>1. Personaje</span>
+        </a>
+        <a href="#paso2" id="hudStep2" class="hud-step-pill">
+          <span class="step-check"></span>
+          <span>2. Transporte</span>
+        </a>
+        <a href="#paso3" id="hudStep3" class="hud-step-pill">
+          <span class="step-check"></span>
+          <span>3. Votar plan</span>
+        </a>
+        <a href="#paso4" id="hudStep4" class="hud-step-pill">
+          <span class="step-check"></span>
+          <span>4. Sumar con pus.io</span>
+        </a>
+      </nav>
+
+      <div class="hud-progress-wrap">
+        <div class="hud-progress-bar">
+          <div id="hudProgressFill" class="hud-progress-fill"></div>
+        </div>
+        <span id="hudLevelText" class="hud-level-text">0/4</span>
+      </div>
+    </div>
   </header>
 
-  <!-- HERO MONUMENTAL CON TIPOGRAFÍA SERIFA MODERNA -->
-  <section class="hero container reveal">
-    <div class="hero-eyebrow">
-      <span class="pulse-dot"></span>
-      <span>Sábado 19 de Diciembre &bull; Casa de Reyvell</span>
+  <!-- HERO PRINCIPAL -->
+  <section class="hero container">
+    <div class="hero-sticker-row">
+      <span class="sticker-tag sticker-berry">Sábado 19 de Diciembre 2026</span>
+      <span class="sticker-tag sticker-ocean">Casa de Reyvell, Chelem</span>
+      <span class="sticker-tag sticker-sun">Misión: Armar la Posada</span>
     </div>
 
-    <h1 class="hero-display">
+    <h1 class="hero-title">
       Posada en <em>Chelem</em>,<br>
-      frente al <span class="berry-italic">mar</span>.
+      frente al <span class="wave-underline">mar</span>.
     </h1>
 
-    <p class="hero-lead">
-      Un espacio vivo para armar el plan entre todos, organizar los autos desde Mérida y sumar ideas con la ayuda de <em>pus.io</em>.
+    <p class="hero-subtitle">
+      Completa los 4 pasos de la página: personaliza las piezas de tu robot, define cómo viajas, vota las actividades y dile a <em>pus.io</em> qué falta agregar.
     </p>
 
-    <!-- Contador Editorial Grande -->
-    <div class="countdown-wrap">
-      <div class="cd-card">
-        <div id="cdDays" class="cd-number">--</div>
-        <div class="cd-unit">Días</div>
+    <div class="countdown-row">
+      <div class="cd-pill">
+        <div id="cdDays" class="cd-num">--</div>
+        <div class="cd-lbl">Días</div>
       </div>
-      <div class="cd-card">
-        <div id="cdHours" class="cd-number">--</div>
-        <div class="cd-unit">Horas</div>
+      <div class="cd-pill">
+        <div id="cdHours" class="cd-num">--</div>
+        <div class="cd-lbl">Horas</div>
       </div>
-      <div class="cd-card">
-        <div id="cdMins" class="cd-number">--</div>
-        <div class="cd-unit">Minutos</div>
+      <div class="cd-pill">
+        <div id="cdMins" class="cd-num">--</div>
+        <div class="cd-lbl">Minutos</div>
       </div>
-      <div class="cd-card">
-        <div id="cdSecs" class="cd-number">--</div>
-        <div class="cd-unit">Segundos</div>
+      <div class="cd-pill">
+        <div id="cdSecs" class="cd-num">--</div>
+        <div class="cd-lbl">Segundos</div>
       </div>
     </div>
   </section>
 
-  <!-- 01. ¿QUIÉNES VAMOS? -->
-  <section id="asistentes" class="section container reveal">
-    <div class="section-header">
-      <div>
-        <span class="section-index">01 / Confirmados</span>
-        <h2 class="section-title">¿Quiénes <em>vamos</em>?</h2>
-        <p class="section-subtitle">Haz clic en tu tarjeta para personalizar tu nombre o diseñar tu robot.</p>
-      </div>
-    </div>
+  <main class="container">
 
-    <div id="whosGoingGrid" class="whos-going-grid">
-      <!-- Tarjetas dinámicas -->
-    </div>
-  </section>
-
-  <!-- 02. RUTAS & TRANSPORTE -->
-  <section id="transporte" class="section container reveal">
-    <div class="section-header">
-      <div>
-        <span class="section-index">02 / Logística Mérida — Chelem</span>
-        <h2 class="section-title">Rutas y <em>transporte</em></h2>
-        <p class="section-subtitle">Registra tu coche si puedes llevar amigos a la playa y activa beneficios exclusivos.</p>
-      </div>
-      <button id="btnOpenCarModal" class="btn btn-dark">+ Puedo dar mi coche</button>
-    </div>
-
-    <div class="transport-layout">
-      <!-- Estado de Autos -->
-      <div id="carsContainer" class="carpool-stage">
-        <!-- Dinámico -->
-      </div>
-
-      <!-- Privilegios de Conductor -->
-      <div class="privileges-bento">
-        <div class="privileges-head">
-          <h3>Privilegios de conductor</h3>
-          <span>Estatuto Oficial</span>
+    <!-- ====================================================================
+         PASO 1: ¿QUIÉNES VAMOS? & TALLER DE PERSONAJE INTERACTIVO
+         ==================================================================== -->
+    <section id="paso1" class="quest-step">
+      <div class="quest-header">
+        <div>
+          <div class="quest-badge-row">
+            <span class="quest-number">Paso 01 de 04</span>
+            <span class="quest-reward">+100 XP al guardar tu robot</span>
+          </div>
+          <h2 class="quest-title">¿Quiénes <em>vamos</em>?</h2>
+          <p class="quest-desc">
+            Selecciona tu tarjeta en la lista de abajo y usa el taller interactivo para cambiar tu nombre, elegir el color de tu robot y combinar sus piezas.
+          </p>
         </div>
-        <div class="privileges-cards">
-          <div class="priv-item">
-            <span class="priv-num">01</span>
-            <h4 class="priv-title">Combustible cubierto</h4>
-            <p class="priv-desc">Tus pasajeros dividen y cubren el gasto total de gasolina del viaje redondo.</p>
+      </div>
+
+      <!-- Tarjetas de amigos -->
+      <div id="whosGoingGrid" class="friends-roster">
+        <!-- Generado por JS -->
+      </div>
+
+      <!-- Taller Interactivo con Partes Seleccionables y Colores -->
+      <div class="character-workshop">
+        <!-- Columna Izquierda: Pedestal del Robot -->
+        <div class="workshop-stage-col">
+          <div id="robotPedestal" class="robot-pedestal" style="background-color: #E3F2FD;">
+            <img id="avatarPreviewTarget" src="" alt="Vista previa del robot">
           </div>
-          <div class="priv-item">
-            <span class="priv-num">02</span>
-            <h4 class="priv-title">Voto de oro</h4>
-            <p class="priv-desc">Tu voto define cualquier empate al elegir la película o dinámica de la noche.</p>
+
+          <div class="workshop-name-box">
+            <label for="nameEditField">Tu nombre o apodo en la lista</label>
+            <input type="text" id="nameEditField" class="workshop-name-input" placeholder="Tu nombre...">
           </div>
-          <div class="priv-item">
-            <span class="priv-num">03</span>
-            <h4 class="priv-title">Ventaja en Smash</h4>
-            <p class="priv-desc">Eliges tu primer rival o pasas directo a la segunda ronda en el torneo de Smash.</p>
-          </div>
-          <div class="priv-item">
-            <span class="priv-num">04</span>
-            <h4 class="priv-title">Distintivo VIP</h4>
-            <p class="priv-desc">Insignia especial de conductor en tu tarjeta principal durante toda la posada.</p>
+
+          <div style="display:flex; gap:8px; width:100%; justify-content:center; flex-wrap:wrap;">
+            <button type="button" id="btnRandomRobot" class="btn btn-sun btn-sm">Tirar dados (Azar)</button>
+            <button type="button" id="btnSaveCharacter" class="btn btn-pine btn-sm">Guardar personaje (+100 XP)</button>
           </div>
         </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- 03. OPCIONES PARA EL PLAN -->
-  <section id="planSection" class="section container reveal">
-    <div class="section-header">
-      <div>
-        <span class="section-index">03 / Propuestas Abiertas</span>
-        <h2 class="section-title">Opciones para el <em>plan</em></h2>
-        <p class="section-subtitle">Aún no hay nada fijo. Vota por las opciones actuales o dile a pus.io qué te gustaría agregar.</p>
-      </div>
-      <button id="btnAskPusio" class="btn btn-coral">+ Sumar propuesta con pus.io</button>
-    </div>
+        <!-- Columna Derecha: Controles de Color, Piezas y Prompt -->
+        <div class="workshop-controls-col">
 
-    <div id="optionsGrid" class="options-grid">
-      <!-- Opciones dinámicas con barra de progreso -->
-    </div>
-  </section>
+          <!-- 1. Color del Chasis -->
+          <div class="control-group">
+            <div class="control-label">
+              <span>Color principal del chasis</span>
+              <span id="selectedColorLabel">Azul Chelem</span>
+            </div>
+            <div id="chassisColorSwatches" class="color-swatches">
+              <!-- Swatches generados por JS -->
+            </div>
+          </div>
 
-  <!-- 04. ASISTENTE INTEGRADOR PUS.IO -->
-  <section id="pusioSection" class="section container reveal">
-    <div class="section-header">
-      <div>
-        <span class="section-index">04 / Asistente Interactivo</span>
-        <h2 class="section-title">Habla con <em>pus.io</em></h2>
-        <p class="section-subtitle">Escribe cualquier idea de comida, bebida, juego o música; pus.io la transforma en tarjeta y la integra arriba.</p>
-      </div>
-    </div>
+          <!-- 2. Color de Fondo de Tarjeta -->
+          <div class="control-group">
+            <div class="control-label">
+              <span>Color de fondo del pedestal</span>
+            </div>
+            <div id="bgColorSwatches" class="color-swatches">
+              <!-- Swatches de fondo generados por JS -->
+            </div>
+          </div>
 
-    <div class="pusio-studio">
-      <div class="pusio-topbar">
-        <div class="pusio-brand">
-          <span class="pulse-dot"></span>
-          <strong>pus.io</strong>
-          <span style="font-size:0.8rem; color:var(--ink-400);">Integrador automático de propuestas</span>
+          <!-- 3. Piezas Seleccionables del Robot -->
+          <div class="control-group">
+            <div class="control-label">
+              <span>Piezas ensamblables del robot</span>
+              <span>Usa las flechas para cambiar cada parte</span>
+            </div>
+            <div class="parts-grid">
+              <!-- Ojos / Visor -->
+              <div class="part-stepper">
+                <span class="part-stepper-title">Ojos / Visor</span>
+                <div class="part-stepper-row">
+                  <button type="button" class="step-arrow" onclick="cyclePart('eyes', -1)">&larr;</button>
+                  <span id="labelPart_eyes" class="part-value-name">Eva Cyber</span>
+                  <button type="button" class="step-arrow" onclick="cyclePart('eyes', 1)">&rarr;</button>
+                </div>
+              </div>
+
+              <!-- Antena / Tope -->
+              <div class="part-stepper">
+                <span class="part-stepper-title">Antena / Cabeza</span>
+                <div class="part-stepper-row">
+                  <button type="button" class="step-arrow" onclick="cyclePart('top', -1)">&larr;</button>
+                  <span id="labelPart_top" class="part-value-name">Radar</span>
+                  <button type="button" class="step-arrow" onclick="cyclePart('top', 1)">&rarr;</button>
+                </div>
+              </div>
+
+              <!-- Boca -->
+              <div class="part-stepper">
+                <span class="part-stepper-title">Boca / Expresión</span>
+                <div class="part-stepper-row">
+                  <button type="button" class="step-arrow" onclick="cyclePart('mouth', -1)">&larr;</button>
+                  <span id="labelPart_mouth" class="part-value-name">Sonrisa</span>
+                  <button type="button" class="step-arrow" onclick="cyclePart('mouth', 1)">&rarr;</button>
+                </div>
+              </div>
+
+              <!-- Forma de Cara -->
+              <div class="part-stepper">
+                <span class="part-stepper-title">Forma de Chasis</span>
+                <div class="part-stepper-row">
+                  <button type="button" class="step-arrow" onclick="cyclePart('face', -1)">&larr;</button>
+                  <span id="labelPart_face" class="part-value-name">Clásico</span>
+                  <button type="button" class="step-arrow" onclick="cyclePart('face', 1)">&rarr;</button>
+                </div>
+              </div>
+
+              <!-- Orejas / Laterales -->
+              <div class="part-stepper">
+                <span class="part-stepper-title">Laterales / Cables</span>
+                <div class="part-stepper-row">
+                  <button type="button" class="step-arrow" onclick="cyclePart('sides', -1)">&larr;</button>
+                  <span id="labelPart_sides" class="part-value-name">Cables</span>
+                  <button type="button" class="step-arrow" onclick="cyclePart('sides', 1)">&rarr;</button>
+                </div>
+              </div>
+
+              <!-- Textura -->
+              <div class="part-stepper">
+                <span class="part-stepper-title">Acabado / Textura</span>
+                <div class="part-stepper-row">
+                  <button type="button" class="step-arrow" onclick="cyclePart('texture', -1)">&larr;</button>
+                  <span id="labelPart_texture" class="part-value-name">Limpio</span>
+                  <button type="button" class="step-arrow" onclick="cyclePart('texture', 1)">&rarr;</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Prompt Libre -->
+          <div class="control-group">
+            <div class="control-label">
+              <span>O combínalo escribiendo un prompt</span>
+              <span>Ej. "lentes de sol rojo feliz con cuernos"</span>
+            </div>
+            <div class="prompt-bar">
+              <input type="text" id="avatarPromptField" class="prompt-input" placeholder="Escribe cómo quieres tu robot y presiona Aplicar...">
+              <button type="button" id="btnApplyPrompt" class="btn btn-ocean btn-sm">Aplicar prompt</button>
+            </div>
+          </div>
+
         </div>
-        <div class="pusio-quick-chips">
-          <button type="button" class="quick-chip" data-idea="Propongo armar reta de Mario Kart después de cenar">+ Mario Kart</button>
-          <button type="button" class="quick-chip" data-idea="Sugiero llevar hieleras con cervezas y refrescos">+ Hieleras y bebidas</button>
-          <button type="button" class="quick-chip" data-idea="Propongo proyectar una película en la terraza por la noche">+ Cine en terraza</button>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         PASO 2: ¿CÓMO LLEGAMOS A CHELEM? (RUTAS Y PRIVILEGIOS VIP)
+         ==================================================================== -->
+    <section id="paso2" class="quest-step">
+      <div class="quest-header">
+        <div>
+          <div class="quest-badge-row">
+            <span class="quest-number">Paso 02 de 04</span>
+            <span class="quest-reward">+150 XP al elegir tu modo de viaje</span>
+          </div>
+          <h2 class="quest-title">Rutas a <em>Chelem</em></h2>
+          <p class="quest-desc">
+            Indica si puedes poner tu coche para llevar amigos desde Mérida o si prefieres ir como pasajero. Quien lleve auto desbloquea los 4 privilegios VIP.
+          </p>
         </div>
       </div>
 
-      <div id="pusioChatArea" class="pusio-messages">
-        <div class="msg-bubble bot">
-          Hola. Escribe cualquier sugerencia para la posada (por ejemplo: <em>"Propongo hacer ceviche y aguachile al mediodía"</em>) y la publicaré directamente en la sección de opciones para que todos voten.
+      <div class="transport-choices">
+        <div id="choiceDriverCard" class="choice-card">
+          <div>
+            <span class="sticker-tag sticker-sun" style="display:inline-block; margin-bottom:12px;">Rango Conductor VIP</span>
+            <h3 class="choice-title">Puedo dar mi coche</h3>
+            <p class="choice-desc">
+              Ofrece los asientos disponibles de tu auto para el traslado Mérida &mdash; Chelem y activa todos los privilegios de conductor.
+            </p>
+          </div>
+          <button type="button" id="btnOpenCarModal" class="btn btn-berry">Registrar mi coche (+150 XP)</button>
+        </div>
+
+        <div id="choicePassengerCard" class="choice-card">
+          <div>
+            <span class="sticker-tag sticker-ocean" style="display:inline-block; margin-bottom:12px;">Modo Caravana</span>
+            <h3 class="choice-title">Voy como pasajero</h3>
+            <p class="choice-desc">
+              Mi coche no está disponible por ahora o prefiero sumarme al auto de alguien más dividiendo la gasolina.
+            </p>
+          </div>
+          <button type="button" id="btnConfirmPassenger" class="btn">Confirmar como pasajero (+100 XP)</button>
         </div>
       </div>
 
-      <form id="pusioForm" class="pusio-composer">
-        <input type="text" id="pusioInput" class="pusio-input" placeholder="Escribe una sugerencia para integrarla a la página..." autocomplete="off">
-        <button type="submit" class="btn btn-dark">Integrar</button>
-      </form>
-    </div>
-  </section>
+      <!-- Lista de autos registrados -->
+      <div id="carsContainer" style="margin-bottom: 24px;"></div>
 
-  <!-- 05. ESTUDIO DE AVATAR & NOMBRE -->
-  <section id="avatarSection" class="section container reveal">
-    <div class="section-header">
+      <!-- Tarjetas de Privilegios para Conductores -->
       <div>
-        <span class="section-index">05 / Identidad Personalizada</span>
-        <h2 class="section-title">Tu robot y <em>nombre</em></h2>
-        <p class="section-subtitle">Ajusta cómo aparece tu nombre en la lista y diseña tu robot escribiendo cualquier prompt.</p>
-      </div>
-    </div>
-
-    <div class="avatar-studio">
-      <div class="avatar-stage">
-        <img id="avatarPreviewTarget" src="https://api.dicebear.com/7.x/bottts/svg?seed=roberto" alt="Vista previa del robot">
-      </div>
-
-      <div>
-        <h3 style="font-family:var(--font-serif); font-size:2rem; font-weight:400; margin-bottom:6px;">
-          Personalizando a <em id="studioCurrentName" style="color:var(--ocean-teal);">Roberto</em>
+        <h3 style="font-family:var(--font-display); font-size:1.75rem; margin-bottom:6px;">
+          Privilegios exclusivos para quien lleve su coche
         </h3>
-        <p style="font-size:0.94rem; color:var(--ink-500);">
-          Prueba distintos prompts o elige un estilo rápido para generar un robot único:
-        </p>
-
-        <div class="preset-pills">
-          <button type="button" class="preset-btn" data-prompt="cyber-surfer-chelem">Estilo Surfer</button>
-          <button type="button" class="preset-btn" data-prompt="festive-winter-bot">Navideño</button>
-          <button type="button" class="preset-btn" data-prompt="smash-champion-99">Smash Pro</button>
-          <button type="button" class="preset-btn" data-prompt="minimal-gold-droid">Minimal Gold</button>
-          <button type="button" id="btnRandomRobot" class="preset-btn">Aleatorio</button>
-        </div>
-
-        <div class="studio-inputs">
-          <input type="text" id="nameEditField" class="field-input" placeholder="Tu nombre o apodo...">
-          <input type="text" id="avatarPromptField" class="field-input" placeholder="Prompt del robot (ej. robot playero)...">
-          <button type="button" class="btn btn-dark" onclick="saveProfileAndAvatar()">Guardar cambios</button>
+        <div class="perks-strip">
+          <div class="perk-card">
+            <span class="perk-badge">Beneficio 01</span>
+            <h4 class="perk-title">Combustible cubierto</h4>
+            <p class="perk-text">Los pasajeros de tu auto dividen y pagan el 100% de la gasolina del viaje.</p>
+          </div>
+          <div class="perk-card">
+            <span class="perk-badge">Beneficio 02</span>
+            <h4 class="perk-title">Voto de oro</h4>
+            <p class="perk-text">Tu voto decide cualquier empate al elegir película o dinámica nocturna.</p>
+          </div>
+          <div class="perk-card">
+            <span class="perk-badge">Beneficio 03</span>
+            <h4 class="perk-title">Ventaja en Smash</h4>
+            <p class="perk-text">Eliges tu primer rival o pasas directo a segunda ronda en el torneo de Smash.</p>
+          </div>
+          <div class="perk-card">
+            <span class="perk-badge">Beneficio 04</span>
+            <h4 class="perk-title">Distintivo VIP</h4>
+            <p class="perk-text">Insignia especial de Conductor VIP en tu carta de jugador toda la posada.</p>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- FOOTER -->
+    <!-- ====================================================================
+         PASO 3: VOTA LAS OPCIONES DEL PLAN (SMASH, ASADO Y MÁS)
+         ==================================================================== -->
+    <section id="paso3" class="quest-step">
+      <div class="quest-header">
+        <div>
+          <div class="quest-badge-row">
+            <span class="quest-number">Paso 03 de 04</span>
+            <span class="quest-reward">+50 XP por cada voto</span>
+          </div>
+          <h2 class="quest-title">Vota las opciones del <em>plan</em></h2>
+          <p class="quest-desc">
+            Aún no hay un plan definitivo. Respalda con tu voto lo que sí o sí quieres que se arme en la casa de Reyvell.
+          </p>
+        </div>
+        <a href="#paso4" class="btn btn-sun btn-sm">Ir a proponer algo nuevo &darr;</a>
+      </div>
+
+      <div id="optionsGrid" class="plan-deck">
+        <!-- Cartas generadas por JS -->
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         PASO 4: LA FORJA DE SUGERENCIAS CON PUS.IO
+         ==================================================================== -->
+    <section id="paso4" class="quest-step">
+      <div class="quest-header">
+        <div>
+          <div class="quest-badge-row">
+            <span class="quest-number">Paso 04 de 04</span>
+            <span class="quest-reward">+200 XP al integrar una propuesta</span>
+          </div>
+          <h2 class="quest-title">Suma una idea con <em>pus.io</em></h2>
+          <p class="quest-desc">
+            ¿Falta algo de comer, tomar o jugar? Toca una carta rápida de inspiración o escríbele tu idea a <em>pus.io</em> para convertirla automáticamente en una carta votable del Paso 3.
+          </p>
+        </div>
+      </div>
+
+      <div class="pusio-forge">
+        <div class="forge-deck-bar">
+          <span class="forge-deck-title">Cartas rápidas de inspiración (toca una para integrarla al instante):</span>
+          <div class="forge-cards-row">
+            <button type="button" class="idea-chip-btn" data-idea="Armar torneo de Mario Kart después de cenar">+ Torneo de Mario Kart</button>
+            <button type="button" class="idea-chip-btn" data-idea="Llevar hieleras con cervezas, refrescos y hielo">+ Hieleras y bebidas</button>
+            <button type="button" class="idea-chip-btn" data-idea="Proyectar película en la terraza frente al mar">+ Cine nocturno en terraza</button>
+            <button type="button" class="idea-chip-btn" data-idea="Preparar aguachile y botanas para la tarde">+ Aguachile y botanas</button>
+            <button type="button" class="idea-chip-btn" data-idea="Llevar bocina grande con playlist compartida">+ Bocina y playlist del grupo</button>
+          </div>
+        </div>
+
+        <div id="pusioChatArea" class="pusio-chat-window">
+          <div class="bubble bot">
+            Soy <strong>pus.io</strong>, el asistente constructor de la posada. Dime cualquier idea que tengas (comida, bebida, juego o música) y la transformaré en una tarjeta oficial arriba para que todos voten.
+          </div>
+        </div>
+
+        <form id="pusioForm" class="forge-input-bar">
+          <input type="text" id="pusioInput" class="forge-input" placeholder="Escribe aquí tu sugerencia para que pus.io la agregue al plan..." autocomplete="off">
+          <button type="submit" class="btn btn-berry">Forjar tarjeta (+200 XP)</button>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
   <footer class="footer container">
-    <div class="footer-serif">Posada Chelem 2026</div>
-    <p>Casa de Reyvell &bull; Chelem, Yucatán</p>
+    Posada Chelem 2026 &bull; Casa de Reyvell
   </footer>
 
-  <!-- MODAL: CAMBIAR USUARIO -->
+  <!-- MODAL: CAMBIAR DE JUGADOR -->
   <div id="modalSwitchUser" class="modal-overlay hidden">
     <div class="modal-box">
       <div class="modal-header">
-        <h3 class="modal-title">¿Quién eres?</h3>
+        <h3 class="modal-title">Elige tu perfil</h3>
         <button class="modal-close-btn" data-close="modalSwitchUser">&times;</button>
       </div>
-      <p style="font-size:0.9rem; color:var(--ink-500); margin-bottom:18px;">
-        Selecciona tu perfil para votar, registrar tu coche o editar tu nombre:
-      </p>
       <div id="userSwitchOptions"></div>
     </div>
   </div>
 
-  <!-- MODAL: OFRECER AUTO -->
+  <!-- MODAL: REGISTRAR COCHE -->
   <div id="modalCar" class="modal-overlay hidden">
     <div class="modal-box">
       <div class="modal-header">
-        <h3 class="modal-title">Ofrecer mi coche</h3>
+        <h3 class="modal-title">Registrar mi coche</h3>
         <button class="modal-close-btn" data-close="modalCar">&times;</button>
       </div>
       <form id="carForm">
         <div class="form-item">
-          <label for="carInputModel">Vehículo / Modelo</label>
-          <input type="text" id="carInputModel" class="form-ctrl" placeholder="Ej. Mazda 3, Swift, SUV" required>
+          <label for="carInputModel">Modelo o tipo de vehículo</label>
+          <input type="text" id="carInputModel" class="form-ctrl" placeholder="Ej. Mazda 3, Swift, Camioneta" required>
         </div>
         <div class="form-item">
-          <label for="carInputSeats">Asientos libres para amigos</label>
+          <label for="carInputSeats">Lugares libres para amigos</label>
           <select id="carInputSeats" class="form-ctrl" required>
-            <option value="2">2 asientos libres</option>
-            <option value="3" selected>3 asientos libres</option>
-            <option value="4">4 asientos libres</option>
-            <option value="5">5 asientos libres</option>
+            <option value="2">2 lugares libres</option>
+            <option value="3" selected>3 lugares libres</option>
+            <option value="4">4 lugares libres</option>
+            <option value="5">5 lugares libres</option>
           </select>
         </div>
         <div class="form-item">
-          <label for="carInputZone">Zona de salida en Mérida</label>
-          <input type="text" id="carInputZone" class="form-ctrl" placeholder="Ej. Norte / Altabrisa / Poniente" required>
+          <label for="carInputZone">Punto de salida en Mérida</label>
+          <input type="text" id="carInputZone" class="form-ctrl" placeholder="Ej. Altabrisa, Periférico Norte, Poniente" required>
         </div>
         <div class="form-item">
-          <label for="carInputTime">Hora tentativa de salida</label>
+          <label for="carInputTime">Hora aproximada de salida</label>
           <input type="text" id="carInputTime" class="form-ctrl" placeholder="Ej. 3:00 PM" required>
         </div>
         <div class="form-item">
-          <label for="carInputNotes">Notas (opcional)</label>
-          <input type="text" id="carInputNotes" class="form-ctrl" placeholder="Ej. Espacio en cajuela para hielera">
+          <label for="carInputNotes">Notas (cajuela, música, etc.)</label>
+          <input type="text" id="carInputNotes" class="form-ctrl" placeholder="Ej. Espacio para una hielera">
         </div>
-        <button type="submit" class="btn btn-dark" style="width:100%; margin-top:8px;">Activar coche y privilegios VIP</button>
+        <button type="submit" class="btn btn-pine" style="width:100%; margin-top:10px;">Publicar coche y activar VIP (+150 XP)</button>
       </form>
     </div>
   </div>
 
-  <!-- Toast Notification -->
-  <div id="toastNotice" class="toast-notice">Cambios guardados</div>
+  <div id="toastNotice" class="toast-notice">Misión actualizada</div>
 
   <script src="js/app.js"></script>
 </body>

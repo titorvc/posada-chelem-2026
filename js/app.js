@@ -1,32 +1,145 @@
 /**
- * POSADA CHELEM 2026
- * Controlador Dinámico, Estudio de Identidad & Asistente Integrador pus.io
- * Estética Editorial Clara con Tipografía Serifa Moderna • Cero Emojis
+ * POSADA CHELEM 2026 — CONTROLADOR GAMIFICADO & TALLER DE PERSONAJE
+ * - Taller interactivo de robot con partes seleccionables y paleta de colores
+ * - Sistema de misiones (Pasos 1 a 4) con puntos XP y confeti vectorial
+ * - Asistente pus.io que forja tarjetas votables en vivo
+ * - Cero emojis
  */
 
 const EVENT_DATE = new Date("2026-12-19T15:00:00-06:00").getTime();
 
-// Lista limpia de amigos confirmados (nombres naturales, editables con 1 clic)
-const DEFAULT_ATTENDEES = [
-  { id: 1, name: "Reyvell", email: "reyvelljk87@gmail.com", avatar_seed: "reyvell-host", puedo_dar_coche: 0 },
-  { id: 2, name: "Roberto", email: "titorvc08@gmail.com", avatar_seed: "roberto-cyber", puedo_dar_coche: 0 },
-  { id: 3, name: "Daniel", email: "danielitoestabonito16@gmail.com", avatar_seed: "daniel-wave", puedo_dar_coche: 0 },
-  { id: 4, name: "Pinzón", email: "mendoza.lpinzon@gmail.com", avatar_seed: "pinzon-bot", puedo_dar_coche: 0 },
-  { id: 5, name: "Alejandro", email: "alejandroaltamiranopuc@gmail.com", avatar_seed: "alejandro-neo", puedo_dar_coche: 0 },
-  { id: 6, name: "Erik", email: "joserikb@gmail.com", avatar_seed: "erik-synth", puedo_dar_coche: 0 },
-  { id: 7, name: "Iván", email: "ivan.raygosa@gmail.com", avatar_seed: "ivan-core", puedo_dar_coche: 0 },
-  { id: 8, name: "Francisco", email: "fjvc091002@gmail.com", avatar_seed: "francisco-retro", puedo_dar_coche: 0 },
-  { id: 9, name: "Carlos", email: "cplus.lat@gmail.com", avatar_seed: "carlos-droid", puedo_dar_coche: 0 }
+// Catálogo oficial de piezas de DiceBear Bottts v7
+const ROBOT_PARTS = {
+  eyes: [
+    { id: "eva", label: "Eva Cyber" },
+    { id: "shade01", label: "Lentes de Sol" },
+    { id: "robocop", label: "Visor Robocop" },
+    { id: "happy", label: "Arco Feliz" },
+    { id: "glow", label: "Brillo Neón" },
+    { id: "sensor", label: "Sensor Óptico" },
+    { id: "roundFrame01", label: "Marco Redondo" },
+    { id: "roundFrame02", label: "Doble Lente" },
+    { id: "bulging", label: "Ojos Saltones" },
+    { id: "hearts", label: "Modo Fiesta" },
+    { id: "dizzy", label: "Mareado" },
+    { id: "frame1", label: "Visor Ancho" }
+  ],
+  top: [
+    { id: "radar", label: "Antena Radar" },
+    { id: "glowingBulb01", label: "Foco Brillante" },
+    { id: "horns", label: "Cuernos Arcade" },
+    { id: "lights", label: "Sirena Triple" },
+    { id: "pyramid", label: "Pirámide" },
+    { id: "antenna", label: "Antena Clásica" },
+    { id: "antennaCrooked", label: "Antena Doblada" },
+    { id: "bulb01", label: "Bulbo Retro" },
+    { id: "glowingBulb02", label: "Foco Solar" }
+  ],
+  mouth: [
+    { id: "smile01", label: "Sonrisa" },
+    { id: "smile02", label: "Gran Sonrisa" },
+    { id: "grill03", label: "Vocoder" },
+    { id: "bite", label: "Mordida" },
+    { id: "diagram", label: "Ondas de Audio" },
+    { id: "grill01", label: "Rejilla Clásica" },
+    { id: "grill02", label: "Rejilla Fina" },
+    { id: "square01", label: "Pixelada" },
+    { id: "square02", label: "Sintetizador" }
+  ],
+  face: [
+    { id: "round01", label: "Clásico" },
+    { id: "round02", label: "Cápsula" },
+    { id: "square01", label: "Cuadrado Retro" },
+    { id: "square02", label: "Blindado" },
+    { id: "square03", label: "Compacto" },
+    { id: "square04", label: "Industrial" }
+  ],
+  sides: [
+    { id: "cables01", label: "Cables" },
+    { id: "cables02", label: "Doble Cable" },
+    { id: "antenna01", label: "Antena Lateral" },
+    { id: "antenna02", label: "Transmisor" },
+    { id: "round", label: "Audífonos" },
+    { id: "square", label: "Bloques" },
+    { id: "squareAssymetric", label: "Asimétrico" }
+  ],
+  texture: [
+    { id: "none", label: "Limpio" },
+    { id: "circuits", label: "Circuitos" },
+    { id: "dots", label: "Puntos" },
+    { id: "camo01", label: "Camuflaje" },
+    { id: "grunge01", label: "Urbano" }
+  ]
+};
+
+const CHASSIS_COLORS = [
+  { hex: "039be5", label: "Azul Chelem" },
+  { hex: "e53935", label: "Rojo Coral" },
+  { hex: "00897b", label: "Verde Pino" },
+  { hex: "ffb300", label: "Amarillo Sol" },
+  { hex: "fb8c00", label: "Naranja Playa" },
+  { hex: "8e24aa", label: "Morado Arcade" },
+  { hex: "00acc1", label: "Turquesa Mar" },
+  { hex: "d81b60", label: "Berry Festivo" },
+  { hex: "546e7a", label: "Acero Titanio" }
 ];
 
-// Opciones iniciales abiertas a votación
+const PEDESTAL_BG_COLORS = [
+  { hex: "#E3F2FD", label: "Cielo" },
+  { hex: "#FFE8EA", label: "Coral Suave" },
+  { hex: "#E0F8F0", label: "Menta" },
+  { hex: "#FFF4E0", label: "Arena" },
+  { hex: "#EFEFFD", label: "Lavanda" },
+  { hex: "#F2EFE6", label: "Crema" }
+];
+
+// Lista inicial de amigos con configuraciones distintas de piezas y colores
+const DEFAULT_ATTENDEES = [
+  {
+    id: 1, name: "Reyvell", travelMode: null, puedo_dar_coche: 0,
+    config: { baseColor: "ffb300", bgColor: "#FFF4E0", eyes: 1, top: 0, mouth: 1, face: 0, sides: 4, texture: 0 }
+  },
+  {
+    id: 2, name: "Roberto", travelMode: null, puedo_dar_coche: 0,
+    config: { baseColor: "039be5", bgColor: "#E3F2FD", eyes: 0, top: 1, mouth: 0, face: 2, sides: 0, texture: 1 }
+  },
+  {
+    id: 3, name: "Daniel", travelMode: null, puedo_dar_coche: 0,
+    config: { baseColor: "00897b", bgColor: "#E0F8F0", eyes: 3, top: 3, mouth: 2, face: 1, sides: 2, texture: 0 }
+  },
+  {
+    id: 4, name: "Pinzón", travelMode: null, puedo_dar_coche: 0,
+    config: { baseColor: "e53935", bgColor: "#FFE8EA", eyes: 2, top: 2, mouth: 0, face: 3, sides: 1, texture: 0 }
+  },
+  {
+    id: 5, name: "Alejandro", travelMode: null, puedo_dar_coche: 0,
+    config: { baseColor: "8e24aa", bgColor: "#EFEFFD", eyes: 4, top: 4, mouth: 4, face: 0, sides: 4, texture: 2 }
+  },
+  {
+    id: 6, name: "Erik", travelMode: null, puedo_dar_coche: 0,
+    config: { baseColor: "fb8c00", bgColor: "#FFF4E0", eyes: 5, top: 5, mouth: 2, face: 4, sides: 0, texture: 0 }
+  },
+  {
+    id: 7, name: "Iván", travelMode: null, puedo_dar_coche: 0,
+    config: { baseColor: "00acc1", bgColor: "#E3F2FD", eyes: 6, top: 0, mouth: 1, face: 2, sides: 3, texture: 1 }
+  },
+  {
+    id: 8, name: "Francisco", travelMode: null, puedo_dar_coche: 0,
+    config: { baseColor: "d81b60", bgColor: "#FFE8EA", eyes: 1, top: 6, mouth: 3, face: 1, sides: 4, texture: 0 }
+  },
+  {
+    id: 9, name: "Carlos", travelMode: null, puedo_dar_coche: 0,
+    config: { baseColor: "546e7a", bgColor: "#F2EFE6", eyes: 2, top: 1, mouth: 4, face: 5, sides: 1, texture: 1 }
+  }
+];
+
 const DEFAULT_PLAN_OPTIONS = [
   {
     id: 1,
     tag: "Torneo",
     tagClass: "berry",
     title: "Torneo de Super Smash Bros Ultimate",
-    desc: "Retas en pantalla grande o proyector en la sala. Eliminatorias 1v1 y partidas abiertas entre todos.",
+    desc: "Retas en pantalla grande o proyector en la sala. Eliminatorias 1v1 y todos contra todos.",
     votes: 3
   },
   {
@@ -44,39 +157,46 @@ let attendeesList = [];
 let carsList = [];
 let planOptions = [];
 let userVotes = new Set();
+let missionState = { step1: false, step2: false, step3: false, step4: false };
 
 document.addEventListener("DOMContentLoaded", () => {
   initCountdown();
   loadState();
+  initSwatches();
   renderAll();
   setupEventListeners();
-  initScrollReveal();
 });
 
-// ----------------- Animación Scroll Reveal ----------------- //
-function initScrollReveal() {
-  const els = document.querySelectorAll(".reveal");
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("visible");
-      }
-    });
-  }, { threshold: 0.08 });
+// ----------------- URL Dinámica de DiceBear con Partes Seleccionables ----------------- //
+function buildRobotUrl(cfg) {
+  if (!cfg) return "https://api.dicebear.com/7.x/bottts/svg?seed=chelem";
+  const eyesId = ROBOT_PARTS.eyes[cfg.eyes % ROBOT_PARTS.eyes.length].id;
+  const topId = ROBOT_PARTS.top[cfg.top % ROBOT_PARTS.top.length].id;
+  const mouthId = ROBOT_PARTS.mouth[cfg.mouth % ROBOT_PARTS.mouth.length].id;
+  const faceId = ROBOT_PARTS.face[cfg.face % ROBOT_PARTS.face.length].id;
+  const sidesId = ROBOT_PARTS.sides[cfg.sides % ROBOT_PARTS.sides.length].id;
+  const texObj = ROBOT_PARTS.texture[cfg.texture % ROBOT_PARTS.texture.length];
 
-  els.forEach(el => observer.observe(el));
-}
+  const params = new URLSearchParams({
+    baseColor: cfg.baseColor || "039be5",
+    eyes: eyesId,
+    top: topId,
+    mouth: mouthId,
+    face: faceId,
+    sides: sidesId,
+    mouthProbability: "100",
+    sidesProbability: "100",
+    topProbability: "100"
+  });
 
-// ----------------- Notificación Toast ----------------- //
-function showToast(msg) {
-  const toast = document.getElementById("toastNotice");
-  if (!toast) return;
-  toast.textContent = msg;
-  toast.classList.add("show");
-  clearTimeout(window._toastTimer);
-  window._toastTimer = setTimeout(() => {
-    toast.classList.remove("show");
-  }, 2800);
+  if (texObj && texObj.id !== "none") {
+    params.set("texture", texObj.id);
+    params.set("textureProbability", "100");
+  } else {
+    params.set("textureProbability", "0");
+  }
+
+  return `https://api.dicebear.com/7.x/bottts/svg?${params.toString()}`;
 }
 
 // ----------------- Contador Regresivo ----------------- //
@@ -89,14 +209,7 @@ function initCountdown() {
   function update() {
     const now = new Date().getTime();
     const diff = EVENT_DATE - now;
-
-    if (diff <= 0) {
-      elDays.textContent = "00";
-      elHours.textContent = "00";
-      elMins.textContent = "00";
-      elSecs.textContent = "00";
-      return;
-    }
+    if (diff <= 0) return;
 
     const d = Math.floor(diff / (1000 * 60 * 60 * 24));
     const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -113,74 +226,181 @@ function initCountdown() {
   setInterval(update, 1000);
 }
 
-// ----------------- Estado Local (v3 limpio) ----------------- //
+// ----------------- Estado Local (v4 Gamificado) ----------------- //
 function loadState() {
-  const savedAttendees = localStorage.getItem("posada_attendees_v3");
+  const savedAttendees = localStorage.getItem("posada_attendees_v4");
   attendeesList = savedAttendees ? JSON.parse(savedAttendees) : DEFAULT_ATTENDEES;
 
-  const savedCars = localStorage.getItem("posada_cars_v3");
+  const savedCars = localStorage.getItem("posada_cars_v4");
   carsList = savedCars ? JSON.parse(savedCars) : [];
 
-  const savedOptions = localStorage.getItem("posada_options_v3");
+  const savedOptions = localStorage.getItem("posada_options_v4");
   planOptions = savedOptions ? JSON.parse(savedOptions) : DEFAULT_PLAN_OPTIONS;
 
-  const savedVotes = localStorage.getItem("posada_votes_v3");
+  const savedVotes = localStorage.getItem("posada_votes_v4");
   if (savedVotes) userVotes = new Set(JSON.parse(savedVotes));
 
-  const savedUser = localStorage.getItem("posada_current_user_v3");
+  const savedMissions = localStorage.getItem("posada_missions_v4");
+  if (savedMissions) missionState = JSON.parse(savedMissions);
+
+  const savedUser = localStorage.getItem("posada_user_v4");
   if (savedUser) {
     const parsed = JSON.parse(savedUser);
     currentUser = attendeesList.find(u => u.id === parsed.id) || attendeesList[1];
   } else {
     currentUser = attendeesList.find(u => u.name === "Roberto") || attendeesList[0];
-    localStorage.setItem("posada_current_user_v3", JSON.stringify(currentUser));
   }
 }
 
 function saveState() {
-  localStorage.setItem("posada_attendees_v3", JSON.stringify(attendeesList));
-  localStorage.setItem("posada_cars_v3", JSON.stringify(carsList));
-  localStorage.setItem("posada_options_v3", JSON.stringify(planOptions));
-  localStorage.setItem("posada_votes_v3", JSON.stringify(Array.from(userVotes)));
+  localStorage.setItem("posada_attendees_v4", JSON.stringify(attendeesList));
+  localStorage.setItem("posada_cars_v4", JSON.stringify(carsList));
+  localStorage.setItem("posada_options_v4", JSON.stringify(planOptions));
+  localStorage.setItem("posada_votes_v4", JSON.stringify(Array.from(userVotes)));
+  localStorage.setItem("posada_missions_v4", JSON.stringify(missionState));
   if (currentUser) {
-    localStorage.setItem("posada_current_user_v3", JSON.stringify(currentUser));
+    localStorage.setItem("posada_user_v4", JSON.stringify(currentUser));
   }
 }
 
-function getAvatarUrl(seed) {
-  return `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(seed)}`;
+// ----------------- Inicialización de Swatches de Color ----------------- //
+function initSwatches() {
+  const chassisWrap = document.getElementById("chassisColorSwatches");
+  const bgWrap = document.getElementById("bgColorSwatches");
+
+  chassisWrap.innerHTML = "";
+  CHASSIS_COLORS.forEach(c => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "color-swatch";
+    btn.style.backgroundColor = `#${c.hex}`;
+    btn.title = c.label;
+    btn.dataset.hex = c.hex;
+    btn.onclick = () => {
+      if (!currentUser) return;
+      currentUser.config.baseColor = c.hex;
+      triggerPedestalBounce();
+      syncWorkshopUI();
+      renderWhosGoing();
+      renderUserHud();
+    };
+    chassisWrap.appendChild(btn);
+  });
+
+  bgWrap.innerHTML = "";
+  PEDESTAL_BG_COLORS.forEach(bg => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "color-swatch";
+    btn.style.backgroundColor = bg.hex;
+    btn.title = bg.label;
+    btn.dataset.bg = bg.hex;
+    btn.onclick = () => {
+      if (!currentUser) return;
+      currentUser.config.bgColor = bg.hex;
+      triggerPedestalBounce();
+      syncWorkshopUI();
+      renderWhosGoing();
+    };
+    bgWrap.appendChild(btn);
+  });
+}
+
+function triggerPedestalBounce() {
+  const ped = document.getElementById("robotPedestal");
+  if (!ped) return;
+  ped.classList.remove("pop-anim");
+  void ped.offsetWidth;
+  ped.classList.add("pop-anim");
+  setTimeout(() => ped.classList.remove("pop-anim"), 360);
+}
+
+// ----------------- Cambiar Piezas del Robot (< / >) ----------------- //
+function cyclePart(partKey, delta) {
+  if (!currentUser || !ROBOT_PARTS[partKey]) return;
+  const list = ROBOT_PARTS[partKey];
+  const currentIdx = currentUser.config[partKey] || 0;
+  const nextIdx = (currentIdx + delta + list.length) % list.length;
+  currentUser.config[partKey] = nextIdx;
+
+  triggerPedestalBounce();
+  syncWorkshopUI();
+  renderWhosGoing();
+  renderUserHud();
 }
 
 // ----------------- Renderizado General ----------------- //
 function renderAll() {
-  renderUserNav();
+  renderUserHud();
   renderWhosGoing();
-  renderCars();
+  syncWorkshopUI();
+  renderTransportSection();
   renderPlanOptions();
-  syncStudioFields();
   renderSwitchUserList();
 }
 
-function renderUserNav() {
-  const avatarEl = document.getElementById("navUserAvatar");
-  const nameEl = document.getElementById("navUserName");
-  if (currentUser) {
-    avatarEl.src = getAvatarUrl(currentUser.avatar_seed || currentUser.name);
-    nameEl.textContent = currentUser.name;
-  }
+function renderUserHud() {
+  if (!currentUser) return;
+  document.getElementById("navUserAvatar").src = buildRobotUrl(currentUser.config);
+  document.getElementById("navUserName").textContent = currentUser.name;
+
+  // Calcular XP y pasos completados
+  let xp = 0;
+  let completedCount = 0;
+
+  if (missionState.step1) { xp += 100; completedCount++; }
+  if (missionState.step2) { xp += currentUser.puedo_dar_coche ? 150 : 100; completedCount++; }
+  if (userVotes.size > 0) { missionState.step3 = true; xp += userVotes.size * 50; completedCount++; }
+  if (missionState.step4) { xp += 200; completedCount++; }
+
+  document.getElementById("hudXpBadge").textContent = `${xp} XP`;
+  document.getElementById("hudLevelText").textContent = `${completedCount}/4`;
+  document.getElementById("hudProgressFill").style.width = `${(completedCount / 4) * 100}%`;
+
+  ["step1", "step2", "step3", "step4"].forEach((k, idx) => {
+    const pill = document.getElementById(`hudStep${idx + 1}`);
+    if (pill) {
+      if (missionState[k]) pill.classList.add("done");
+      else pill.classList.remove("done");
+    }
+  });
 }
 
-function syncStudioFields() {
+function syncWorkshopUI() {
   if (!currentUser) return;
-  const studioName = document.getElementById("studioCurrentName");
-  const nameInput = document.getElementById("nameEditField");
-  const promptInput = document.getElementById("avatarPromptField");
-  const previewImg = document.getElementById("avatarPreviewTarget");
+  const cfg = currentUser.config;
 
-  if (studioName) studioName.textContent = currentUser.name;
-  if (nameInput) nameInput.value = currentUser.name;
-  if (promptInput) promptInput.value = currentUser.avatar_seed || currentUser.name;
-  if (previewImg) previewImg.src = getAvatarUrl(currentUser.avatar_seed || currentUser.name);
+  const previewImg = document.getElementById("avatarPreviewTarget");
+  const pedestal = document.getElementById("robotPedestal");
+  const nameInput = document.getElementById("nameEditField");
+
+  if (previewImg) previewImg.src = buildRobotUrl(cfg);
+  if (pedestal) pedestal.style.backgroundColor = cfg.bgColor || "#E3F2FD";
+  if (nameInput && document.activeElement !== nameInput) {
+    nameInput.value = currentUser.name;
+  }
+
+  // Etiquetas de piezas actuales
+  Object.keys(ROBOT_PARTS).forEach(key => {
+    const lblEl = document.getElementById(`labelPart_${key}`);
+    if (lblEl) {
+      const idx = cfg[key] % ROBOT_PARTS[key].length;
+      lblEl.textContent = ROBOT_PARTS[key][idx].label;
+    }
+  });
+
+  // Etiqueta de color y estado activo en swatches
+  const colorObj = CHASSIS_COLORS.find(c => c.hex === cfg.baseColor) || CHASSIS_COLORS[0];
+  const colorLbl = document.getElementById("selectedColorLabel");
+  if (colorLbl) colorLbl.textContent = colorObj.label;
+
+  document.querySelectorAll("#chassisColorSwatches .color-swatch").forEach(btn => {
+    btn.classList.toggle("selected", btn.dataset.hex === cfg.baseColor);
+  });
+
+  document.querySelectorAll("#bgColorSwatches .color-swatch").forEach(btn => {
+    btn.classList.toggle("selected", btn.dataset.bg === cfg.bgColor);
+  });
 }
 
 function renderWhosGoing() {
@@ -188,25 +408,23 @@ function renderWhosGoing() {
   grid.innerHTML = "";
 
   attendeesList.forEach(person => {
-    const isCurrent = currentUser && currentUser.id === person.id;
+    const isMe = currentUser && currentUser.id === person.id;
     const isVIP = person.puedo_dar_coche === 1;
 
     const card = document.createElement("div");
-    card.className = `person-card ${isCurrent ? 'is-current' : ''}`;
-    card.title = "Haz clic para seleccionar este perfil o personalizar su nombre y robot";
+    card.className = `friend-card ${isMe ? 'active' : ''}`;
+
+    let statusText = "Confirmado";
+    if (isVIP) statusText = "Conductor VIP";
+    else if (person.travelMode === "passenger") statusText = "Pasajero";
 
     card.innerHTML = `
-      <div class="person-avatar-box">
-        <img class="person-avatar" src="${getAvatarUrl(person.avatar_seed || person.name)}" alt="${person.name}">
+      <div class="friend-avatar-wrap" style="background-color: ${person.config.bgColor || '#E3F2FD'};">
+        <img src="${buildRobotUrl(person.config)}" alt="${person.name}">
       </div>
-      <div class="person-info">
-        <div class="person-name">${person.name}</div>
-        <div class="person-meta">
-          <span class="status-pill ${isVIP ? 'status-vip' : 'status-confirmed'}">
-            ${isVIP ? 'Conductor VIP' : 'Confirmado'}
-          </span>
-          <span class="edit-hint">${isCurrent ? 'Tu perfil' : 'Seleccionar'}</span>
-        </div>
+      <div class="friend-info">
+        <div class="friend-name">${person.name}</div>
+        <span class="friend-status ${isVIP ? 'vip' : ''}">${statusText}</span>
       </div>
     `;
 
@@ -214,76 +432,75 @@ function renderWhosGoing() {
       currentUser = person;
       saveState();
       renderAll();
-      showToast(`Perfil activo: ${person.name}`);
-      const studio = document.getElementById("avatarSection");
-      if (studio) studio.scrollIntoView({ behavior: "smooth", block: "center" });
+      triggerPedestalBounce();
+      showToast(`Editando a ${person.name}`);
     };
 
     grid.appendChild(card);
   });
 }
 
-function renderCars() {
+function renderTransportSection() {
+  const driverCard = document.getElementById("choiceDriverCard");
+  const passCard = document.getElementById("choicePassengerCard");
+
+  if (currentUser) {
+    driverCard.classList.toggle("selected-mode", currentUser.puedo_dar_coche === 1);
+    passCard.classList.toggle("selected-mode", currentUser.travelMode === "passenger" && currentUser.puedo_dar_coche === 0);
+  }
+
   const container = document.getElementById("carsContainer");
   container.innerHTML = "";
 
-  if (carsList.length === 0) {
-    container.innerHTML = `
-      <div class="carpool-empty-state">
-        <span class="empty-kicker">Disponibilidad abierta</span>
-        <h3 class="empty-headline">Ningún coche registrado por ahora</h3>
-        <p class="empty-copy">
-          La lista de transporte se irá armando conforme confirmemos quién puede llevar auto a Chelem. Si decides llevar el tuyo, activas automáticamente los privilegios de conductor.
-        </p>
-        <button class="btn btn-outline" id="btnOpenCarModalInner">Ofrecer mi coche</button>
-      </div>
-    `;
-    const innerBtn = document.getElementById("btnOpenCarModalInner");
-    if (innerBtn) innerBtn.onclick = () => openModal("modalCar");
-    return;
-  }
+  if (carsList.length === 0) return;
 
-  const listWrap = document.createElement("div");
-  listWrap.style.display = "flex";
-  listWrap.style.flexDirection = "column";
-  listWrap.style.gap = "16px";
+  const list = document.createElement("div");
+  list.className = "plan-deck";
 
   carsList.forEach(car => {
-    const isMyCar = currentUser && car.driverId === currentUser.id;
+    const isMine = currentUser && car.driverId === currentUser.id;
     const item = document.createElement("div");
-    item.style.background = "var(--bg-page)";
-    item.style.border = "1px solid var(--border-light)";
-    item.style.borderRadius = "var(--radius-md)";
-    item.style.padding = "22px";
+    item.className = "plan-card";
+    item.style.background = "var(--pine-bg)";
 
     item.innerHTML = `
-      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
-        <h4 style="font-family:var(--font-serif); font-size:1.75rem; font-weight:400;">${car.driver} &mdash; ${car.model}</h4>
-        <span class="cat-pill teal">${car.seats} lugares libres</span>
+      <div>
+        <div class="plan-card-top">
+          <span class="plan-tag pine">Auto VIP Activo</span>
+          <span class="plan-votes-num">${car.seats} lugares</span>
+        </div>
+        <h4 class="plan-card-title">${car.driver} &mdash; ${car.model}</h4>
+        <p class="plan-card-desc">
+          Salida: <strong>${car.zone}</strong> a las <strong>${car.time}</strong>
+          ${car.notes ? `<br>Nota: ${car.notes}` : ''}
+        </p>
       </div>
-      <p style="font-size:0.92rem; color:var(--ink-500); margin-bottom:16px;">
-        Salida desde <strong>${car.zone}</strong> a las <strong>${car.time}</strong>
-        ${car.notes ? `<br>Nota: ${car.notes}` : ''}
-      </p>
-      <div style="display:flex; justify-content:flex-end;">
+      <div>
         ${
-          isMyCar
-            ? `<button class="btn btn-outline btn-sm" onclick="retireCar(${car.id})">Retirar mi coche</button>`
-            : `<button class="btn btn-dark btn-sm" onclick="requestSeat('${car.driver}')">Apartar lugar</button>`
+          isMine
+            ? `<button type="button" class="btn btn-sm" onclick="retireCar(${car.id})">Retirar mi coche</button>`
+            : `<button type="button" class="btn btn-ocean btn-sm" onclick="joinCar('${car.driver}')">Pedir lugar en este auto</button>`
         }
       </div>
     `;
-    listWrap.appendChild(item);
+    list.appendChild(item);
   });
 
-  container.appendChild(listWrap);
+  container.appendChild(list);
 }
 
-function requestSeat(driverName) {
-  showToast(`Solicitud enviada para ir con ${driverName}`);
+function joinCar(driverName) {
+  if (currentUser) {
+    currentUser.travelMode = "passenger";
+  }
+  missionState.step2 = true;
+  saveState();
+  renderAll();
+  launchConfetti();
+  showToast(`Lugar solicitado con ${driverName} (+100 XP)`);
 }
 
-function renderPlanOptions(newlyAddedId = null) {
+function renderPlanOptions() {
   const grid = document.getElementById("optionsGrid");
   grid.innerHTML = "";
 
@@ -294,197 +511,238 @@ function renderPlanOptions(newlyAddedId = null) {
     const pct = Math.min(100, Math.round((opt.votes / maxVotes) * 100));
 
     const card = document.createElement("div");
-    card.className = `option-card ${opt.id === newlyAddedId ? 'just-added' : ''}`;
+    card.className = `plan-card ${voted ? 'voted-card' : ''}`;
 
     card.innerHTML = `
       <div>
-        <div class="option-top">
-          <span class="cat-pill ${opt.tagClass || 'teal'}">${opt.tag}</span>
-          <span class="vote-counter-big">${opt.votes} ${opt.votes === 1 ? 'voto' : 'votos'}</span>
+        <div class="plan-card-top">
+          <span class="plan-tag ${opt.tagClass || 'teal'}">${opt.tag}</span>
+          <span class="plan-votes-num">${opt.votes} ${opt.votes === 1 ? 'voto' : 'votos'}</span>
         </div>
-        <h3 class="option-title">${opt.title}</h3>
-        <p class="option-desc">${opt.desc}</p>
+        <h3 class="plan-card-title">${opt.title}</h3>
+        <p class="plan-card-desc">${opt.desc}</p>
       </div>
       <div>
-        <div class="vote-bar-track">
-          <div class="vote-bar-fill" style="width: ${pct}%;"></div>
+        <div class="plan-progress">
+          <div class="plan-progress-bar" style="width: ${pct}%;"></div>
         </div>
-        <div class="option-footer">
-          <span style="font-family:var(--font-mono); font-size:0.74rem; color:var(--ink-400);">
-            ${voted ? 'Respaldado por ti' : 'Opción abierta'}
-          </span>
-          <button class="vote-btn ${voted ? 'active' : ''}" onclick="toggleVote(${opt.id})">
-            ${voted ? 'Votado' : 'Votar opción'}
-          </button>
-        </div>
+        <button type="button" class="btn ${voted ? 'btn-berry' : 'btn-sun'}" style="width:100%;" onclick="toggleVote(${opt.id})">
+          ${voted ? 'Voto registrado (Quitar)' : 'Dar mi voto (+50 XP)'}
+        </button>
       </div>
     `;
     grid.appendChild(card);
   });
 }
 
-// ----------------- Votación y Manejo de Autos ----------------- //
+// ----------------- Acciones de Juego ----------------- //
 function toggleVote(id) {
   const opt = planOptions.find(o => o.id === id);
   if (!opt) return;
 
+  const wasEmpty = userVotes.size === 0;
+
   if (userVotes.has(id)) {
     userVotes.delete(id);
     opt.votes = Math.max(0, opt.votes - 1);
-    showToast(`Voto retirado de: ${opt.title}`);
+    showToast(`Voto retirado de ${opt.title}`);
   } else {
     userVotes.add(id);
     opt.votes += 1;
-    showToast(`Voto sumado a: ${opt.title}`);
+    missionState.step3 = true;
+    if (wasEmpty) launchConfetti();
+    showToast(`+50 XP por votar en: ${opt.title}`);
   }
+
   saveState();
-  renderPlanOptions();
+  renderAll();
 }
 
 function retireCar(id) {
   carsList = carsList.filter(c => c.id !== id);
   if (currentUser) {
     currentUser.puedo_dar_coche = 0;
-    const person = attendeesList.find(u => u.id === currentUser.id);
-    if (person) person.puedo_dar_coche = 0;
   }
   saveState();
   renderAll();
-  showToast("Tu coche fue retirado de la lista");
+  showToast("Coche retirado");
 }
 
-// ----------------- Estudio de Robot y Nombre ----------------- //
-function previewRobotAvatar() {
-  const input = document.getElementById("avatarPromptField");
-  const img = document.getElementById("avatarPreviewTarget");
-  const val = input.value.trim() || (currentUser ? currentUser.name : "chelem-bot");
-  img.src = getAvatarUrl(val);
+// Traducir un prompt en español a piezas reales del robot
+function applyPromptToRobot(promptText) {
+  if (!currentUser || !promptText) return;
+  const lower = promptText.toLowerCase();
+  const cfg = currentUser.config;
+
+  // Colores por palabra clave
+  if (lower.includes("rojo") || lower.includes("coral") || lower.includes("fuego")) cfg.baseColor = "e53935";
+  else if (lower.includes("azul") || lower.includes("mar") || lower.includes("playa") || lower.includes("surfer")) cfg.baseColor = "039be5";
+  else if (lower.includes("verde") || lower.includes("pino") || lower.includes("navid")) cfg.baseColor = "00897b";
+  else if (lower.includes("amarillo") || lower.includes("oro") || lower.includes("dorado") || lower.includes("sol")) cfg.baseColor = "ffb300";
+  else if (lower.includes("morado") || lower.includes("violeta") || lower.includes("cyber")) cfg.baseColor = "8e24aa";
+  else if (lower.includes("naranja")) cfg.baseColor = "fb8c00";
+  else if (lower.includes("rosa") || lower.includes("berry")) cfg.baseColor = "d81b60";
+
+  // Ojos por palabra clave
+  if (lower.includes("lente") || lower.includes("gafa") || lower.includes("sol") || lower.includes("cool")) cfg.eyes = 1;
+  else if (lower.includes("robocop") || lower.includes("laser") || lower.includes("láser")) cfg.eyes = 2;
+  else if (lower.includes("feliz") || lower.includes("alegre")) cfg.eyes = 3;
+  else if (lower.includes("neon") || lower.includes("neón") || lower.includes("brill")) cfg.eyes = 4;
+  else if (lower.includes("fiesta") || lower.includes("coraz")) cfg.eyes = 9;
+
+  // Tope / Antena
+  if (lower.includes("cuerno") || lower.includes("diablo") || lower.includes("rock")) cfg.top = 2;
+  else if (lower.includes("radar")) cfg.top = 0;
+  else if (lower.includes("foco") || lower.includes("idea") || lower.includes("luz")) cfg.top = 1;
+  else if (lower.includes("sirena") || lower.includes("polic")) cfg.top = 3;
+  else if (lower.includes("piramid") || lower.includes("pirámid")) cfg.top = 4;
+
+  // Si no coincidió con palabras específicas, usar hash determinístico del prompt para variar todas las piezas
+  let hash = 0;
+  for (let i = 0; i < lower.length; i++) {
+    hash = (hash * 31 + lower.charCodeAt(i)) % 10000;
+  }
+  if (!lower.includes("lente") && !lower.includes("robocop") && !lower.includes("feliz")) {
+    cfg.eyes = hash % ROBOT_PARTS.eyes.length;
+  }
+  cfg.mouth = (hash >> 2) % ROBOT_PARTS.mouth.length;
+  cfg.face = (hash >> 3) % ROBOT_PARTS.face.length;
+  cfg.sides = (hash >> 4) % ROBOT_PARTS.sides.length;
+
+  triggerPedestalBounce();
+  syncWorkshopUI();
+  renderWhosGoing();
+  renderUserHud();
+  showToast(`Prompt aplicado al robot de ${currentUser.name}`);
 }
 
-function saveProfileAndAvatar() {
-  if (!currentUser) return;
-  const nameInput = document.getElementById("nameEditField");
-  const promptInput = document.getElementById("avatarPromptField");
-
-  const newName = nameInput.value.trim();
-  const newSeed = promptInput.value.trim();
-
-  if (newName) {
-    currentUser.name = newName;
-  }
-  if (newSeed) {
-    currentUser.avatar_seed = newSeed;
-  }
-
-  const person = attendeesList.find(u => u.id === currentUser.id);
-  if (person) {
-    if (newName) person.name = newName;
-    if (newSeed) person.avatar_seed = newSeed;
-  }
-
-  saveState();
-  renderAll();
-  showToast(`Perfil actualizado: ${currentUser.name}`);
-}
-
-// ----------------- pus.io: Integrador Automático de Sugerencias ----------------- //
-function handlePusioInteraction(message) {
-  const text = message.trim();
+// ----------------- pus.io: Forjador Gamificado de Sugerencias ----------------- //
+function handlePusioSuggestion(rawText) {
+  const text = rawText.trim();
   if (!text) return;
 
-  addChatMessage(text, "user");
+  addChatBubble(text, "user");
 
   setTimeout(() => {
-    const parsed = parseSuggestionForPage(text);
-    if (parsed.isProposal) {
-      const newOption = {
-        id: Date.now(),
-        tag: parsed.category,
-        tagClass: parsed.tagClass,
-        title: parsed.title,
-        desc: parsed.desc,
-        votes: 1
-      };
+    const parsed = parseIdea(text);
+    const newOption = {
+      id: Date.now(),
+      tag: parsed.category,
+      tagClass: parsed.tagClass,
+      title: parsed.title,
+      desc: `Sugerencia forjada por ${currentUser ? currentUser.name : 'un amigo'} con pus.io.`,
+      votes: 1
+    };
 
-      planOptions.push(newOption);
-      userVotes.add(newOption.id);
-      saveState();
-      renderPlanOptions(newOption.id);
+    planOptions.push(newOption);
+    userVotes.add(newOption.id);
+    missionState.step4 = true;
+    missionState.step3 = true;
 
-      const botReply = `Listo, ${currentUser ? currentUser.name : ''}. He integrado "${parsed.title}" como una nueva tarjeta en la sección de opciones del plan para que todos la voten.`;
-      addChatMessage(botReply, "bot");
-      showToast(`Propuesta integrada: ${parsed.title}`);
-    } else {
-      const reply = generateConversationalReply(text);
-      addChatMessage(reply, "bot");
-    }
-  }, 350);
+    saveState();
+    renderAll();
+    launchConfetti();
+
+    addChatBubble(
+      `Excelente idea, ${currentUser ? currentUser.name : ''}. Acabo de forjar la carta "${parsed.title}" en el Paso 3 con tu primer voto (+200 XP).`,
+      "bot"
+    );
+    showToast(`+200 XP: Nueva carta añadida al plan`);
+  }, 300);
 }
 
-function parseSuggestionForPage(text) {
+function parseIdea(text) {
   const lower = text.toLowerCase();
-  const questionStarters = ["cuándo", "cuando", "a qué hora", "donde", "dónde", "quiénes", "quienes"];
-  const isPureQuestion = questionStarters.some(q => lower.startsWith(q)) && text.includes("?");
-
-  if (isPureQuestion) {
-    return { isProposal: false };
-  }
-
-  if (text.length < 4) {
-    return { isProposal: false };
-  }
-
   let category = "Propuesta";
   let tagClass = "teal";
 
-  if (lower.includes("comida") || lower.includes("asado") || lower.includes("carne") || lower.includes("ceviche") || lower.includes("hamburguesa") || lower.includes("botana") || lower.includes("cenar") || lower.includes("pizza") || lower.includes("tacos")) {
+  if (lower.includes("comida") || lower.includes("asado") || lower.includes("aguachile") || lower.includes("botana") || lower.includes("carne") || lower.includes("tacos") || lower.includes("pizza")) {
     category = "Comida";
     tagClass = "amber";
-  } else if (lower.includes("película") || lower.includes("cine") || lower.includes("serie") || lower.includes("proyectar")) {
-    category = "Cine";
-    tagClass = "teal";
-  } else if (lower.includes("juego") || lower.includes("torneo") || lower.includes("smash") || lower.includes("mario") || lower.includes("reta") || lower.includes("cartas") || lower.includes("poker")) {
-    category = "Dinámica";
-    tagClass = "berry";
-  } else if (lower.includes("bebida") || lower.includes("cerveza") || lower.includes("hielera") || lower.includes("hielo") || lower.includes("refresco") || lower.includes("trago")) {
+  } else if (lower.includes("bebida") || lower.includes("cerveza") || lower.includes("hielera") || lower.includes("refresco") || lower.includes("hielo")) {
     category = "Bebidas";
     tagClass = "pine";
+  } else if (lower.includes("juego") || lower.includes("torneo") || lower.includes("mario") || lower.includes("smash") || lower.includes("reta") || lower.includes("pong")) {
+    category = "Juego";
+    tagClass = "berry";
+  } else if (lower.includes("cine") || lower.includes("película") || lower.includes("proyectar") || lower.includes("música") || lower.includes("bocina")) {
+    category = "Ambiente";
+    tagClass = "teal";
   }
 
-  let cleanedTitle = text
-    .replace(/^(propongo|sugiero que|sugiero|podríamos|hay que|idea:|sugerencia:|llevar|armar)\s+/i, "")
+  let title = text
+    .replace(/^(propongo|sugiero que|sugiero|podríamos|hay que|llevar|armar|preparar)\s+/i, "")
     .trim();
 
-  cleanedTitle = cleanedTitle.charAt(0).toUpperCase() + cleanedTitle.slice(1);
-  if (cleanedTitle.endsWith(".")) cleanedTitle = cleanedTitle.slice(0, -1);
+  title = title.charAt(0).toUpperCase() + title.slice(1);
+  if (title.endsWith(".")) title = title.slice(0, -1);
 
-  return {
-    isProposal: true,
-    category: category,
-    tagClass: tagClass,
-    title: cleanedTitle,
-    desc: `Propuesta integrada por ${currentUser ? currentUser.name : 'un amigo'} a través del asistente pus.io.`
-  };
+  return { category, tagClass, title };
 }
 
-function generateConversationalReply(text) {
-  const lower = text.toLowerCase();
-  if (lower.includes("fecha") || lower.includes("cuándo") || lower.includes("cuando") || lower.includes("hora")) {
-    return "La posada es el sábado 19 de diciembre de 2026 en la casa de Reyvell en Chelem.";
-  }
-  if (lower.includes("donde") || lower.includes("dónde")) {
-    return "La sede es la casa de playa de Reyvell en Chelem, Yucatán.";
-  }
-  return "Escribe cualquier idea de actividad, comida, bebida o juego y la añadiré automáticamente a las tarjetas de votación de la página.";
+function addChatBubble(text, role) {
+  const win = document.getElementById("pusioChatArea");
+  const div = document.createElement("div");
+  div.className = `bubble ${role}`;
+  div.textContent = text;
+  win.appendChild(div);
+  win.scrollTop = win.scrollHeight;
 }
 
-function addChatMessage(text, sender) {
-  const area = document.getElementById("pusioChatArea");
-  const bubble = document.createElement("div");
-  bubble.className = `msg-bubble ${sender}`;
-  bubble.textContent = text;
-  area.appendChild(bubble);
-  area.scrollTop = area.scrollHeight;
+// ----------------- Confeti Vectorial en Canvas ----------------- //
+function launchConfetti() {
+  const canvas = document.getElementById("confettiCanvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const colors = ["#FF4757", "#00A878", "#0984E3", "#FFB142", "#6C5CE7"];
+  const pieces = Array.from({ length: 55 }, () => ({
+    x: canvas.width / 2 + (Math.random() - 0.5) * 260,
+    y: canvas.height * 0.45,
+    vx: (Math.random() - 0.5) * 14,
+    vy: -Math.random() * 14 - 4,
+    size: 7 + Math.random() * 6,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    rot: Math.random() * Math.PI,
+    vrot: (Math.random() - 0.5) * 0.25
+  }));
+
+  let frame = 0;
+  function tick() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.45;
+      p.rot += p.vrot;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.65);
+      ctx.strokeStyle = "#121316";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.65);
+      ctx.restore();
+    });
+    frame++;
+    if (frame < 75) requestAnimationFrame(tick);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  requestAnimationFrame(tick);
+}
+
+// ----------------- Notificación Toast ----------------- //
+function showToast(msg) {
+  const toast = document.getElementById("toastNotice");
+  if (!toast) return;
+  toast.textContent = msg;
+  toast.classList.add("show");
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
 }
 
 // ----------------- Event Listeners ----------------- //
@@ -492,60 +750,74 @@ function setupEventListeners() {
   document.getElementById("btnUserChip").onclick = () => openModal("modalSwitchUser");
   document.getElementById("btnOpenCarModal").onclick = () => openModal("modalCar");
 
-  document.getElementById("btnAskPusio").onclick = () => {
-    const section = document.getElementById("pusioSection");
-    if (section) section.scrollIntoView({ behavior: "smooth" });
-    setTimeout(() => {
-      const chatInput = document.getElementById("pusioInput");
-      if (chatInput) chatInput.focus();
-    }, 450);
+  // Botón Tirar Dados (Robot al azar)
+  document.getElementById("btnRandomRobot").onclick = () => {
+    if (!currentUser) return;
+    const cfg = currentUser.config;
+    cfg.baseColor = CHASSIS_COLORS[Math.floor(Math.random() * CHASSIS_COLORS.length)].hex;
+    cfg.bgColor = PEDESTAL_BG_COLORS[Math.floor(Math.random() * PEDESTAL_BG_COLORS.length)].hex;
+    Object.keys(ROBOT_PARTS).forEach(k => {
+      cfg[k] = Math.floor(Math.random() * ROBOT_PARTS[k].length);
+    });
+    triggerPedestalBounce();
+    syncWorkshopUI();
+    renderWhosGoing();
+    renderUserHud();
   };
 
-  // Chips rápidos de pus.io
-  document.querySelectorAll(".quick-chip").forEach(chip => {
-    chip.onclick = () => {
-      const ideaText = chip.getAttribute("data-idea");
-      if (ideaText) handlePusioInteraction(ideaText);
-    };
+  // Guardar personaje (+100 XP)
+  document.getElementById("btnSaveCharacter").onclick = () => {
+    if (!currentUser) return;
+    const nameVal = document.getElementById("nameEditField").value.trim();
+    if (nameVal) currentUser.name = nameVal;
+
+    const wasDone = missionState.step1;
+    missionState.step1 = true;
+    saveState();
+    renderAll();
+    if (!wasDone) launchConfetti();
+    showToast(`Personaje guardado para ${currentUser.name} (+100 XP)`);
+  };
+
+  // Editar nombre en vivo
+  document.getElementById("nameEditField").addEventListener("input", (e) => {
+    if (!currentUser) return;
+    const v = e.target.value.trim();
+    if (v) {
+      currentUser.name = v;
+      renderWhosGoing();
+      renderUserHud();
+    }
   });
 
-  // Botones de estilos rápidos de robot
-  document.querySelectorAll(".preset-btn[data-prompt]").forEach(btn => {
-    btn.onclick = () => {
-      const preset = btn.getAttribute("data-prompt");
-      const promptInput = document.getElementById("avatarPromptField");
-      if (promptInput && currentUser) {
-        promptInput.value = `${currentUser.name.toLowerCase()}-${preset}`;
-        previewRobotAvatar();
-      }
-    };
+  // Aplicar prompt al robot
+  document.getElementById("btnApplyPrompt").onclick = () => {
+    const val = document.getElementById("avatarPromptField").value.trim();
+    if (val) applyPromptToRobot(val);
+  };
+
+  document.getElementById("avatarPromptField").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const val = e.target.value.trim();
+      if (val) applyPromptToRobot(val);
+    }
   });
 
-  // Botón de robot aleatorio
-  const randomBtn = document.getElementById("btnRandomRobot");
-  if (randomBtn) {
-    randomBtn.onclick = () => {
-      const randomSeed = `bot-chelem-${Math.floor(1000 + Math.random() * 9000)}`;
-      const promptInput = document.getElementById("avatarPromptField");
-      if (promptInput) {
-        promptInput.value = randomSeed;
-        previewRobotAvatar();
-      }
-    };
-  }
+  // Confirmar como pasajero (Paso 2)
+  document.getElementById("btnConfirmPassenger").onclick = () => {
+    if (!currentUser) return;
+    currentUser.travelMode = "passenger";
+    currentUser.puedo_dar_coche = 0;
+    const wasDone = missionState.step2;
+    missionState.step2 = true;
+    saveState();
+    renderAll();
+    if (!wasDone) launchConfetti();
+    showToast(`${currentUser.name} confirmado como pasajero (+100 XP)`);
+  };
 
-  // Cerrar modales
-  document.querySelectorAll("[data-close]").forEach(btn => {
-    btn.onclick = () => closeModal(btn.getAttribute("data-close"));
-  });
-
-  // Vista previa en tiempo real al escribir prompt
-  const promptInput = document.getElementById("avatarPromptField");
-  if (promptInput) {
-    promptInput.addEventListener("input", previewRobotAvatar);
-  }
-
-  // Formulario de auto
+  // Registrar coche (Paso 2 VIP)
   document.getElementById("carForm").onsubmit = (e) => {
     e.preventDefault();
     if (!currentUser) return;
@@ -563,26 +835,40 @@ function setupEventListeners() {
 
     carsList.push(newCar);
     currentUser.puedo_dar_coche = 1;
-    const person = attendeesList.find(u => u.id === currentUser.id);
-    if (person) person.puedo_dar_coche = 1;
+    currentUser.travelMode = "driver";
+    missionState.step2 = true;
 
     saveState();
     closeModal("modalCar");
     document.getElementById("carForm").reset();
     renderAll();
-    showToast(`Coche registrado y privilegios VIP activados para ${currentUser.name}`);
+    launchConfetti();
+    showToast(`Coche registrado y Rango VIP activado (+150 XP)`);
   };
 
-  // Formulario de pus.io
+  // Cartas rápidas de pus.io
+  document.querySelectorAll(".idea-chip-btn").forEach(btn => {
+    btn.onclick = () => {
+      const idea = btn.getAttribute("data-idea");
+      if (idea) handlePusioSuggestion(idea);
+    };
+  });
+
+  // Formulario pus.io
   document.getElementById("pusioForm").onsubmit = (e) => {
     e.preventDefault();
     const input = document.getElementById("pusioInput");
     const val = input.value.trim();
     if (val) {
-      handlePusioInteraction(val);
+      handlePusioSuggestion(val);
       input.value = "";
     }
   };
+
+  // Cerrar modales
+  document.querySelectorAll("[data-close]").forEach(btn => {
+    btn.onclick = () => closeModal(btn.getAttribute("data-close"));
+  });
 }
 
 function renderSwitchUserList() {
@@ -593,23 +879,24 @@ function renderSwitchUserList() {
   attendeesList.forEach(u => {
     const isMe = currentUser && currentUser.id === u.id;
     const btn = document.createElement("button");
-    btn.className = isMe ? "btn btn-dark" : "btn btn-outline";
+    btn.type = "button";
+    btn.className = `btn ${isMe ? 'btn-sun' : ''}`;
     btn.style.width = "100%";
     btn.style.justifyContent = "space-between";
     btn.style.marginBottom = "8px";
     btn.innerHTML = `
-      <span style="display:flex; align-items:center; gap:12px;">
-        <img src="${getAvatarUrl(u.avatar_seed || u.name)}" style="width:28px; height:28px; border-radius:50%; background:var(--bg-Cream);">
-        <span style="font-family:var(--font-serif); font-size:1.35rem; font-weight:400;">${u.name}</span>
+      <span style="display:flex; align-items:center; gap:10px;">
+        <img src="${buildRobotUrl(u.config)}" style="width:32px; height:32px; border-radius:50%; background:${u.config.bgColor}; border:1px solid #121316;">
+        <span style="font-family:var(--font-display); font-size:1.25rem;">${u.name}</span>
       </span>
-      <span style="font-family:var(--font-mono); font-size:0.72rem; opacity:0.7;">${isMe ? 'ACTIVO' : 'ELEGIR'}</span>
+      <span style="font-family:var(--font-mono); font-size:0.72rem;">${isMe ? 'JUGANDO' : 'ELEGIR'}</span>
     `;
     btn.onclick = () => {
       currentUser = u;
       saveState();
       renderAll();
       closeModal("modalSwitchUser");
-      showToast(`Hola, ${u.name}`);
+      showToast(`Jugador activo: ${u.name}`);
     };
     container.appendChild(btn);
   });
