@@ -235,6 +235,62 @@ body {
   font-weight: 600;
 }
 
+/* ==========================================================================
+   CONTADOR EDITORIAL GRANDE (DÍAS, HORAS, MINUTOS, SEGUNDOS)
+   ========================================================================== */
+.countdown-wrap {
+  display: inline-grid;
+  grid-template-columns: repeat(4, minmax(90px, 120px));
+  gap: 12px;
+  background: var(--bg-card);
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  margin: 0 auto 30px;
+}
+
+@media (max-width: 540px) {
+  .countdown-wrap {
+    grid-template-columns: repeat(4, 1fr);
+    width: 100%;
+    padding: 10px;
+    gap: 6px;
+  }
+}
+
+.cd-card {
+  background: var(--bg-page);
+  border-radius: var(--radius-md);
+  padding: 14px 8px;
+  text-align: center;
+  border: 1px solid var(--border);
+  transition: transform 0.2s var(--ease), border-color 0.2s ease;
+}
+
+.cd-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--ink);
+  box-shadow: var(--shadow-sm);
+}
+
+.cd-number {
+  font-family: var(--font-serif);
+  font-size: clamp(2.3rem, 4.6vw, 3.4rem);
+  line-height: 0.95;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+
+.cd-unit {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-secondary);
+  margin-top: 6px;
+}
+
 /* Acciones Principales con toques de color suaves */
 .hero-actions-deck {
   display: grid;

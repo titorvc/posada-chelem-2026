@@ -188,21 +188,39 @@ function renderRobotSVG(robotCfg, overridePart = null, overrideShape = null) {
 
 // ----------------- Contador y Metadatos ----------------- //
 function initCountdown() {
-  const el = document.getElementById("heroMetaText");
+  const elMeta = document.getElementById("heroMetaText");
+  const elDays = document.getElementById("cdDays");
+  const elHours = document.getElementById("cdHours");
+  const elMins = document.getElementById("cdMins");
+  const elSecs = document.getElementById("cdSecs");
+
   function update() {
     const now = new Date().getTime();
     const diff = EVENT_DATE - now;
-    if (!el) return;
+
     if (diff <= 0) {
-      el.innerHTML = "Chelem Puerto, Yucatán &bull; ¡Es hoy la Posada!";
+      if (elMeta) elMeta.innerHTML = "Chelem Puerto, Yucatán &bull; ¡Es hoy la Posada!";
+      if (elDays) elDays.textContent = "00";
+      if (elHours) elHours.textContent = "00";
+      if (elMins) elMins.textContent = "00";
+      if (elSecs) elSecs.textContent = "00";
       return;
     }
+
     const d = Math.floor(diff / (1000 * 60 * 60 * 24));
     const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    el.innerHTML = `Chelem Puerto, Yucatán &bull; Sábado 19 Dic 2026 &bull; Faltan ${d} días (${h} hrs)`;
+    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+    if (elMeta) elMeta.innerHTML = `Chelem Puerto, Yucatán &bull; Sábado 19 Dic 2026 &bull; Faltan ${d} días`;
+    if (elDays) elDays.textContent = String(d).padStart(2, "0");
+    if (elHours) elHours.textContent = String(h).padStart(2, "0");
+    if (elMins) elMins.textContent = String(m).padStart(2, "0");
+    if (elSecs) elSecs.textContent = String(s).padStart(2, "0");
   }
+
   update();
-  setInterval(update, 60000);
+  setInterval(update, 1000);
 }
 
 // ----------------- Estado Local (v8 con Bottts Auténticos + HSL por Pieza) ----------------- //
