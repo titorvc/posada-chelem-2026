@@ -1,14 +1,16 @@
 /**
- * POSADA CHELEM 2026 — TALLER VISUAL NATIVO & EXPERIENCIA GAMIFICADA
- * - Selección 100% visual de piezas mediante cuadrícula de miniaturas SVG en vivo
- * - Sin prompts ni etiquetas inventadas: ves cada pieza y la tocas para equiparla
- * - 19 colores de chasis + selector RGB libre, colores de fondo, espejo, zoom y giro
+ * POSADA CHELEM 2026 — SISTEMA COLABORATIVO & SESIÓN GOOGLE 1-TOQUE
+ * - Inicio de sesión con un toque por correo Gmail + registro de nombre
+ * - Navegación ligera por pestañas (ideal para móvil y escritorio)
+ * - Sin planes ni votos predefinidos de relleno: inicia limpio
+ * - Asistente pus.io que desglosa cualquier comida/actividad en insumos divisibles
+ * - Taller visual nativo de robot en modal (sin prompts)
  * - Cero emojis
  */
 
 const EVENT_DATE = new Date("2026-12-19T15:00:00-06:00").getTime();
 
-// Catálogo completo de piezas nativas de DiceBear Bottts v7 (sin nombres inventados)
+// Catálogo nativo de piezas de DiceBear Bottts v7
 const NATIVE_PARTS = {
   eyes: [
     "eva", "shade01", "robocop", "happy", "glow", "sensor",
@@ -36,75 +38,55 @@ const NATIVE_PARTS = {
   ]
 };
 
-// Los 19 colores nativos de chasis + opción libre RGB
 const CHASSIS_HEX_LIST = [
   "039be5", "e53935", "00897b", "ffb300", "fb8c00",
   "8e24aa", "00acc1", "d81b60", "43a047", "3949ab",
   "1e88e5", "f4511e", "5e35b1", "7cb342", "fdd835",
-  "c0ca33", "546e7a", "6d4c41", "757575"
+  "546e7a", "6d4c41"
 ];
 
-// Paleta de fondos de pedestal + opción libre RGB
 const PEDESTAL_BG_LIST = [
   "#E3F2FD", "#FFE8EA", "#E0F8F0", "#FFF4E0", "#EFEFFD",
-  "#F2EFE6", "#E0F7FA", "#FCE4EC", "#F1F8E9", "#FFFDE7"
+  "#F2EFE6", "#E0F7FA", "#FCE4EC"
 ];
 
+// Cuentas verificadas del grupo (sin autos ni planes pre-cargados)
 const DEFAULT_ATTENDEES = [
   {
-    id: 1, name: "Reyvell", travelMode: null, puedo_dar_coche: 0,
-    config: { baseColor: "ffb300", bgColor: "#FFF4E0", eyes: "shade01", face: "round01", mouth: "smile02", top: "radar", sides: "round", texture: "none", flip: false, scale: 100, rotate: 0 }
+    id: 1, name: "Reyvell", email: "reyvelljk87@gmail.com", travelMode: null, puedo_dar_coche: 0,
+    config: { baseColor: "ffb300", bgColor: "#FFF4E0", eyes: "shade01", face: "round01", mouth: "smile02", top: "radar", sides: "round", texture: "none", flip: false }
   },
   {
-    id: 2, name: "Roberto", travelMode: null, puedo_dar_coche: 0,
-    config: { baseColor: "039be5", bgColor: "#E3F2FD", eyes: "eva", face: "square01", mouth: "smile01", top: "glowingBulb01", sides: "cables01", texture: "circuits", flip: false, scale: 100, rotate: 0 }
+    id: 2, name: "Roberto", email: "titorvc08@gmail.com", travelMode: null, puedo_dar_coche: 0,
+    config: { baseColor: "039be5", bgColor: "#E3F2FD", eyes: "eva", face: "square01", mouth: "smile01", top: "glowingBulb01", sides: "cables01", texture: "circuits", flip: false }
   },
   {
-    id: 3, name: "Daniel", travelMode: null, puedo_dar_coche: 0,
-    config: { baseColor: "00897b", bgColor: "#E0F8F0", eyes: "happy", face: "round02", mouth: "grill03", top: "lights", sides: "antenna01", texture: "none", flip: false, scale: 100, rotate: 0 }
+    id: 3, name: "Daniel", email: "danielitoestabonito16@gmail.com", travelMode: null, puedo_dar_coche: 0,
+    config: { baseColor: "00897b", bgColor: "#E0F8F0", eyes: "happy", face: "round02", mouth: "grill03", top: "lights", sides: "antenna01", texture: "none", flip: false }
   },
   {
-    id: 4, name: "Pinzón", travelMode: null, puedo_dar_coche: 0,
-    config: { baseColor: "e53935", bgColor: "#FFE8EA", eyes: "robocop", face: "square02", mouth: "smile01", top: "horns", sides: "cables02", texture: "none", flip: false, scale: 100, rotate: 0 }
+    id: 4, name: "Pinzón", email: "mendoza.lpinzon@gmail.com", travelMode: null, puedo_dar_coche: 0,
+    config: { baseColor: "e53935", bgColor: "#FFE8EA", eyes: "robocop", face: "square02", mouth: "smile01", top: "horns", sides: "cables02", texture: "none", flip: false }
   },
   {
-    id: 5, name: "Alejandro", travelMode: null, puedo_dar_coche: 0,
-    config: { baseColor: "8e24aa", bgColor: "#EFEFFD", eyes: "glow", face: "round01", mouth: "diagram", top: "pyramid", sides: "round", texture: "dots", flip: false, scale: 100, rotate: 0 }
+    id: 5, name: "Alejandro", email: "alejandroaltamiranopuc@gmail.com", travelMode: null, puedo_dar_coche: 0,
+    config: { baseColor: "8e24aa", bgColor: "#EFEFFD", eyes: "glow", face: "round01", mouth: "diagram", top: "pyramid", sides: "round", texture: "dots", flip: false }
   },
   {
-    id: 6, name: "Erik", travelMode: null, puedo_dar_coche: 0,
-    config: { baseColor: "fb8c00", bgColor: "#FFF4E0", eyes: "sensor", face: "square03", mouth: "grill01", top: "antenna", sides: "cables01", texture: "none", flip: false, scale: 100, rotate: 0 }
+    id: 6, name: "Erik", email: "joserikb@gmail.com", travelMode: null, puedo_dar_coche: 0,
+    config: { baseColor: "fb8c00", bgColor: "#FFF4E0", eyes: "sensor", face: "square03", mouth: "grill01", top: "antenna", sides: "cables01", texture: "none", flip: false }
   },
   {
-    id: 7, name: "Iván", travelMode: null, puedo_dar_coche: 0,
-    config: { baseColor: "00acc1", bgColor: "#E0F7FA", eyes: "roundFrame01", face: "square01", mouth: "smile02", top: "radar", sides: "antenna02", texture: "circuits", flip: false, scale: 100, rotate: 0 }
+    id: 7, name: "Iván", email: "ivan.raygosa@gmail.com", travelMode: null, puedo_dar_coche: 0,
+    config: { baseColor: "00acc1", bgColor: "#E0F7FA", eyes: "roundFrame01", face: "square01", mouth: "smile02", top: "radar", sides: "antenna02", texture: "circuits", flip: false }
   },
   {
-    id: 8, name: "Francisco", travelMode: null, puedo_dar_coche: 0,
-    config: { baseColor: "d81b60", bgColor: "#FCE4EC", eyes: "frame1", face: "round02", mouth: "bite", top: "antennaCrooked", sides: "round", texture: "none", flip: false, scale: 100, rotate: 0 }
+    id: 8, name: "Francisco", email: "fjvc091002@gmail.com", travelMode: null, puedo_dar_coche: 0,
+    config: { baseColor: "d81b60", bgColor: "#FCE4EC", eyes: "frame1", face: "round02", mouth: "bite", top: "antennaCrooked", sides: "round", texture: "none", flip: false }
   },
   {
-    id: 9, name: "Carlos", travelMode: null, puedo_dar_coche: 0,
-    config: { baseColor: "546e7a", bgColor: "#F2EFE6", eyes: "roundFrame02", face: "square04", mouth: "square01", top: "bulb01", sides: "square", texture: "dots", flip: false, scale: 100, rotate: 0 }
-  }
-];
-
-const DEFAULT_PLAN_OPTIONS = [
-  {
-    id: 1,
-    tag: "Torneo",
-    tagClass: "berry",
-    title: "Torneo de Super Smash Bros Ultimate",
-    desc: "Retas en pantalla grande o proyector en la sala. Eliminatorias 1v1 y todos contra todos.",
-    votes: 3
-  },
-  {
-    id: 2,
-    tag: "Comida",
-    tagClass: "amber",
-    title: "Asado al carbón en la terraza",
-    desc: "Parrillada frente al mar en Chelem con hamburguesas al carbón, cortes y guarniciones.",
-    votes: 4
+    id: 9, name: "Carlos", email: "cplus.lat@gmail.com", travelMode: null, puedo_dar_coche: 0,
+    config: { baseColor: "546e7a", bgColor: "#F2EFE6", eyes: "roundFrame02", face: "square04", mouth: "square01", top: "bulb01", sides: "square", texture: "dots", flip: false }
   }
 ];
 
@@ -112,9 +94,7 @@ let currentUser = null;
 let activeCategory = "eyes";
 let attendeesList = [];
 let carsList = [];
-let planOptions = [];
-let userVotes = new Set();
-let missionState = { step1: false, step2: false, step3: false, step4: false };
+let collaborations = []; // Inicia 100% vacío, sin modelos ni votos falsos
 
 document.addEventListener("DOMContentLoaded", () => {
   initCountdown();
@@ -124,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupEventListeners();
 });
 
-// ----------------- Construcción Nativa de URL SVG ----------------- //
+// ----------------- Construcción de URL SVG de Robot ----------------- //
 function buildRobotUrl(cfg, overrideKey = null, overrideVal = null) {
   if (!cfg) return "https://api.dicebear.com/7.x/bottts/svg?seed=chelem";
   const c = Object.assign({}, cfg);
@@ -166,18 +146,15 @@ function buildRobotUrl(cfg, overrideKey = null, overrideVal = null) {
   }
 
   if (c.flip) params.set("flip", "true");
-  if (c.scale && c.scale !== 100) params.set("scale", String(c.scale));
-  if (c.rotate && c.rotate !== 0) params.set("rotate", String(c.rotate));
 
   return `https://api.dicebear.com/7.x/bottts/svg?${params.toString()}`;
 }
 
-// ----------------- Contador Regresivo ----------------- //
+// ----------------- Contador Compacto ----------------- //
 function initCountdown() {
   const elDays = document.getElementById("cdDays");
   const elHours = document.getElementById("cdHours");
   const elMins = document.getElementById("cdMins");
-  const elSecs = document.getElementById("cdSecs");
 
   function update() {
     const now = new Date().getTime();
@@ -187,56 +164,594 @@ function initCountdown() {
     const d = Math.floor(diff / (1000 * 60 * 60 * 24));
     const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const s = Math.floor((diff % (1000 * 60)) / 1000);
 
-    elDays.textContent = String(d).padStart(2, "0");
+    elDays.textContent = String(d);
     elHours.textContent = String(h).padStart(2, "0");
     elMins.textContent = String(m).padStart(2, "0");
-    elSecs.textContent = String(s).padStart(2, "0");
   }
 
   update();
-  setInterval(update, 1000);
+  setInterval(update, 15000);
 }
 
-// ----------------- Estado Local (v5 Visual Nativo) ----------------- //
+// ----------------- Estado Local (v6 Limpio & Colaborativo) ----------------- //
 function loadState() {
-  const savedAttendees = localStorage.getItem("posada_attendees_v5");
+  const savedAttendees = localStorage.getItem("posada_attendees_v6");
   attendeesList = savedAttendees ? JSON.parse(savedAttendees) : DEFAULT_ATTENDEES;
 
-  const savedCars = localStorage.getItem("posada_cars_v5");
+  const savedCars = localStorage.getItem("posada_cars_v6");
   carsList = savedCars ? JSON.parse(savedCars) : [];
 
-  const savedOptions = localStorage.getItem("posada_options_v5");
-  planOptions = savedOptions ? JSON.parse(savedOptions) : DEFAULT_PLAN_OPTIONS;
+  const savedCollabs = localStorage.getItem("posada_collabs_v6");
+  collaborations = savedCollabs ? JSON.parse(savedCollabs) : [];
 
-  const savedVotes = localStorage.getItem("posada_votes_v5");
-  if (savedVotes) userVotes = new Set(JSON.parse(savedVotes));
-
-  const savedMissions = localStorage.getItem("posada_missions_v5");
-  if (savedMissions) missionState = JSON.parse(savedMissions);
-
-  const savedUser = localStorage.getItem("posada_user_v5");
+  const savedUser = localStorage.getItem("posada_user_v6");
   if (savedUser) {
     const parsed = JSON.parse(savedUser);
-    currentUser = attendeesList.find(u => u.id === parsed.id) || attendeesList[1];
+    currentUser = attendeesList.find(u => u.email.toLowerCase() === parsed.email.toLowerCase()) || attendeesList[1];
   } else {
-    currentUser = attendeesList.find(u => u.name === "Roberto") || attendeesList[0];
+    currentUser = attendeesList[1]; // Roberto por defecto, cambiable en 1 toque
   }
 }
 
 function saveState() {
-  localStorage.setItem("posada_attendees_v5", JSON.stringify(attendeesList));
-  localStorage.setItem("posada_cars_v5", JSON.stringify(carsList));
-  localStorage.setItem("posada_options_v5", JSON.stringify(planOptions));
-  localStorage.setItem("posada_votes_v5", JSON.stringify(Array.from(userVotes)));
-  localStorage.setItem("posada_missions_v5", JSON.stringify(missionState));
+  localStorage.setItem("posada_attendees_v6", JSON.stringify(attendeesList));
+  localStorage.setItem("posada_cars_v6", JSON.stringify(carsList));
+  localStorage.setItem("posada_collabs_v6", JSON.stringify(collaborations));
   if (currentUser) {
-    localStorage.setItem("posada_user_v5", JSON.stringify(currentUser));
+    localStorage.setItem("posada_user_v6", JSON.stringify(currentUser));
   }
 }
 
-// ----------------- Paleta de Colores + Selector RGB Libre ----------------- //
+// ----------------- Navegación por Pestañas ----------------- //
+function switchTab(tabId) {
+  document.querySelectorAll(".tab-trigger").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.tab === tabId);
+  });
+  document.querySelectorAll(".tab-panel").forEach(panel => {
+    panel.classList.toggle("active", panel.id === tabId);
+  });
+}
+
+// ----------------- Renderizado General ----------------- //
+function renderAll() {
+  renderSessionHeader();
+  renderCollabBoard();
+  renderWhosGoing();
+  renderTransportSection();
+  renderGoogleQuickAccounts();
+  syncWorkshopModal();
+}
+
+function renderSessionHeader() {
+  if (!currentUser) return;
+  document.getElementById("navUserAvatar").src = buildRobotUrl(currentUser.config);
+  document.getElementById("navUserName").textContent = currentUser.name;
+  document.getElementById("navUserEmail").textContent = currentUser.email;
+}
+
+// ----------------- 1. PESTAÑA: PENDIENTES Y COLABORACIONES ----------------- //
+function renderCollabBoard() {
+  const container = document.getElementById("collabBoardContainer");
+  const badgeCount = document.getElementById("badgePendientesCount");
+
+  // Contar total de pendientes
+  const totalTasks = collaborations.reduce((acc, c) => acc + c.items.length, 0);
+  if (badgeCount) badgeCount.textContent = String(collaborations.length);
+
+  container.innerHTML = "";
+
+  if (collaborations.length === 0) {
+    container.innerHTML = `
+      <div class="empty-board">
+        <h3 class="empty-board-title">Aún no hay pendientes registrados</h3>
+        <p class="empty-board-desc">
+          Todavía no se ha definido comida ni actividades. Entra al chat con <strong>pus.io</strong> y escribe qué te gustaría comer o hacer (por ejemplo: <em>"Quiero comer nachos de pastor"</em>) para que arme la lista y nos dividamos qué llevar.
+        </p>
+        <button type="button" class="btn btn-pine" onclick="switchTab('tabPusio')">Proponer primera idea en pus.io</button>
+      </div>
+    `;
+    return;
+  }
+
+  const list = document.createElement("div");
+  list.className = "collab-list";
+
+  collaborations.forEach(collab => {
+    const claimedCount = collab.items.filter(i => i.claimedBy).length;
+    const totalCount = collab.items.length;
+
+    const card = document.createElement("div");
+    card.className = "collab-card";
+
+    let itemsHtml = "";
+    collab.items.forEach(item => {
+      const isClaimed = Boolean(item.claimedBy);
+      const isClaimedByMe = currentUser && item.claimedByEmail === currentUser.email;
+
+      itemsHtml += `
+        <div class="task-row ${isClaimed ? 'claimed' : ''}">
+          <span class="task-name">${item.name}</span>
+          ${
+            isClaimed
+              ? `<button type="button" class="task-assignee" onclick="toggleClaimItem(${collab.id}, '${item.id}')" title="${isClaimedByMe ? 'Toca para soltar este pendiente' : 'Asignado a ' + item.claimedBy}">
+                   <img src="${item.claimedByAvatar}" alt="${item.claimedBy}">
+                   <span>${item.claimedBy}</span>
+                 </button>`
+              : `<button type="button" class="claim-btn" onclick="toggleClaimItem(${collab.id}, '${item.id}')">
+                   Yo lo llevo
+                 </button>`
+          }
+        </div>
+      `;
+    });
+
+    card.innerHTML = `
+      <div class="collab-card-head">
+        <div>
+          <span class="collab-cat-badge">${collab.category}</span>
+          <h3 class="collab-title">${collab.title}</h3>
+          <div class="collab-author">Propuesto por ${collab.author}</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="collab-progress-pill">${claimedCount}/${totalCount} cubiertos</span>
+          <button type="button" class="modal-close-btn" style="width:26px; height:26px; font-size:0.9rem;" onclick="deleteCollab(${collab.id})" title="Eliminar esta actividad">&times;</button>
+        </div>
+      </div>
+
+      <div class="checklist-items">
+        ${itemsHtml}
+      </div>
+
+      <form class="add-subitem-row" onsubmit="addCustomSubItem(event, ${collab.id})">
+        <input type="text" class="add-subitem-input" placeholder="+ Agregar otro insumo o pendiente a esta lista..." required>
+        <button type="submit" class="btn btn-sm">Sumar</button>
+      </form>
+    `;
+
+    list.appendChild(card);
+  });
+
+  container.appendChild(list);
+}
+
+function toggleClaimItem(collabId, itemId) {
+  if (!currentUser) {
+    openModal("modalAuth");
+    return;
+  }
+
+  const collab = collaborations.find(c => c.id === collabId);
+  if (!collab) return;
+  const item = collab.items.find(i => String(i.id) === String(itemId));
+  if (!item) return;
+
+  if (item.claimedBy) {
+    // Si ya lo tenía el usuario actual (o quiere liberarlo)
+    if (item.claimedByEmail === currentUser.email) {
+      item.claimedBy = null;
+      item.claimedByEmail = null;
+      item.claimedByAvatar = null;
+      showToast(`Liberaste: ${item.name}`);
+    } else {
+      // Permitir reasignar si otro lo toma
+      item.claimedBy = currentUser.name;
+      item.claimedByEmail = currentUser.email;
+      item.claimedByAvatar = buildRobotUrl(currentUser.config);
+      showToast(`Te anotaste con: ${item.name}`);
+    }
+  } else {
+    item.claimedBy = currentUser.name;
+    item.claimedByEmail = currentUser.email;
+    item.claimedByAvatar = buildRobotUrl(currentUser.config);
+    showToast(`${currentUser.name} lleva: ${item.name}`);
+  }
+
+  saveState();
+  renderCollabBoard();
+}
+
+function addCustomSubItem(e, collabId) {
+  e.preventDefault();
+  const input = e.target.querySelector("input");
+  const val = input.value.trim();
+  if (!val) return;
+
+  const collab = collaborations.find(c => c.id === collabId);
+  if (!collab) return;
+
+  collab.items.push({
+    id: "item_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
+    name: val.charAt(0).toUpperCase() + val.slice(1),
+    claimedBy: null,
+    claimedByEmail: null,
+    claimedByAvatar: null
+  });
+
+  input.value = "";
+  saveState();
+  renderCollabBoard();
+  showToast(`Insumo agregado a ${collab.title}`);
+}
+
+function deleteCollab(collabId) {
+  collaborations = collaborations.filter(c => c.id !== collabId);
+  saveState();
+  renderCollabBoard();
+  showToast("Actividad eliminada");
+}
+
+// ----------------- 2. PESTAÑA: MOTOR IA PUS.IO (DESGLOSADOR COLABORATIVO) ----------------- //
+function handlePusioMessage(rawText) {
+  const text = rawText.trim();
+  if (!text) return;
+
+  appendChatMsg(text, "user");
+
+  setTimeout(() => {
+    const plan = decomposeProposalIntoTasks(text);
+
+    if (!plan.isActionable) {
+      appendChatMsg(plan.reply, "bot");
+      return;
+    }
+
+    const newCollab = {
+      id: Date.now(),
+      title: plan.title,
+      category: plan.category,
+      author: currentUser ? currentUser.name : "Amigo",
+      items: plan.items.map((name, idx) => ({
+        id: `t_${Date.now()}_${idx}`,
+        name: name,
+        claimedBy: null,
+        claimedByEmail: null,
+        claimedByAvatar: null
+      }))
+    };
+
+    collaborations.unshift(newCollab);
+    saveState();
+    renderCollabBoard();
+
+    const itemNames = plan.items.join(", ");
+    appendChatMsg(
+      `Listo, ${currentUser ? currentUser.name : ''}. Creé "${plan.title}" en la pestaña de Pendientes y lo dividí en: ${itemNames}. Ya pueden tocar cada insumo para repartírselo.`,
+      "bot"
+    );
+
+    showToast(`Agregado a Pendientes: ${plan.title}`);
+  }, 300);
+}
+
+// Motor inteligente que desglosa cualquier comida, bebida o actividad en pendientes divisibles
+function decomposeProposalIntoTasks(text) {
+  const lower = text.toLowerCase();
+
+  // Si es una duda general de fecha/lugar
+  if ((lower.startsWith("cuándo") || lower.startsWith("cuando") || lower.startsWith("dónde") || lower.startsWith("donde")) && text.includes("?")) {
+    return {
+      isActionable: false,
+      reply: "La posada es el sábado 19 de diciembre de 2026 en la casa de Reyvell en Chelem. Dime qué te gustaría comer o hacer y armo la lista de pendientes."
+    };
+  }
+
+  // Recetario y desglosador colaborativo por contexto
+  if (lower.includes("nacho") && lower.includes("pastor")) {
+    return {
+      isActionable: true,
+      title: "Nachos de pastor",
+      category: "Comida colaborativa",
+      items: [
+        "Carne al pastor (1.5 kg)",
+        "Totopos / Tostadas (3 bolsas)",
+        "Queso para fundir y jalapeños",
+        "Guacamole, cilantro y cebolla",
+        "Charolas de aluminio y servilletas"
+      ]
+    };
+  }
+
+  if (lower.includes("nacho")) {
+    return {
+      isActionable: true,
+      title: "Nachos preparados",
+      category: "Comida colaborativa",
+      items: [
+        "Totopos / Tostadas grandes",
+        "Carne o arrachera picada",
+        "Queso líquido / queso para fundir",
+        "Guacamole y pico de gallo",
+        "Chiles jalapeños y charolas"
+      ]
+    };
+  }
+
+  if (lower.includes("pastor") || lower.includes("taco") || lower.includes("taquiza")) {
+    return {
+      isActionable: true,
+      title: "Tacos al pastor / Taquiza",
+      category: "Comida colaborativa",
+      items: [
+        "Carne al pastor / bistec (2 kg)",
+        "Tortillas taqueras y piña",
+        "Cilantro, cebolla picada y limones",
+        "Salsas (verde, roja y habanero)",
+        "Platos y servilletas"
+      ]
+    };
+  }
+
+  if (lower.includes("hamburguesa") || lower.includes("burger")) {
+    return {
+      isActionable: true,
+      title: "Hamburguesas al carbón",
+      category: "Comida colaborativa",
+      items: [
+        "Carne para hamburguesa y tocino",
+        "Pan para hamburguesa y queso americano",
+        "Lechuga, tomate, cebolla y pepinillos",
+        "Aderezos (catsup, mostaza, mayonesa) y papas",
+        "Carbón e iniciador de fuego"
+      ]
+    };
+  }
+
+  if (lower.includes("asado") || lower.includes("carne asada") || lower.includes("parrillada")) {
+    return {
+      isActionable: true,
+      title: "Carne asada en la terraza",
+      category: "Comida colaborativa",
+      items: [
+        "Cortes de carne para asar",
+        "Chorizo, queso para asar y cebollitas",
+        "Tortillas, guacamole y limones",
+        "Carbón (2 bolsas) e iniciador",
+        "Desechables y salsas"
+      ]
+    };
+  }
+
+  if (lower.includes("ceviche") || lower.includes("aguachile") || lower.includes("marisco")) {
+    return {
+      isActionable: true,
+      title: lower.includes("aguachile") ? "Aguachile playero" : "Ceviche frente al mar",
+      category: "Comida colaborativa",
+      items: [
+        "Camarón / pescado fresco limpio",
+        "Jugo de limón (1 kg de limones)",
+        "Pepino, cebolla morada, cilantro y chile",
+        "Tostadas y galletas saladas",
+        "Aguacates y salsa marisquera"
+      ]
+    };
+  }
+
+  if (lower.includes("pizza")) {
+    return {
+      isActionable: true,
+      title: "Pizzas para la noche",
+      category: "Comida colaborativa",
+      items: [
+        "Pizzas de pepperoni / carnes frías",
+        "Pizzas especiales / hawaiana",
+        "Refrescos grandes",
+        "Aderezos y servilletas"
+      ]
+    };
+  }
+
+  if (lower.includes("smash") || lower.includes("mario kart") || lower.includes("switch") || lower.includes("torneo") || lower.includes("videojuego")) {
+    const gameName = lower.includes("mario") ? "Torneo de Mario Kart" : "Torneo de Super Smash Bros";
+    return {
+      isActionable: true,
+      title: gameName,
+      category: "Actividad / Torneo",
+      items: [
+        "Consola Nintendo Switch con el juego",
+        "Dock, cable HDMI y proyector / TV",
+        "Controles extra (mínimo 4 mandos)",
+        "Extensión eléctrica y multicontacto",
+        "Botanas para las retas"
+      ]
+    };
+  }
+
+  if (lower.includes("hielera") || lower.includes("bebida") || lower.includes("cerveza") || lower.includes("pomo") || lower.includes("hielo") || lower.includes("refresco")) {
+    return {
+      isActionable: true,
+      title: "Hieleras y bebidas",
+      category: "Bebidas",
+      items: [
+        "Hielera grande",
+        "Bolsas de hielo (4 bolsas)",
+        "Refrescos, agua mineral y jugos",
+        "Cervezas / bebidas del grupo",
+        "Vasos grandes y limones"
+      ]
+    };
+  }
+
+  if (lower.includes("película") || lower.includes("cine") || lower.includes("proyector")) {
+    return {
+      isActionable: true,
+      title: "Cine nocturno en la terraza",
+      category: "Actividad",
+      items: [
+        "Proyector y cable HDMI",
+        "Bocina Bluetooth potente",
+        "Laptop con las películas listas",
+        "Palomitas y dulces para compartir"
+      ]
+    };
+  }
+
+  // Cualquier otra propuesta abierta: limpiamos el título y generamos pendientes colaborativos
+  let cleanTitle = text
+    .replace(/^(quiero comer|quiero hacer|quiero|propongo|sugiero|hay que|vamos a|hacer|armar|llevar)\s+/i, "")
+    .trim();
+
+  cleanTitle = cleanTitle.charAt(0).toUpperCase() + cleanTitle.slice(1);
+  if (cleanTitle.endsWith(".")) cleanTitle = cleanTitle.slice(0, -1);
+
+  const isFood = lower.includes("comer") || lower.includes("cena") || lower.includes("almuerzo") || lower.includes("botana") || lower.includes("postre");
+
+  return {
+    isActionable: true,
+    title: cleanTitle,
+    category: isFood ? "Comida colaborativa" : "Actividad grupal",
+    items: isFood
+      ? [
+          `Ingrediente principal para ${cleanTitle.toLowerCase()}`,
+          "Complementos, guarnición y salsas",
+          "Tostadas, pan o tortillas",
+          "Bebidas para acompañar",
+          "Platos y servilletas"
+        ]
+      : [
+          `Equipo o material principal para ${cleanTitle.toLowerCase()}`,
+          "Accesorios o insumos secundarios",
+          "Coordinación y montaje en la casa",
+          "Snacks o bebidas durante la dinámica"
+        ]
+  };
+}
+
+function appendChatMsg(text, role) {
+  const area = document.getElementById("pusioChatArea");
+  const div = document.createElement("div");
+  div.className = `chat-msg ${role}`;
+  div.textContent = text;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+// ----------------- 3. PESTAÑA: ¿QUIÉNES VAMOS? ----------------- //
+function renderWhosGoing() {
+  const grid = document.getElementById("whosGoingGrid");
+  grid.innerHTML = "";
+
+  attendeesList.forEach(person => {
+    const isMe = currentUser && currentUser.email.toLowerCase() === person.email.toLowerCase();
+    const isVIP = person.puedo_dar_coche === 1;
+
+    let statusLabel = "Confirmado";
+    if (isVIP) statusLabel = "Conductor VIP";
+    else if (person.travelMode === "passenger") statusLabel = "Pasajero";
+
+    const tile = document.createElement("div");
+    tile.className = `friend-tile ${isMe ? 'is-me' : ''}`;
+    tile.title = "Toca para activar o personalizar";
+
+    tile.innerHTML = `
+      <div class="friend-tile-avatar" style="background-color: ${person.config.bgColor || '#E3F2FD'};">
+        <img src="${buildRobotUrl(person.config)}" alt="${person.name}">
+      </div>
+      <div>
+        <div class="friend-tile-name">${person.name}</div>
+        <span class="friend-tile-tag">${statusLabel}</span>
+      </div>
+    `;
+
+    tile.onclick = () => {
+      currentUser = person;
+      saveState();
+      renderAll();
+      openModal("modalWorkshop");
+    };
+
+    grid.appendChild(tile);
+  });
+}
+
+// ----------------- 4. PESTAÑA: TRANSPORTE ----------------- //
+function renderTransportSection() {
+  const container = document.getElementById("carsContainer");
+  container.innerHTML = "";
+
+  if (carsList.length === 0) return;
+
+  const list = document.createElement("div");
+  list.className = "collab-list";
+
+  carsList.forEach(car => {
+    const isMine = currentUser && car.driverEmail === currentUser.email;
+    const item = document.createElement("div");
+    item.className = "collab-card";
+
+    item.innerHTML = `
+      <div class="collab-card-head" style="margin-bottom:0; border-bottom:none; padding-bottom:0;">
+        <div>
+          <span class="collab-cat-badge">Auto disponible (${car.seats} lugares)</span>
+          <h3 class="collab-title">${car.driver} &mdash; ${car.model}</h3>
+          <div class="collab-author">Salida: ${car.zone} a las ${car.time}</div>
+        </div>
+        <div>
+          ${
+            isMine
+              ? `<button type="button" class="btn btn-sm" onclick="retireCar(${car.id})">Retirar</button>`
+              : `<button type="button" class="btn btn-ocean btn-sm" onclick="showToast('Lugar solicitado con ${car.driver}')">Pedir lugar</button>`
+          }
+        </div>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+
+  container.appendChild(list);
+}
+
+function retireCar(id) {
+  carsList = carsList.filter(c => c.id !== id);
+  if (currentUser) currentUser.puedo_dar_coche = 0;
+  saveState();
+  renderAll();
+  showToast("Coche retirado");
+}
+
+// ----------------- MODAL 1: INICIO DE SESIÓN GOOGLE 1-TOQUE ----------------- //
+function renderGoogleQuickAccounts() {
+  const container = document.getElementById("googleQuickList");
+  if (!container) return;
+  container.innerHTML = "";
+
+  attendeesList.forEach(u => {
+    const isMe = currentUser && currentUser.email.toLowerCase() === u.email.toLowerCase();
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = `google-account-btn ${isMe ? 'active-acc' : ''}`;
+
+    btn.innerHTML = `
+      <div class="acc-left">
+        <img class="acc-avatar" src="${buildRobotUrl(u.config)}" style="background:${u.config.bgColor};" alt="${u.name}">
+        <div>
+          <span class="acc-name">${u.name}</span>
+          <span class="acc-mail">${u.email}</span>
+        </div>
+      </div>
+      <span style="font-family:var(--font-mono); font-size:0.68rem; font-weight:700;">${isMe ? 'ACTIVA' : 'ENTRAR'}</span>
+    `;
+
+    btn.onclick = () => {
+      currentUser = u;
+      document.getElementById("authInputName").value = u.name;
+      document.getElementById("authInputEmail").value = u.email;
+      saveState();
+      renderAll();
+      closeModal("modalAuth");
+      showToast(`Sesión iniciada como ${u.name}`);
+    };
+
+    container.appendChild(btn);
+  });
+
+  if (currentUser) {
+    document.getElementById("authInputName").value = currentUser.name;
+    document.getElementById("authInputEmail").value = currentUser.email;
+  }
+}
+
+// ----------------- MODAL 2: TALLER VISUAL NATIVO DE ROBOT ----------------- //
 function initSwatches() {
   const chassisWrap = document.getElementById("chassisColorSwatches");
   const bgWrap = document.getElementById("bgColorSwatches");
@@ -251,28 +766,27 @@ function initSwatches() {
     btn.onclick = () => {
       if (!currentUser) return;
       currentUser.config.baseColor = hex;
-      triggerPedestalBounce();
-      syncWorkshopUI();
+      saveState();
+      syncWorkshopModal();
+      renderSessionHeader();
       renderWhosGoing();
-      renderUserHud();
     };
     chassisWrap.appendChild(btn);
   });
 
-  // Selector libre RGB para el chasis
-  const customChassisInput = document.createElement("input");
-  customChassisInput.type = "color";
-  customChassisInput.className = "custom-color-picker";
-  customChassisInput.title = "Elegir cualquier color personalizado";
-  customChassisInput.value = "#039be5";
-  customChassisInput.addEventListener("input", (e) => {
+  const customColor = document.createElement("input");
+  customColor.type = "color";
+  customColor.className = "custom-color-picker";
+  customColor.value = "#039be5";
+  customColor.addEventListener("input", (e) => {
     if (!currentUser) return;
     currentUser.config.baseColor = e.target.value.replace("#", "");
-    syncWorkshopUI();
+    saveState();
+    syncWorkshopModal();
+    renderSessionHeader();
     renderWhosGoing();
-    renderUserHud();
   });
-  chassisWrap.appendChild(customChassisInput);
+  chassisWrap.appendChild(customColor);
 
   bgWrap.innerHTML = "";
   PEDESTAL_BG_LIST.forEach(bgHex => {
@@ -284,87 +798,27 @@ function initSwatches() {
     btn.onclick = () => {
       if (!currentUser) return;
       currentUser.config.bgColor = bgHex;
-      triggerPedestalBounce();
-      syncWorkshopUI();
+      saveState();
+      syncWorkshopModal();
       renderWhosGoing();
     };
     bgWrap.appendChild(btn);
   });
-
-  // Selector libre RGB para el fondo
-  const customBgInput = document.createElement("input");
-  customBgInput.type = "color";
-  customBgInput.className = "custom-color-picker";
-  customBgInput.title = "Elegir cualquier color de fondo";
-  customBgInput.value = "#E3F2FD";
-  customBgInput.addEventListener("input", (e) => {
-    if (!currentUser) return;
-    currentUser.config.bgColor = e.target.value;
-    syncWorkshopUI();
-    renderWhosGoing();
-  });
-  bgWrap.appendChild(customBgInput);
 }
 
-function triggerPedestalBounce() {
-  const ped = document.getElementById("robotPedestal");
-  if (!ped) return;
-  ped.classList.remove("pop-anim");
-  void ped.offsetWidth;
-  ped.classList.add("pop-anim");
-  setTimeout(() => ped.classList.remove("pop-anim"), 340);
-}
-
-// ----------------- Renderizado General ----------------- //
-function renderAll() {
-  renderUserHud();
-  renderWhosGoing();
-  syncWorkshopUI();
-  renderTransportSection();
-  renderPlanOptions();
-  renderSwitchUserList();
-}
-
-function renderUserHud() {
-  if (!currentUser) return;
-  document.getElementById("navUserAvatar").src = buildRobotUrl(currentUser.config);
-  document.getElementById("navUserName").textContent = currentUser.name;
-
-  let xp = 0;
-  let completedCount = 0;
-
-  if (missionState.step1) { xp += 100; completedCount++; }
-  if (missionState.step2) { xp += currentUser.puedo_dar_coche ? 150 : 100; completedCount++; }
-  if (userVotes.size > 0) { missionState.step3 = true; xp += userVotes.size * 50; completedCount++; }
-  if (missionState.step4) { xp += 200; completedCount++; }
-
-  document.getElementById("hudXpBadge").textContent = `${xp} XP`;
-  document.getElementById("hudLevelText").textContent = `${completedCount}/4`;
-  document.getElementById("hudProgressFill").style.width = `${(completedCount / 4) * 100}%`;
-
-  ["step1", "step2", "step3", "step4"].forEach((k, idx) => {
-    const pill = document.getElementById(`hudStep${idx + 1}`);
-    if (pill) pill.classList.toggle("done", Boolean(missionState[k]));
-  });
-}
-
-function syncWorkshopUI() {
+function syncWorkshopModal() {
   if (!currentUser) return;
   const cfg = currentUser.config;
 
   const previewImg = document.getElementById("avatarPreviewTarget");
   const pedestal = document.getElementById("robotPedestal");
-  const nameInput = document.getElementById("nameEditField");
-  const sliderScale = document.getElementById("sliderScale");
-  const sliderRotate = document.getElementById("sliderRotate");
+  const nameInput = document.getElementById("workshopNameInput");
 
   if (previewImg) previewImg.src = buildRobotUrl(cfg);
   if (pedestal) pedestal.style.backgroundColor = cfg.bgColor || "#E3F2FD";
   if (nameInput && document.activeElement !== nameInput) {
     nameInput.value = currentUser.name;
   }
-  if (sliderScale) sliderScale.value = cfg.scale || 100;
-  if (sliderRotate) sliderRotate.value = cfg.rotate || 0;
 
   document.querySelectorAll("#chassisColorSwatches .color-swatch").forEach(btn => {
     btn.classList.toggle("selected", btn.dataset.hex === cfg.baseColor);
@@ -377,7 +831,6 @@ function syncWorkshopUI() {
   renderVisualCatalogGrid();
 }
 
-// Renderiza la cuadrícula visual de miniaturas SVG para la categoría activa
 function renderVisualCatalogGrid() {
   const grid = document.getElementById("visualPartsGrid");
   if (!grid || !currentUser) return;
@@ -393,7 +846,7 @@ function renderVisualCatalogGrid() {
     tile.className = `visual-part-tile ${isSelected ? 'selected' : ''}`;
 
     if (partVal === "none") {
-      tile.innerHTML = `<span class="tile-none-box">Sin pieza</span>`;
+      tile.innerHTML = `<span class="tile-none-box">Nada</span>`;
     } else {
       const thumbUrl = buildRobotUrl(cfg, activeCategory, partVal);
       tile.innerHTML = `<img src="${thumbUrl}" alt="${partVal}" loading="lazy">`;
@@ -401,314 +854,71 @@ function renderVisualCatalogGrid() {
 
     tile.onclick = () => {
       cfg[activeCategory] = partVal;
-      triggerPedestalBounce();
-      syncWorkshopUI();
+      saveState();
+      syncWorkshopModal();
+      renderSessionHeader();
       renderWhosGoing();
-      renderUserHud();
     };
 
     grid.appendChild(tile);
   });
 }
 
-function renderWhosGoing() {
-  const grid = document.getElementById("whosGoingGrid");
-  grid.innerHTML = "";
-
-  attendeesList.forEach(person => {
-    const isMe = currentUser && currentUser.id === person.id;
-    const isVIP = person.puedo_dar_coche === 1;
-
-    const card = document.createElement("div");
-    card.className = `friend-card ${isMe ? 'active' : ''}`;
-
-    let statusText = "Confirmado";
-    if (isVIP) statusText = "Conductor VIP";
-    else if (person.travelMode === "passenger") statusText = "Pasajero";
-
-    card.innerHTML = `
-      <div class="friend-avatar-wrap" style="background-color: ${person.config.bgColor || '#E3F2FD'};">
-        <img src="${buildRobotUrl(person.config)}" alt="${person.name}">
-      </div>
-      <div class="friend-info">
-        <div class="friend-name">${person.name}</div>
-        <span class="friend-status ${isVIP ? 'vip' : ''}">${statusText}</span>
-      </div>
-    `;
-
-    card.onclick = () => {
-      currentUser = person;
-      saveState();
-      renderAll();
-      triggerPedestalBounce();
-      showToast(`Editando a ${person.name}`);
-    };
-
-    grid.appendChild(card);
+// ----------------- Event Listeners ----------------- //
+function setupEventListeners() {
+  // Pestañas principales
+  document.querySelectorAll(".tab-trigger").forEach(btn => {
+    btn.onclick = () => switchTab(btn.dataset.tab);
   });
-}
 
-function renderTransportSection() {
-  const driverCard = document.getElementById("choiceDriverCard");
-  const passCard = document.getElementById("choicePassengerCard");
+  // Modales
+  document.getElementById("btnOpenAuthModal").onclick = () => {
+    renderGoogleQuickAccounts();
+    openModal("modalAuth");
+  };
 
-  if (currentUser) {
-    driverCard.classList.toggle("selected-mode", currentUser.puedo_dar_coche === 1);
-    passCard.classList.toggle("selected-mode", currentUser.travelMode === "passenger" && currentUser.puedo_dar_coche === 0);
-  }
+  document.getElementById("btnOpenWorkshopModal").onclick = () => {
+    syncWorkshopModal();
+    openModal("modalWorkshop");
+  };
 
-  const container = document.getElementById("carsContainer");
-  container.innerHTML = "";
+  document.getElementById("btnOpenCarModal").onclick = () => openModal("modalCar");
 
-  if (carsList.length === 0) return;
+  // Registro / edición por nombre y correo Google
+  document.getElementById("customAuthForm").onsubmit = (e) => {
+    e.preventDefault();
+    const nameVal = document.getElementById("authInputName").value.trim();
+    const emailVal = document.getElementById("authInputEmail").value.trim().toLowerCase();
+    if (!nameVal || !emailVal) return;
 
-  const list = document.createElement("div");
-  list.className = "plan-deck";
-
-  carsList.forEach(car => {
-    const isMine = currentUser && car.driverId === currentUser.id;
-    const item = document.createElement("div");
-    item.className = "plan-card";
-    item.style.background = "var(--pine-bg)";
-
-    item.innerHTML = `
-      <div>
-        <div class="plan-card-top">
-          <span class="plan-tag pine">Auto VIP Activo</span>
-          <span class="plan-votes-num">${car.seats} lugares</span>
-        </div>
-        <h4 class="plan-card-title">${car.driver} &mdash; ${car.model}</h4>
-        <p class="plan-card-desc">
-          Salida: <strong>${car.zone}</strong> a las <strong>${car.time}</strong>
-          ${car.notes ? `<br>Nota: ${car.notes}` : ''}
-        </p>
-      </div>
-      <div>
-        ${
-          isMine
-            ? `<button type="button" class="btn btn-sm" onclick="retireCar(${car.id})">Retirar mi coche</button>`
-            : `<button type="button" class="btn btn-ocean btn-sm" onclick="joinCar('${car.driver}')">Pedir lugar en este auto</button>`
+    let existing = attendeesList.find(u => u.email.toLowerCase() === emailVal);
+    if (existing) {
+      existing.name = nameVal;
+      currentUser = existing;
+    } else {
+      const newUser = {
+        id: Date.now(),
+        name: nameVal,
+        email: emailVal,
+        travelMode: null,
+        puedo_dar_coche: 0,
+        config: {
+          baseColor: CHASSIS_HEX_LIST[attendeesList.length % CHASSIS_HEX_LIST.length],
+          bgColor: PEDESTAL_BG_LIST[attendeesList.length % PEDESTAL_BG_LIST.length],
+          eyes: "eva", face: "round01", mouth: "smile01", top: "radar", sides: "round", texture: "none", flip: false
         }
-      </div>
-    `;
-    list.appendChild(item);
-  });
-
-  container.appendChild(list);
-}
-
-function joinCar(driverName) {
-  if (currentUser) {
-    currentUser.travelMode = "passenger";
-  }
-  missionState.step2 = true;
-  saveState();
-  renderAll();
-  launchConfetti();
-  showToast(`Lugar solicitado con ${driverName} (+100 XP)`);
-}
-
-function renderPlanOptions() {
-  const grid = document.getElementById("optionsGrid");
-  grid.innerHTML = "";
-
-  const maxVotes = Math.max(5, ...planOptions.map(o => o.votes));
-
-  planOptions.forEach(opt => {
-    const voted = userVotes.has(opt.id);
-    const pct = Math.min(100, Math.round((opt.votes / maxVotes) * 100));
-
-    const card = document.createElement("div");
-    card.className = `plan-card ${voted ? 'voted-card' : ''}`;
-
-    card.innerHTML = `
-      <div>
-        <div class="plan-card-top">
-          <span class="plan-tag ${opt.tagClass || 'teal'}">${opt.tag}</span>
-          <span class="plan-votes-num">${opt.votes} ${opt.votes === 1 ? 'voto' : 'votos'}</span>
-        </div>
-        <h3 class="plan-card-title">${opt.title}</h3>
-        <p class="plan-card-desc">${opt.desc}</p>
-      </div>
-      <div>
-        <div class="plan-progress">
-          <div class="plan-progress-bar" style="width: ${pct}%;"></div>
-        </div>
-        <button type="button" class="btn ${voted ? 'btn-berry' : 'btn-sun'}" style="width:100%;" onclick="toggleVote(${opt.id})">
-          ${voted ? 'Voto registrado (Quitar)' : 'Dar mi voto (+50 XP)'}
-        </button>
-      </div>
-    `;
-    grid.appendChild(card);
-  });
-}
-
-function toggleVote(id) {
-  const opt = planOptions.find(o => o.id === id);
-  if (!opt) return;
-
-  const wasEmpty = userVotes.size === 0;
-
-  if (userVotes.has(id)) {
-    userVotes.delete(id);
-    opt.votes = Math.max(0, opt.votes - 1);
-    showToast(`Voto retirado de ${opt.title}`);
-  } else {
-    userVotes.add(id);
-    opt.votes += 1;
-    missionState.step3 = true;
-    if (wasEmpty) launchConfetti();
-    showToast(`+50 XP por votar en: ${opt.title}`);
-  }
-
-  saveState();
-  renderAll();
-}
-
-function retireCar(id) {
-  carsList = carsList.filter(c => c.id !== id);
-  if (currentUser) {
-    currentUser.puedo_dar_coche = 0;
-  }
-  saveState();
-  renderAll();
-  showToast("Coche retirado");
-}
-
-// ----------------- pus.io: Forjador de Sugerencias ----------------- //
-function handlePusioSuggestion(rawText) {
-  const text = rawText.trim();
-  if (!text) return;
-
-  addChatBubble(text, "user");
-
-  setTimeout(() => {
-    const parsed = parseIdea(text);
-    const newOption = {
-      id: Date.now(),
-      tag: parsed.category,
-      tagClass: parsed.tagClass,
-      title: parsed.title,
-      desc: `Sugerencia forjada por ${currentUser ? currentUser.name : 'un amigo'} con pus.io.`,
-      votes: 1
-    };
-
-    planOptions.push(newOption);
-    userVotes.add(newOption.id);
-    missionState.step4 = true;
-    missionState.step3 = true;
+      };
+      attendeesList.push(newUser);
+      currentUser = newUser;
+    }
 
     saveState();
     renderAll();
-    launchConfetti();
+    closeModal("modalAuth");
+    showToast(`Guardado: ${currentUser.name} (${currentUser.email})`);
+  };
 
-    addChatBubble(
-      `Excelente idea, ${currentUser ? currentUser.name : ''}. Acabo de forjar la carta "${parsed.title}" en el Paso 3 con tu primer voto (+200 XP).`,
-      "bot"
-    );
-    showToast(`+200 XP: Nueva carta añadida al plan`);
-  }, 300);
-}
-
-function parseIdea(text) {
-  const lower = text.toLowerCase();
-  let category = "Propuesta";
-  let tagClass = "teal";
-
-  if (lower.includes("comida") || lower.includes("asado") || lower.includes("aguachile") || lower.includes("botana") || lower.includes("carne") || lower.includes("tacos") || lower.includes("pizza")) {
-    category = "Comida";
-    tagClass = "amber";
-  } else if (lower.includes("bebida") || lower.includes("cerveza") || lower.includes("hielera") || lower.includes("refresco") || lower.includes("hielo")) {
-    category = "Bebidas";
-    tagClass = "pine";
-  } else if (lower.includes("juego") || lower.includes("torneo") || lower.includes("mario") || lower.includes("smash") || lower.includes("reta") || lower.includes("pong")) {
-    category = "Juego";
-    tagClass = "berry";
-  } else if (lower.includes("cine") || lower.includes("película") || lower.includes("proyectar") || lower.includes("música") || lower.includes("bocina")) {
-    category = "Ambiente";
-    tagClass = "teal";
-  }
-
-  let title = text
-    .replace(/^(propongo|sugiero que|sugiero|podríamos|hay que|llevar|armar|preparar)\s+/i, "")
-    .trim();
-
-  title = title.charAt(0).toUpperCase() + title.slice(1);
-  if (title.endsWith(".")) title = title.slice(0, -1);
-
-  return { category, tagClass, title };
-}
-
-function addChatBubble(text, role) {
-  const win = document.getElementById("pusioChatArea");
-  const div = document.createElement("div");
-  div.className = `bubble ${role}`;
-  div.textContent = text;
-  win.appendChild(div);
-  win.scrollTop = win.scrollHeight;
-}
-
-// ----------------- Confeti Vectorial ----------------- //
-function launchConfetti() {
-  const canvas = document.getElementById("confettiCanvas");
-  if (!canvas) return;
-  const ctx = canvas.getContext("2d");
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-
-  const colors = ["#FF4757", "#00A878", "#0984E3", "#FFB142", "#6C5CE7"];
-  const pieces = Array.from({ length: 55 }, () => ({
-    x: canvas.width / 2 + (Math.random() - 0.5) * 260,
-    y: canvas.height * 0.45,
-    vx: (Math.random() - 0.5) * 14,
-    vy: -Math.random() * 14 - 4,
-    size: 7 + Math.random() * 6,
-    color: colors[Math.floor(Math.random() * colors.length)],
-    rot: Math.random() * Math.PI,
-    vrot: (Math.random() - 0.5) * 0.25
-  }));
-
-  let frame = 0;
-  function tick() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    pieces.forEach(p => {
-      p.x += p.vx;
-      p.y += p.vy;
-      p.vy += 0.45;
-      p.rot += p.vrot;
-
-      ctx.save();
-      ctx.translate(p.x, p.y);
-      ctx.rotate(p.rot);
-      ctx.fillStyle = p.color;
-      ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.65);
-      ctx.strokeStyle = "#121316";
-      ctx.lineWidth = 1;
-      ctx.strokeRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.65);
-      ctx.restore();
-    });
-    frame++;
-    if (frame < 75) requestAnimationFrame(tick);
-    else ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
-  requestAnimationFrame(tick);
-}
-
-function showToast(msg) {
-  const toast = document.getElementById("toastNotice");
-  if (!toast) return;
-  toast.textContent = msg;
-  toast.classList.add("show");
-  clearTimeout(window._toastTimer);
-  window._toastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
-}
-
-// ----------------- Event Listeners ----------------- //
-function setupEventListeners() {
-  document.getElementById("btnUserChip").onclick = () => openModal("modalSwitchUser");
-  document.getElementById("btnOpenCarModal").onclick = () => openModal("modalCar");
-
-  // Cambio de pestaña de categoría de piezas
+  // Pestañas del taller de robot
   document.querySelectorAll("#workshopTabs .part-tab-btn").forEach(btn => {
     btn.onclick = () => {
       document.querySelectorAll("#workshopTabs .part-tab-btn").forEach(b => b.classList.remove("active"));
@@ -718,34 +928,18 @@ function setupEventListeners() {
     };
   });
 
-  // Invertir orientación horizontal (flip)
-  document.getElementById("btnFlipRobot").onclick = () => {
+  // Nombre en el taller
+  document.getElementById("workshopNameInput").addEventListener("input", (e) => {
     if (!currentUser) return;
-    currentUser.config.flip = !currentUser.config.flip;
-    triggerPedestalBounce();
-    syncWorkshopUI();
-    renderWhosGoing();
-    renderUserHud();
-  };
-
-  // Sliders nativos de Zoom y Giro
-  document.getElementById("sliderScale").addEventListener("input", (e) => {
-    if (!currentUser) return;
-    currentUser.config.scale = parseInt(e.target.value, 10);
-    syncWorkshopUI();
-    renderWhosGoing();
-    renderUserHud();
+    const v = e.target.value.trim();
+    if (v) {
+      currentUser.name = v;
+      saveState();
+      renderSessionHeader();
+      renderWhosGoing();
+    }
   });
 
-  document.getElementById("sliderRotate").addEventListener("input", (e) => {
-    if (!currentUser) return;
-    currentUser.config.rotate = parseInt(e.target.value, 10);
-    syncWorkshopUI();
-    renderWhosGoing();
-    renderUserHud();
-  });
-
-  // Combinación al azar
   document.getElementById("btnRandomRobot").onclick = () => {
     if (!currentUser) return;
     const cfg = currentUser.config;
@@ -755,50 +949,34 @@ function setupEventListeners() {
       const list = NATIVE_PARTS[k];
       cfg[k] = list[Math.floor(Math.random() * list.length)];
     });
-    cfg.rotate = 0;
-    cfg.scale = 100;
-    triggerPedestalBounce();
-    syncWorkshopUI();
-    renderWhosGoing();
-    renderUserHud();
-  };
-
-  // Guardar personaje (+100 XP)
-  document.getElementById("btnSaveCharacter").onclick = () => {
-    if (!currentUser) return;
-    const nameVal = document.getElementById("nameEditField").value.trim();
-    if (nameVal) currentUser.name = nameVal;
-
-    const wasDone = missionState.step1;
-    missionState.step1 = true;
     saveState();
-    renderAll();
-    if (!wasDone) launchConfetti();
-    showToast(`Personaje guardado para ${currentUser.name} (+100 XP)`);
+    syncWorkshopModal();
+    renderSessionHeader();
+    renderWhosGoing();
   };
 
-  // Editar nombre en vivo
-  document.getElementById("nameEditField").addEventListener("input", (e) => {
+  document.getElementById("btnFlipRobot").onclick = () => {
     if (!currentUser) return;
-    const v = e.target.value.trim();
-    if (v) {
-      currentUser.name = v;
-      renderWhosGoing();
-      renderUserHud();
-    }
-  });
+    currentUser.config.flip = !currentUser.config.flip;
+    saveState();
+    syncWorkshopModal();
+    renderSessionHeader();
+    renderWhosGoing();
+  };
 
-  // Confirmar como pasajero
+  document.getElementById("btnSaveWorkshop").onclick = () => {
+    closeModal("modalWorkshop");
+    showToast(`Robot guardado para ${currentUser ? currentUser.name : ''}`);
+  };
+
+  // Confirmar pasajero
   document.getElementById("btnConfirmPassenger").onclick = () => {
     if (!currentUser) return;
     currentUser.travelMode = "passenger";
     currentUser.puedo_dar_coche = 0;
-    const wasDone = missionState.step2;
-    missionState.step2 = true;
     saveState();
     renderAll();
-    if (!wasDone) launchConfetti();
-    showToast(`${currentUser.name} confirmado como pasajero (+100 XP)`);
+    showToast(`${currentUser.name} confirmado como pasajero`);
   };
 
   // Registrar coche
@@ -806,45 +984,40 @@ function setupEventListeners() {
     e.preventDefault();
     if (!currentUser) return;
 
-    const newCar = {
+    carsList.push({
       id: Date.now(),
-      driverId: currentUser.id,
+      driverEmail: currentUser.email,
       driver: currentUser.name,
       model: document.getElementById("carInputModel").value.trim(),
       seats: document.getElementById("carInputSeats").value,
       zone: document.getElementById("carInputZone").value.trim(),
-      time: document.getElementById("carInputTime").value.trim(),
-      notes: document.getElementById("carInputNotes").value.trim()
-    };
+      time: document.getElementById("carInputTime").value.trim()
+    });
 
-    carsList.push(newCar);
     currentUser.puedo_dar_coche = 1;
     currentUser.travelMode = "driver";
-    missionState.step2 = true;
-
     saveState();
     closeModal("modalCar");
     document.getElementById("carForm").reset();
     renderAll();
-    launchConfetti();
-    showToast(`Coche registrado y Rango VIP activado (+150 XP)`);
+    showToast(`Coche registrado para ${currentUser.name}`);
   };
 
-  // Cartas rápidas de pus.io
-  document.querySelectorAll(".idea-chip-btn").forEach(btn => {
+  // Ejemplos rápidos de pus.io
+  document.querySelectorAll(".example-pill").forEach(btn => {
     btn.onclick = () => {
-      const idea = btn.getAttribute("data-idea");
-      if (idea) handlePusioSuggestion(idea);
+      const prompt = btn.dataset.prompt;
+      if (prompt) handlePusioMessage(prompt);
     };
   });
 
-  // Formulario pus.io
+  // Chat pus.io
   document.getElementById("pusioForm").onsubmit = (e) => {
     e.preventDefault();
     const input = document.getElementById("pusioInput");
     const val = input.value.trim();
     if (val) {
-      handlePusioSuggestion(val);
+      handlePusioMessage(val);
       input.value = "";
     }
   };
@@ -855,35 +1028,13 @@ function setupEventListeners() {
   });
 }
 
-function renderSwitchUserList() {
-  const container = document.getElementById("userSwitchOptions");
-  if (!container) return;
-  container.innerHTML = "";
-
-  attendeesList.forEach(u => {
-    const isMe = currentUser && currentUser.id === u.id;
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = `btn ${isMe ? 'btn-sun' : ''}`;
-    btn.style.width = "100%";
-    btn.style.justifyContent = "space-between";
-    btn.style.marginBottom = "8px";
-    btn.innerHTML = `
-      <span style="display:flex; align-items:center; gap:10px;">
-        <img src="${buildRobotUrl(u.config)}" style="width:32px; height:32px; border-radius:50%; background:${u.config.bgColor}; border:1px solid #121316;">
-        <span style="font-family:var(--font-display); font-size:1.25rem;">${u.name}</span>
-      </span>
-      <span style="font-family:var(--font-mono); font-size:0.72rem;">${isMe ? 'JUGANDO' : 'ELEGIR'}</span>
-    `;
-    btn.onclick = () => {
-      currentUser = u;
-      saveState();
-      renderAll();
-      closeModal("modalSwitchUser");
-      showToast(`Jugador activo: ${u.name}`);
-    };
-    container.appendChild(btn);
-  });
+function showToast(msg) {
+  const toast = document.getElementById("toastNotice");
+  if (!toast) return;
+  toast.textContent = msg;
+  toast.classList.add("show");
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
 }
 
 function openModal(id) {
