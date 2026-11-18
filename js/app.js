@@ -2895,9 +2895,19 @@ function showToast(msg, actionLabel = null, actionCallback = null, duration = 26
   }, duration);
 }
 
+function syncModalBodyScrollLock() {
+  const hasOpenModal = document.querySelector(".modal-overlay:not(.hidden)") !== null;
+  document.body.style.overflow = hasOpenModal ? "hidden" : "";
+}
+
 function openModal(id) {
   const el = document.getElementById(id);
-  if (el) el.classList.remove("hidden");
+  if (el) {
+    el.classList.remove("hidden");
+    const box = el.querySelector(".modal-box");
+    if (box) box.scrollTop = 0;
+  }
+  syncModalBodyScrollLock();
 }
 
 function closeModal(id) {
@@ -2908,6 +2918,7 @@ function closeModal(id) {
     studioIsDirty = false;
     studioOriginalState = null;
   }
+  syncModalBodyScrollLock();
 }
 
 function requestCloseStudio() {
@@ -3178,6 +3189,7 @@ window.deleteSubItem = deleteSubItem;
 window.retireCar = retireCar;
 window.leaveCar = leaveCar;
 window.joinCarAsPassenger = joinCarAsPassenger;
+window.joinCarSelectedPerson = joinCarSelectedPerson;
 window.openCarDetailModal = openCarDetailModal;
 window.selectUserForCustomization = selectUserForCustomization;
 window.openPusioActionMenu = openPusioActionMenu;
