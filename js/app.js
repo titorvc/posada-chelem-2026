@@ -55,19 +55,19 @@ function createBotConfig(hue, fIdx, eIdx, mIdx, tIdx, sIdx, txIdx = 0) {
 }
 
 const DEFAULT_ATTENDEES = [
-  { id: 1,  name: "Reyvell", email: "reyvelljk87@gmail.com",          pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(38,  0, 1,  1, 0, 4, 0) },
-  { id: 2,  name: "Tito",    email: "titorvc08@gmail.com",            pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(198, 2, 0,  0, 1, 0, 1) },
-  { id: 3,  name: "Shory",   email: "fjvc091002@gmail.com",           pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(332, 1, 11, 3, 6, 4, 0) },
-  { id: 4,  name: "Luis",    email: "mendoza.lpinzon@gmail.com",      pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(350, 3, 2,  0, 2, 1, 0) },
-  { id: 5,  name: "Alex",    email: "alejandroaltamiranopuc@gmail.com",pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(265, 0, 4,  4, 4, 4, 2) },
-  { id: 6,  name: "Choro",   email: "joserikb@gmail.com",             pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(22,  4, 5,  5, 5, 0, 0) },
-  { id: 7,  name: "Rubén",   email: "ivan.raygosa@gmail.com",         pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(184, 2, 6,  1, 0, 3, 1) },
-  { id: 8,  name: "Beto",    email: "cplus.lat@gmail.com",            pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(212, 5, 7,  7, 7, 5, 2) },
-  { id: 9,  name: "Daniel",  email: "danielitoestabonito16@gmail.com",pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(162, 1, 3,  2, 3, 2, 0) },
-  { id: 10, name: "César",   email: "cesar.amigo@posadachelem.com",   pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(140, 2, 8,  6, 3, 2, 1) },
-  { id: 11, name: "Aldo",    email: "aldo.amigo@posadachelem.com",    pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(280, 4, 9,  4, 1, 3, 0) },
-  { id: 12, name: "Noé",     email: "noe.amigo@posadachelem.com",     pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(45,  1, 10, 2, 5, 0, 2) },
-  { id: 13, name: "Andrés",  email: "andres.amigo@posadachelem.com",  pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(200, 3, 12, 5, 2, 4, 0) }
+  { id: 1,  name: "Reyvell", email: "reyvelljk87@gmail.com",          pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(38,  0, 1,  1, 0, 4, 0) },
+  { id: 2,  name: "Tito",    email: "titorvc08@gmail.com",            pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(198, 2, 0,  0, 1, 0, 1) },
+  { id: 3,  name: "Shory",   email: "fjvc091002@gmail.com",           pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(332, 1, 11, 3, 6, 4, 0) },
+  { id: 4,  name: "Luis",    email: "mendoza.lpinzon@gmail.com",      pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(350, 3, 2,  0, 2, 1, 0) },
+  { id: 5,  name: "Alex",    email: "alejandroaltamiranopuc@gmail.com",pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(265, 0, 4,  4, 4, 4, 2) },
+  { id: 6,  name: "Choro",   email: "joserikb@gmail.com",             pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(22,  4, 5,  5, 5, 0, 0) },
+  { id: 7,  name: "Rubén",   email: "ivan.raygosa@gmail.com",         pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(184, 2, 6,  1, 0, 3, 1) },
+  { id: 8,  name: "Beto",    email: "cplus.lat@gmail.com",            pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(212, 5, 7,  7, 7, 5, 2) },
+  { id: 9,  name: "Daniel",  email: "danielitoestabonito16@gmail.com",pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(162, 1, 3,  2, 3, 2, 0) },
+  { id: 10, name: "César",   email: "cesar.amigo@posadachelem.com",   pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(140, 2, 8,  6, 3, 2, 1) },
+  { id: 11, name: "Aldo",    email: "aldo.amigo@posadachelem.com",    pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(280, 4, 9,  4, 1, 3, 0) },
+  { id: 12, name: "Noé",     email: "noe.amigo@posadachelem.com",     pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(45,  1, 10, 2, 5, 0, 2) },
+  { id: 13, name: "Andrés",  email: "andres.amigo@posadachelem.com",  pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(200, 3, 12, 5, 2, 4, 0) }
 ];
 
 // Tablero inicial completamente limpio y vacío para la versión final de producción
@@ -339,6 +339,23 @@ function renderSessionHeader() {
   }
 }
 
+function setAttendanceStatus(status) {
+  if (!requireAuth()) return;
+  currentUser.attendance = status;
+  saveState();
+  renderAll();
+  const label = status === "confirmed" ? "confirmada" : (status === "declined" ? "cancelada (no voy)" : "en pendiente");
+  showToast(`Asistencia de ${currentUser.name} marcada como ${label}`);
+}
+
+function setStudioAttendance(status) {
+  if (editingTarget !== "user") return;
+  if (!requireAuth()) return;
+  currentUser.attendance = status;
+  studioIsDirty = true;
+  renderRobotStudio();
+}
+
 function selectUserForCustomization(personId) {
   const person = attendeesList.find(u => u.id === personId);
   if (!person) return;
@@ -362,6 +379,7 @@ function selectUserForCustomization(personId) {
     target: "user",
     userId: person.id,
     name: person.name,
+    attendance: person.attendance || "pending",
     robot: JSON.parse(JSON.stringify(person.robot))
   };
   studioIsDirty = false;
@@ -446,23 +464,63 @@ function dismissInlineRecentPlan(planId) {
 }
 
 function renderSummaryPanel() {
-  // 1. Lado izquierdo: Avatares en gris (no confirmados) o con brillo (confirmados)
+  // Sincronizar barra de confirmación rápida del usuario activo
+  const myActionBox = document.getElementById("attendeeStatusActionBox");
+  const myBadge = document.getElementById("myAttendanceBadge");
+  if (myActionBox && myBadge) {
+    if (currentUser) {
+      myActionBox.style.display = "block";
+      const att = currentUser.attendance || "pending";
+      myBadge.className = `attendance-badge status-${att}`;
+      if (att === "confirmed") myBadge.textContent = "Confirmado";
+      else if (att === "declined") myBadge.textContent = "No voy";
+      else myBadge.textContent = "Pendiente";
+
+      const btnConf = myActionBox.querySelector(".btn-attend-confirmed");
+      const btnPend = myActionBox.querySelector(".btn-attend-pending");
+      const btnDecl = myActionBox.querySelector(".btn-attend-declined");
+      if (btnConf) btnConf.classList.toggle("active", att === "confirmed");
+      if (btnPend) btnPend.classList.toggle("active", att === "pending");
+      if (btnDecl) btnDecl.classList.toggle("active", att === "declined");
+    } else {
+      myActionBox.style.display = "none";
+    }
+  }
+
+  // 1. Lado izquierdo: Avatares con estados de color (azul al iniciar sesión, verde/amarillo/rojo por asistencia, dorado VIP)
   const avatarsGrid = document.getElementById("summaryAvatarsGrid");
   if (avatarsGrid) {
     avatarsGrid.innerHTML = "";
     attendeesList.forEach(person => {
-      const isConfirmed = Boolean(person.pinHash);
-      const isVIP = person.puedo_dar_coche === 1;
       const isMe = currentUser && currentUser.email.toLowerCase() === person.email.toLowerCase();
+      const isVIP = person.puedo_dar_coche === 1;
+      const att = person.attendance || (person.pinHash ? "confirmed" : "pending");
 
+      let statusClass = "status-pending";
       let statusText = "Pendiente";
-      if (isVIP) statusText = "Conductor VIP";
-      else if (isConfirmed) statusText = "Confirmado";
+
+      if (att === "confirmed") {
+        statusClass = "status-confirmed";
+        statusText = "Confirmado";
+      } else if (att === "declined") {
+        statusClass = "status-declined";
+        statusText = "No voy";
+      } else {
+        statusClass = "status-pending";
+        statusText = "Pendiente";
+      }
+
+      if (isVIP) {
+        statusText = "Conductor VIP";
+      }
 
       const btn = document.createElement("button");
       btn.type = "button";
-      btn.className = `avatar-token ${isVIP ? 'is-vip' : (isConfirmed ? 'is-confirmed' : 'is-unconfirmed')}`;
-      btn.title = `${person.name}: ${statusText}. Clic para personalizar.`;
+      // Si el usuario tiene sesión activa, iluminar de azul vibrante con clase is-logged-in
+      const loggedClass = isMe ? "is-logged-in" : "";
+      const vipClass = isVIP ? "is-vip" : "";
+      btn.className = `avatar-token ${statusClass} ${vipClass} ${loggedClass}`;
+      btn.title = `${person.name}: ${statusText}${isMe ? ' (En línea / Sesión activa)' : ''}. Clic para personalizar.`;
       btn.onclick = () => selectUserForCustomization(person.id);
 
       // Render robot sin fondo (únicamente los íconos vectoriales)
@@ -472,6 +530,7 @@ function renderSummaryPanel() {
         <div class="avatar-svg-wrap">
           ${svgIcon}
           ${isVIP ? '<span class="avatar-vip-badge">VIP</span>' : ''}
+          ${isMe ? '<span class="avatar-online-badge" title="Sesión activa"></span>' : ''}
         </div>
         <span class="avatar-token-name">${person.name}${isMe ? ' (Tú)' : ''}</span>
         <span class="avatar-token-status">${statusText}</span>
@@ -693,6 +752,20 @@ function renderRobotStudio() {
       hintEl.textContent = currentUser
         ? `Editando el robot de ${currentUser.name} (${currentUser.email})`
         : "Vista previa libre. Inicia sesión arriba para guardar en tu perfil.";
+    }
+  }
+
+  // Sincronizar sección de estado de asistencia en el estudio
+  const studioAttendSec = document.getElementById("studioAttendanceSection");
+  if (studioAttendSec) {
+    if (editingTarget === "pusio") {
+      studioAttendSec.style.display = "none";
+    } else {
+      studioAttendSec.style.display = "block";
+      const curAtt = (currentUser && currentUser.attendance) ? currentUser.attendance : "pending";
+      document.querySelectorAll(".studio-status-pill").forEach(pill => {
+        pill.classList.toggle("active", pill.dataset.status === curAtt);
+      });
     }
   }
 
@@ -1929,6 +2002,7 @@ function setupEventListeners() {
           name: nameVal,
           email: emailVal,
           pinHash: candidateHash,
+          attendance: "confirmed",
           travelMode: null,
           puedo_dar_coche: 0,
           robot: createBotConfig(rndHue, 0, 0, 0, 0, 0)
@@ -2261,6 +2335,9 @@ function confirmDiscardAndCloseStudio() {
     } else if (currentUser && studioOriginalState.target === "user") {
       currentUser.robot = studioOriginalState.robot;
       currentUser.name = studioOriginalState.name;
+      if (studioOriginalState.attendance) {
+        currentUser.attendance = studioOriginalState.attendance;
+      }
     }
   }
   studioIsDirty = false;
@@ -2493,6 +2570,8 @@ window.requestCloseStudio = requestCloseStudio;
 window.saveRobotStudioAction = saveRobotStudioAction;
 window.confirmSaveAndCloseStudio = confirmSaveAndCloseStudio;
 window.confirmDiscardAndCloseStudio = confirmDiscardAndCloseStudio;
+window.setAttendanceStatus = setAttendanceStatus;
+window.setStudioAttendance = setStudioAttendance;
 window.submitRewardIdea = submitRewardIdea;
 window.submitCurrentPusioToContest = submitCurrentPusioToContest;
 window.votePusioDesign = votePusioDesign;

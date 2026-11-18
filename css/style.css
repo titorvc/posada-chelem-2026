@@ -653,7 +653,7 @@ body {
   margin-top: 4px;
 }
 
-/* Columna 1: Avatares en gris y brillo */
+/* Columna 1: Avatares con estados de asistencia */
 .summary-avatars-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
@@ -699,33 +699,92 @@ body {
   height: 100%;
 }
 
-/* Sin confirmar: gris apagado, sin fondo */
-.avatar-token.is-unconfirmed .avatar-svg-wrap {
+/* ==========================================================================
+   ESTADOS DE ASISTENCIA: COLORES Y BRILLOS
+   - Al iniciar sesión: brillo azul (en línea / conectado)
+   - Confirmado: verde
+   - Pendiente: amarillo
+   - No voy: rojo
+   - Conductor VIP: dorado
+   ========================================================================== */
+
+/* Estado inicial / Sin sesión ni respuesta: gris */
+.avatar-token.status-unanswered .avatar-svg-wrap {
   filter: grayscale(100%) opacity(45%);
 }
 
-.avatar-token.is-unconfirmed:hover .avatar-svg-wrap {
-  filter: grayscale(70%) opacity(75%);
+.avatar-token.status-unanswered:hover .avatar-svg-wrap {
+  filter: grayscale(60%) opacity(75%);
 }
 
-/* Confirmado normal: brillo playero/teal */
-.avatar-token.is-confirmed .avatar-svg-wrap {
-  filter: drop-shadow(0 0 10px rgba(0, 168, 150, 0.45)) drop-shadow(0 0 2px rgba(2, 132, 199, 0.6));
+/* 1. Sesión activa: Muñequito iluminado en azul vibrante (Ya entró) */
+.avatar-token.is-logged-in .avatar-svg-wrap {
+  filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.75)) drop-shadow(0 0 3px rgba(37, 99, 235, 0.9));
+  animation: loggedInPulse 3s ease-in-out infinite;
 }
 
-/* Conductor VIP: Brillo dorado/ámbar cálido y distinción de rango */
+@keyframes loggedInPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.65)) drop-shadow(0 0 2px rgba(37, 99, 235, 0.8));
+  }
+  50% {
+    filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.95)) drop-shadow(0 0 5px rgba(37, 99, 235, 1));
+  }
+}
+
+.avatar-token.is-logged-in .avatar-token-status {
+  color: #2563EB;
+  font-weight: 700;
+}
+
+/* 2. Confirmado: Verde esmeralda fresco */
+.avatar-token.status-confirmed .avatar-svg-wrap {
+  filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.65)) drop-shadow(0 0 2px rgba(5, 150, 105, 0.8));
+}
+
+.avatar-token.status-confirmed .avatar-token-status {
+  color: #059669;
+  font-weight: 700;
+}
+
+/* 3. Pendiente: Amarillo / Ámbar suave */
+.avatar-token.status-pending .avatar-svg-wrap {
+  filter: drop-shadow(0 0 10px rgba(234, 179, 8, 0.65)) drop-shadow(0 0 2px rgba(202, 138, 4, 0.8));
+}
+
+.avatar-token.status-pending .avatar-token-status {
+  color: #CA8A04;
+  font-weight: 700;
+}
+
+/* 4. No voy: Rojo coral */
+.avatar-token.status-declined .avatar-svg-wrap {
+  filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.65)) drop-shadow(0 0 2px rgba(220, 38, 38, 0.8));
+}
+
+.avatar-token.status-declined .avatar-token-status {
+  color: #DC2626;
+  font-weight: 700;
+}
+
+/* 5. Conductor VIP: Brillo dorado/ámbar cálido y distinción de rango */
 .avatar-token.is-vip .avatar-svg-wrap {
-  filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.65)) drop-shadow(0 0 4px rgba(217, 119, 6, 0.7));
+  filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.75)) drop-shadow(0 0 4px rgba(217, 119, 6, 0.85)) !important;
   animation: vipGlowPulse 2.8s ease-in-out infinite;
 }
 
 @keyframes vipGlowPulse {
   0%, 100% {
-    filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.55)) drop-shadow(0 0 3px rgba(217, 119, 6, 0.6));
+    filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.6)) drop-shadow(0 0 3px rgba(217, 119, 6, 0.7));
   }
   50% {
-    filter: drop-shadow(0 0 16px rgba(245, 158, 11, 0.85)) drop-shadow(0 0 6px rgba(217, 119, 6, 0.85));
+    filter: drop-shadow(0 0 18px rgba(245, 158, 11, 0.95)) drop-shadow(0 0 6px rgba(217, 119, 6, 0.95));
   }
+}
+
+.avatar-token.is-vip .avatar-token-status {
+  color: #D97706 !important;
+  font-weight: 800;
 }
 
 .avatar-vip-badge {
@@ -745,9 +804,17 @@ body {
   line-height: 1.2;
 }
 
-.avatar-token.is-vip .avatar-token-status {
-  color: #D97706;
-  font-weight: 800;
+/* Insignia online azul de sesión iniciada */
+.avatar-online-badge {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #3B82F6;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.9);
 }
 
 .avatar-token-name {
@@ -757,10 +824,6 @@ body {
   color: var(--ink);
 }
 
-.avatar-token.is-unconfirmed .avatar-token-name {
-  color: var(--ink-muted);
-}
-
 .avatar-token-status {
   font-family: var(--font-mono);
   font-size: 0.62rem;
@@ -768,10 +831,152 @@ body {
   color: var(--ink-muted);
 }
 
-.avatar-token.is-confirmed .avatar-token-status {
-  color: var(--teal-accent);
-  font-weight: 700;
+/* ==========================================================================
+   COMPONENTES DE CONFIRMACIÓN DE ASISTENCIA
+   ========================================================================== */
+.attendance-action-box {
+  background: var(--bg-page);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  margin-bottom: 14px;
 }
+
+.attendance-action-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.attendance-action-label {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ink-secondary);
+}
+
+.attendance-badge {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  letter-spacing: 0.04em;
+}
+
+.attendance-badge.status-confirmed {
+  background: rgba(16, 185, 129, 0.15);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.attendance-badge.status-pending {
+  background: rgba(234, 179, 8, 0.15);
+  color: #CA8A04;
+  border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.attendance-badge.status-declined {
+  background: rgba(239, 68, 68, 0.15);
+  color: #DC2626;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.attendance-toggle-pills {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.attend-btn {
+  border: 1px solid var(--border);
+  background: #FFFFFF;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 6px 4px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.18s ease;
+}
+
+.attend-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.attend-btn.active.btn-attend-confirmed {
+  background: #10B981;
+  color: #FFFFFF;
+  border-color: #059669;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+}
+
+.attend-btn.active.btn-attend-pending {
+  background: #EAB308;
+  color: #FFFFFF;
+  border-color: #CA8A04;
+  box-shadow: 0 2px 8px rgba(234, 179, 8, 0.35);
+}
+
+.attend-btn.active.btn-attend-declined {
+  background: #EF4444;
+  color: #FFFFFF;
+  border-color: #DC2626;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35);
+}
+
+/* Selector en el modal de estudio */
+.studio-status-pills {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.studio-status-pill {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 8px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: #FFFFFF;
+  font-family: var(--font-sans);
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--ink-secondary);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.studio-status-pill:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.studio-status-pill.active {
+  border-color: var(--ink);
+  color: var(--ink);
+  background: var(--bg-subtle);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.status-indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-indicator-dot.dot-green  { background: #10B981; }
+.status-indicator-dot.dot-yellow { background: #EAB308; }
+.status-indicator-dot.dot-red    { background: #EF4444; }
 
 .avatar-add-wrap {
   border: 1.5px dashed var(--border-hover);

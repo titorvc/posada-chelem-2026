@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>El pusio 2026</title>
 
-  <link rel="stylesheet" href="css/style.css?v=20261117_2315">
+  <link rel="stylesheet" href="css/style.css?v=20261117_2320">
 
   <meta property="og:title" content="El pusio 2026">
   <meta property="og:description" content="Organización colaborativa para la posada en Chelem.">
@@ -87,8 +87,22 @@
         <div class="summary-card-header">
           <span class="summary-eyebrow">Asistencia</span>
           <h2 class="summary-title">¿Quiénes vamos?</h2>
-          <p class="summary-caption">Gris: no confirmado. Con brillo: confirmado. Toca tu muñequito para personalizarlo.</p>
+          <p class="summary-caption">Verde: confirmado. Amarillo: pendiente. Rojo: no voy. Azul: en línea. Dorado: VIP.</p>
         </div>
+
+        <!-- Barra rápida de confirmación de asistencia del usuario activo -->
+        <div id="attendeeStatusActionBox" class="attendance-action-box">
+          <div class="attendance-action-header">
+            <span class="attendance-action-label">Tu confirmación:</span>
+            <span id="myAttendanceBadge" class="attendance-badge status-pending">Pendiente</span>
+          </div>
+          <div class="attendance-toggle-pills">
+            <button type="button" class="attend-btn btn-attend-confirmed" onclick="setAttendanceStatus('confirmed')">Confirmar</button>
+            <button type="button" class="attend-btn btn-attend-pending" onclick="setAttendanceStatus('pending')">Pendiente</button>
+            <button type="button" class="attend-btn btn-attend-declined" onclick="setAttendanceStatus('declined')">No voy</button>
+          </div>
+        </div>
+
         <div id="summaryAvatarsGrid" class="summary-avatars-grid"></div>
       </div>
 
@@ -314,6 +328,27 @@
           <div class="form-item" style="text-align:left; margin-bottom:10px;">
             <label for="studioNameInput">Tu nombre en la lista</label>
             <input type="text" id="studioNameInput" class="form-ctrl" placeholder="Tu nombre...">
+          </div>
+
+          <!-- Selector de Estado de Asistencia en el Estudio -->
+          <div id="studioAttendanceSection" class="studio-attendance-section" style="text-align:left; margin-bottom:12px;">
+            <label style="font-size:0.78rem; font-weight:700; color:var(--ink-secondary); display:block; margin-bottom:6px;">
+              Estado de confirmación
+            </label>
+            <div class="studio-status-pills">
+              <button type="button" class="studio-status-pill status-pill-confirmed" data-status="confirmed" onclick="setStudioAttendance('confirmed')">
+                <span class="status-indicator-dot dot-green"></span>
+                <span>Confirmado</span>
+              </button>
+              <button type="button" class="studio-status-pill status-pill-pending" data-status="pending" onclick="setStudioAttendance('pending')">
+                <span class="status-indicator-dot dot-yellow"></span>
+                <span>Pendiente</span>
+              </button>
+              <button type="button" class="studio-status-pill status-pill-declined" data-status="declined" onclick="setStudioAttendance('declined')">
+                <span class="status-indicator-dot dot-red"></span>
+                <span>No voy</span>
+              </button>
+            </div>
           </div>
 
           <p id="studioAuthHint" style="font-size:0.75rem; color:var(--ink-muted);">
@@ -563,6 +598,6 @@
   <div id="toastNotice" class="toast-notice">Guardado</div>
 
   <script src="js/bottts_parts.js"></script>
-  <script src="js/app.js?v=20261117_2310"></script>
+  <script src="js/app.js?v=20261117_2320"></script>
 </body>
 </html>
