@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>El pusio 2026</title>
 
-  <link rel="stylesheet" href="css/style.css?v=20261117_2345">
+  <link rel="stylesheet" href="css/style.css?v=20261118_1635">
 
   <meta property="og:title" content="El pusio 2026">
   <meta property="og:description" content="Organización colaborativa para la posada en Chelem.">
@@ -158,6 +158,18 @@
         </div>
 
         <div class="pusio-card-body">
+          <!-- Avatar de perfil interactivo y centrado de Pus.io: ahora ubicado justo arriba del input -->
+          <div class="pusio-profile-center">
+            <div id="pusioMascotWrap" class="pusio-portrait-avatar" onclick="selectPusioForCustomization()" title="Toca a Pus.io para personalizar su diseño y colores">
+              <!-- Se renderiza dinámicamente con Bottts y tus selecciones -->
+            </div>
+            <div class="pusio-action-links">
+              <button type="button" class="pusio-customize-link" onclick="selectPusioForCustomization()">Personal&iacute;zame</button>
+              <span class="pusio-link-sep">&bull;</span>
+              <button type="button" class="pusio-contest-link" onclick="openPusioContestModal()">Concurso Pus.io</button>
+            </div>
+          </div>
+
           <!-- Formulario con botón enter de acción táctil -->
           <form id="agendaProposalForm" class="pusio-composer-form">
             <div class="pusio-input-wrap">
@@ -171,20 +183,8 @@
             </div>
           </form>
 
-          <!-- Ranura interactiva para nuevo plan recién creado en móvil -->
+          <!-- Ranura interactiva para nuevo plan recién creado -->
           <div id="pusioInlineRecentPlan" class="pusio-inline-plan-slot"></div>
-
-          <!-- Avatar de perfil interactivo y centrado de Pus.io -->
-          <div class="pusio-profile-center">
-            <div id="pusioMascotWrap" class="pusio-portrait-avatar" onclick="selectPusioForCustomization()" title="Toca a Pus.io para personalizar su diseño y colores">
-              <!-- Se renderiza dinámicamente con Bottts y tus selecciones -->
-            </div>
-            <div class="pusio-action-links">
-              <button type="button" class="pusio-customize-link" onclick="selectPusioForCustomization()">Personal&iacute;zame</button>
-              <span class="pusio-link-sep">&bull;</span>
-              <button type="button" class="pusio-contest-link" onclick="openPusioContestModal()">Concurso Pus.io</button>
-            </div>
-          </div>
 
           <!-- Estante dinámico de sugerencias conversacionales (alimentado por Pus.io) -->
           <div class="pusio-suggestions-deck">
@@ -587,6 +587,6 @@
   <div id="toastNotice" class="toast-notice">Guardado</div>
 
   <script src="js/bottts_parts.js"></script>
-  <script src="js/app.js?v=20261117_2345"></script>
+  <script src="js/app.js?v=20261118_1635"></script>
 </body>
 </html>
