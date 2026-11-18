@@ -72,9 +72,11 @@ body {
 }
 
 .container {
-  max-width: 1040px;
+  width: 100%;
+  max-width: min(1440px, 95vw);
   margin: 0 auto;
-  padding: 0 22px;
+  padding: 0 clamp(14px, 2.5vw, 32px);
+  box-sizing: border-box;
 }
 
 /* ==========================================================================
@@ -298,7 +300,8 @@ body {
    MI RESUMEN & GUÍA DE IDENTIFICACIÓN (DESPUÉS DEL CONTADOR)
    ========================================================================== */
 .my-summary-card {
-  max-width: 960px;
+  width: 100%;
+  max-width: 100%;
   margin: 0 auto 28px;
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -307,6 +310,7 @@ body {
   box-shadow: var(--shadow-sm);
   text-align: left;
   transition: all 0.22s var(--ease);
+  box-sizing: border-box;
 }
 
 .my-summary-card:hover {
@@ -531,9 +535,10 @@ body {
     border-radius: var(--radius-pill);
     padding: 4px;
     margin: 0 auto 20px;
-    max-width: 440px;
+    max-width: 100%;
     width: 100%;
     box-shadow: var(--shadow-sm);
+    box-sizing: border-box;
   }
 
   .mobile-tab-btn {
@@ -2221,7 +2226,7 @@ body {
 
 /* Modal menú de opciones de Pus.io */
 .pusio-actions-modal-box {
-  max-width: 440px !important;
+  max-width: min(560px, 94vw);
 }
 
 .pusio-actions-menu-grid {
@@ -4183,7 +4188,7 @@ body {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  max-width: 440px;
+  max-width: min(620px, 94vw);
   width: 100%;
   padding: 24px 26px;
   box-shadow: var(--shadow-lg);
@@ -4196,7 +4201,7 @@ body {
 }
 
 .modal-box-studio {
-  max-width: 920px;
+  max-width: min(1180px, 95vw);
   width: 95vw;
   max-height: 88vh;
   max-height: 90dvh;
@@ -4216,8 +4221,8 @@ body {
   }
 
   .modal-box {
-    width: 94vw;
-    max-width: 460px;
+    width: 96vw;
+    max-width: 96vw;
     max-height: 88vh;
     max-height: 90dvh;
     padding: 16px 16px 20px;
@@ -4225,8 +4230,8 @@ body {
   }
 
   .modal-box-studio {
-    width: 95vw;
-    max-width: 520px;
+    width: 96vw;
+    max-width: 96vw;
     max-height: 90vh;
     max-height: 92dvh;
     padding: 16px 14px 20px;
@@ -4234,14 +4239,15 @@ body {
   }
 
   .contest-modal-box {
-    width: 94vw !important;
-    max-width: 480px !important;
+    width: 96vw !important;
+    max-width: 96vw !important;
     max-height: 88vh !important;
     max-height: 90dvh !important;
   }
 
   .modal-box-summary {
-    width: 94vw !important;
+    width: 96vw !important;
+    max-width: 96vw !important;
     max-height: 88vh !important;
     max-height: 90dvh !important;
     padding: 16px 16px 20px !important;
@@ -4300,15 +4306,16 @@ body {
 }
 
 .modal-box-confirm {
-  max-width: 400px !important;
+  max-width: min(460px, 94vw);
   text-align: center;
   padding: 24px 22px;
 }
 
 .modal-box-summary {
-  max-width: 660px !important;
+  max-width: min(860px, 94vw);
   width: 95vw;
   max-height: 88vh;
+  max-height: 90dvh;
   overflow-y: auto;
   overflow-x: hidden;
   box-sizing: border-box;
@@ -4589,7 +4596,7 @@ body {
    ESTILOS: CONCURSO PUS.IO (VOTACIONES & RECOMPENSAS APRENDIDAS - MINIMALISTA)
    ========================================================================== */
 .contest-modal-box {
-  max-width: 540px !important;
+  max-width: min(760px, 94vw);
 }
 
 .contest-reward-card {
