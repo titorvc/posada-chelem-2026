@@ -186,42 +186,11 @@
             </div>
           </div>
 
-          <!-- Estante dinámico de sugerencias conversacionales -->
+          <!-- Estante dinámico de sugerencias conversacionales (alimentado por Pus.io) -->
           <div class="pusio-suggestions-deck">
-            <div class="suggestions-conversational-title">Elige una idea para ver la magia</div>
-            <div class="sparks-grid">
-              <button type="button" class="spark-chip" data-prompt="Hacer hamburguesas al carbón con papas">
-                <span class="spark-dot dot-amber"></span>
-                <span>Hamburguesas al carb&oacute;n</span>
-              </button>
-              <button type="button" class="spark-chip" data-prompt="Organizar torneo de Mario Kart en la noche">
-                <span class="spark-dot dot-slate"></span>
-                <span>Torneo de Mario Kart</span>
-              </button>
-              <button type="button" class="spark-chip" data-prompt="Preparar ceviche playero y botanas de marisco">
-                <span class="spark-dot dot-teal"></span>
-                <span>Ceviche playero</span>
-              </button>
-              <button type="button" class="spark-chip" data-prompt="Hieleras con hielo, refrescos y bebidas frías">
-                <span class="spark-dot dot-pine"></span>
-                <span>Hieleras comunitarias</span>
-              </button>
-              <button type="button" class="spark-chip" data-prompt="Intercambio de regalos estilo elefante blanco">
-                <span class="spark-dot dot-coral"></span>
-                <span>Intercambio de regalos</span>
-              </button>
-              <button type="button" class="spark-chip" data-prompt="Torneo de retas de Smash Bros en la sala">
-                <span class="spark-dot dot-purple"></span>
-                <span>Torneo de Smash</span>
-              </button>
-              <button type="button" class="spark-chip" data-prompt="Nachos con queso derretido y carne al pastor">
-                <span class="spark-dot dot-amber"></span>
-                <span>Nachos de pastor</span>
-              </button>
-              <button type="button" class="spark-chip" data-prompt="Sesión de karaoke y música con bocina frente al mar">
-                <span class="spark-dot dot-teal"></span>
-                <span>Karaoke en la terraza</span>
-              </button>
+            <div class="suggestions-conversational-title">Ideas recomendadas para hoy</div>
+            <div id="sparksGridContainer" class="sparks-grid">
+              <!-- Renderizado dinámicamente según el aprendizaje de los planes existentes -->
             </div>
           </div>
         </div>

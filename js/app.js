@@ -431,6 +431,7 @@ function renderAll() {
   renderMySummary();
   renderSummaryPanel();
   renderPusioMascot();
+  renderDynamicSparks();
   renderInlineRecentPlan();
   renderAgendaBoards();
   renderDynamicTimeline();
@@ -541,8 +542,8 @@ function renderMySummary() {
             <strong class="stat-tile-value">${userPlans.length} planes creados</strong>
           </div>
           <div class="my-summary-stat-tile">
-            <span class="stat-tile-label">Insumos que llevas</span>
-            <strong class="stat-tile-value">${claimedItemsCount} insumos asignados</strong>
+            <span class="stat-tile-label">Cosas / Tareas que llevas</span>
+            <strong class="stat-tile-value">${claimedItemsCount} elementos asignados</strong>
           </div>
           <div class="my-summary-stat-tile">
             <span class="stat-tile-label">Evento General</span>
@@ -672,52 +673,123 @@ function renderPusioMascot() {
   mascotWrap.innerHTML = renderRobotSVG(cfg, null, null, true);
 }
 
-let lastCreatedPlanId = null;
+let pendingPlanProposal = null;
+let expandedPlanIds = new Set();
+let newlyAddedPlanId = null;
 
 function renderInlineRecentPlan() {
   const slot = document.getElementById("pusioInlineRecentPlan");
   if (!slot) return;
 
-  if (!lastCreatedPlanId) {
+  if (!pendingPlanProposal) {
     slot.innerHTML = "";
     return;
   }
 
-  const plan = collaborations.find(c => c.id === lastCreatedPlanId);
-  if (!plan) {
-    slot.innerHTML = "";
-    return;
-  }
+  const p = pendingPlanProposal;
+  const isFood = (p.category || "").toLowerCase().includes("comida") || (p.category || "").toLowerCase().includes("bebida");
+  const catLabel = isFood ? "Comida o Bebida" : "Actividad o Dinámica";
+  const itemsNoun = isFood ? "Ingredientes e insumos" : "Cosas y tareas necesarias";
+  const targetBoard = isFood ? "Comidas" : "Actividades";
 
-  const isMine = currentUser && (
-    (plan.authorEmail && plan.authorEmail.toLowerCase() === currentUser.email.toLowerCase()) ||
-    (plan.author && plan.author.toLowerCase() === currentUser.name.toLowerCase())
-  );
-
-  const itemsPreview = plan.items.slice(0, 4).map(i => `<span class="inline-plan-item-pill">${i.name}</span>`).join("");
-  const moreCount = plan.items.length > 4 ? `<span class="inline-plan-item-pill">+${plan.items.length - 4} más</span>` : "";
+  const itemsListHtml = p.items.map((it, idx) => `
+    <li class="preview-item-row">
+      <span class="preview-item-dot"></span>
+      <span class="preview-item-text">${it}</span>
+      <button type="button" class="preview-item-del-btn" onclick="removePendingProposalItem(${idx})" title="Quitar este elemento">&times;</button>
+    </li>
+  `).join("");
 
   slot.innerHTML = `
-    <div class="inline-plan-card plan-enter-anim">
-      ${isMine ? `<button type="button" class="inline-plan-close-btn" onclick="dismissInlineRecentPlan(${plan.id})" title="Eliminar este plan que propusiste">&times;</button>` : ''}
+    <div class="inline-plan-card plan-enter-anim preview-mode-card">
       <div class="inline-plan-head">
         <div>
-          <span class="inline-plan-badge">${plan.category}</span>
-          <h4 class="inline-plan-title">${plan.title}</h4>
+          <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+            <span class="inline-plan-badge ${isFood ? 'badge-food' : 'badge-activity'}">${catLabel}</span>
+            <span class="preview-tag-pill">&bull; Propuesta lista</span>
+          </div>
+          <h4 class="inline-plan-title">${p.title}</h4>
         </div>
+        <button type="button" class="inline-plan-close-btn" onclick="discardPendingProposal()" title="Descartar esta propuesta">&times;</button>
       </div>
-      <div class="inline-plan-items">
-        ${itemsPreview}
-        ${moreCount}
+
+      <div class="preview-items-section">
+        <span class="preview-items-title">${itemsNoun} sugeridas:</span>
+        <ul class="preview-items-list">
+          ${itemsListHtml}
+        </ul>
+      </div>
+
+      <div class="preview-card-actions">
+        <button type="button" class="btn btn-sm btn-confirm-plan" onclick="confirmPendingProposal()">
+          <span>Añadir a ${targetBoard}</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
+        <button type="button" class="btn btn-sm btn-secondary" onclick="discardPendingProposal()">
+          Descartar
+        </button>
       </div>
     </div>
   `;
 }
 
-function dismissInlineRecentPlan(planId) {
-  deleteCollab(planId);
-  lastCreatedPlanId = null;
+function removePendingProposalItem(idx) {
+  if (!pendingPlanProposal || !pendingPlanProposal.items) return;
+  pendingPlanProposal.items.splice(idx, 1);
   renderInlineRecentPlan();
+}
+
+function discardPendingProposal() {
+  pendingPlanProposal = null;
+  renderInlineRecentPlan();
+  showToast("Propuesta descartada");
+}
+
+function confirmPendingProposal() {
+  if (!pendingPlanProposal) return;
+  if (!requireAuth()) return;
+
+  const p = pendingPlanProposal;
+  const isFood = (p.category || "").toLowerCase().includes("comida") || (p.category || "").toLowerCase().includes("bebida");
+
+  const newCollab = {
+    id: Date.now(),
+    title: p.title,
+    category: p.category,
+    stage: p.stage || "stage2",
+    author: currentUser.name,
+    authorEmail: currentUser.email,
+    items: p.items.map((name, idx) => ({
+      id: `t_${Date.now()}_${idx}`,
+      name: name,
+      claimedBy: null,
+      claimedByEmail: null
+    }))
+  };
+
+  collaborations.unshift(newCollab);
+  newlyAddedPlanId = newCollab.id;
+  // Expandir por defecto el plan recién añadido para que el creador vea sus elementos
+  expandedPlanIds.add(newCollab.id);
+  pendingPlanProposal = null;
+
+  saveState();
+  renderAll();
+
+  // Animación y scroll suave hacia la tarjeta acomodada en su columna
+  setTimeout(() => {
+    const el = document.getElementById(`planCard_${newCollab.id}`);
+    if (el) {
+      el.classList.add("plan-just-landed-anim");
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      setTimeout(() => {
+        el.classList.remove("plan-just-landed-anim");
+        newlyAddedPlanId = null;
+      }, 2000);
+    }
+  }, 100);
+
+  showToast(`¡Añadido a ${isFood ? 'Comidas' : 'Actividades'}!`);
 }
 
 function renderSummaryPanel() {
@@ -1186,7 +1258,126 @@ function triggerCanvasPop() {
 
 // ==========================================================================
 // PLANES Y PROPUESTAS, CRECIMIENTO CON IA (PUS.IO) Y COLABORACIONES
-// ==========================================================================
+// Catálogo curado de sugerencias vivas de Pus.io
+const PUSIO_CANDIDATE_IDEAS = [
+  {
+    title: "Ceviche frente al mar",
+    shortLabel: "Ceviche playero",
+    category: "Comida",
+    dot: "dot-teal",
+    keywords: ["ceviche", "marisco", "pescado"],
+    prompt: "Preparar ceviche playero y botanas de marisco frente al mar"
+  },
+  {
+    title: "Hieleras comunitarias",
+    shortLabel: "Hieleras y barra libre",
+    category: "Comida",
+    dot: "dot-pine",
+    keywords: ["hielera", "bebida", "cerveza", "refresco"],
+    prompt: "Hieleras con hielo, refrescos y bebidas frías"
+  },
+  {
+    title: "Intercambio de regalos",
+    shortLabel: "Intercambio de regalos",
+    category: "Actividad",
+    dot: "dot-coral",
+    keywords: ["regalo", "intercambio", "elefante blanco"],
+    prompt: "Intercambio de regalos chuscos estilo elefante blanco"
+  },
+  {
+    title: "Karaoke en la terraza",
+    shortLabel: "Karaoke en la terraza",
+    category: "Actividad",
+    dot: "dot-purple",
+    keywords: ["karaoke", "cantar", "microfono"],
+    prompt: "Sesión de karaoke y música con bocina frente al mar"
+  },
+  {
+    title: "Retas de Beer Pong",
+    shortLabel: "Beer Pong playero",
+    category: "Actividad",
+    dot: "dot-amber",
+    keywords: ["beer pong", "pong", "vasos rojos"],
+    prompt: "Armar mesa y retas de beer pong con vasos rojos y pelotas"
+  },
+  {
+    title: "Fogata playera nocturna",
+    shortLabel: "Fogata con malvaviscos",
+    category: "Actividad",
+    dot: "dot-coral",
+    keywords: ["fogata", "malvavisco", "fuego en la playa"],
+    prompt: "Fogata playera nocturna con malvaviscos y música acústica"
+  },
+  {
+    title: "Voleibol en la playa",
+    shortLabel: "Voleibol playero",
+    category: "Actividad",
+    dot: "dot-teal",
+    keywords: ["voleibol", "voley", "balon", "playa"],
+    prompt: "Partido de voleibol en la arena al atardecer"
+  },
+  {
+    title: "Juegos de mesa rápidos",
+    shortLabel: "Juegos de mesa",
+    category: "Actividad",
+    dot: "dot-slate",
+    keywords: ["juegos de mesa", "uno", "cartas", "codenames", "catan"],
+    prompt: "Juegos de mesa rápidos y cartas (Uno, Exploding Kittens, Codenames)"
+  },
+  {
+    title: "Coctelería & Mojitos",
+    shortLabel: "Barra de coctelería",
+    category: "Comida",
+    dot: "dot-pine",
+    keywords: ["coctel", "mojito", "piña colada", "ron", "tequila"],
+    prompt: "Barra de coctelería playera con mojitos, piña colada y escarchados"
+  },
+  {
+    title: "Choripanes al carbón",
+    shortLabel: "Choripanes argentinos",
+    category: "Comida",
+    dot: "dot-amber",
+    keywords: ["choripan", "chorizo argentino", "chimichurri"],
+    prompt: "Choripanes al carbón con chimichurri casero y pan rústico"
+  }
+];
+
+function renderDynamicSparks() {
+  const container = document.getElementById("sparksGridContainer");
+  if (!container) return;
+
+  // Aprendizaje: detectar qué temas ya existen en el tablero de colaboraciones
+  const existingTitles = collaborations.map(c => (c.title || "").toLowerCase());
+  
+  const filteredCandidates = PUSIO_CANDIDATE_IDEAS.filter(idea => {
+    // Si algún plan existente contiene las palabras clave, se descarta para no repetir
+    const isAlreadyPresent = existingTitles.some(title => {
+      if (title.includes(idea.title.toLowerCase()) || idea.title.toLowerCase().includes(title)) return true;
+      return idea.keywords.some(k => title.includes(k));
+    });
+    return !isAlreadyPresent;
+  });
+
+  // Mostrar un conjunto fresco de hasta 6 sugerencias
+  const toShow = filteredCandidates.slice(0, 6);
+
+  if (toShow.length === 0) {
+    container.innerHTML = `
+      <div style="font-size:0.75rem; color:var(--ink-muted); grid-column:1/-1; padding:8px 0;">
+        ¡Increíble! Casi todas las dinámicas sugeridas ya están en el tablero. Escribe cualquier idea propia arriba.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = toShow.map(idea => `
+    <button type="button" class="spark-chip" onclick="handlePusioMessage('${idea.prompt.replace(/'/g, "\\'")}')">
+      <span class="spark-dot ${idea.dot}"></span>
+      <span>${idea.shortLabel}</span>
+    </button>
+  `).join("");
+}
+
 const SMART_GROWTH_SUGGESTIONS = {
   pastor: [
     "Cebollitas cambray asadas con salsa inglesa",
@@ -1257,47 +1448,28 @@ function addSuggestedItemToCollab(collabId, itemName) {
   showToast(`Sumado a ${collab.title}: ${itemName}`);
 }
 
+function togglePlanCollapse(planId) {
+  if (expandedPlanIds.has(planId)) {
+    expandedPlanIds.delete(planId);
+  } else {
+    expandedPlanIds.add(planId);
+  }
+  renderAgendaBoards();
+}
+
 function calculateCollabTraction(collab) {
   const total = collab.items.length || 1;
   const claimed = collab.items.filter(i => i.claimedBy).length;
-  // Prioridad: mayor cobertura y mayor número de colaboradores confirmados
-  return (claimed / total) * 10 + (claimed * 3);
+  // Prioridad matemática: mayor porcentaje de cobertura y mayor cantidad de asignados
+  return (claimed / total) * 100 + (claimed * 10);
 }
 
-function renderAgendaBoards() {
-  const foodContainer = document.getElementById("foodBoardContainer");
-  const activityContainer = document.getElementById("activityBoardContainer");
-  const badgeFood = document.getElementById("badgeFoodCount");
-  const badgeActivity = document.getElementById("badgeActivityCount");
-
-  if (!foodContainer || !activityContainer) return;
-
-  const foodPlans = collaborations
-    .filter(c => (c.category || "").toLowerCase().includes("comida") || (c.category || "").toLowerCase().includes("bebida"))
-    .sort((a, b) => calculateCollabTraction(b) - calculateCollabTraction(a));
-
-  const activityPlans = collaborations
-    .filter(c => !(c.category || "").toLowerCase().includes("comida") && !(c.category || "").toLowerCase().includes("bebida"))
-    .sort((a, b) => calculateCollabTraction(b) - calculateCollabTraction(a));
-
-  if (badgeFood) badgeFood.textContent = String(foodPlans.length);
-  if (badgeActivity) badgeActivity.textContent = String(activityPlans.length);
-
-  foodContainer.innerHTML = foodPlans.length === 0
-    ? `<div class="empty-column-notice">Sin propuestas de comida o bebida aún.</div>`
-    : "";
-
-  activityContainer.innerHTML = activityPlans.length === 0
-    ? `<div class="empty-column-notice">Sin dinámicas propuestas aún.</div>`
-    : "";
-
-  foodPlans.forEach(plan => {
-    foodContainer.appendChild(createPlanCardElement(plan, "cat-food"));
-  });
-
-  activityPlans.forEach(plan => {
-    activityContainer.appendChild(createPlanCardElement(plan, "cat-activity"));
-  });
+function getCollabVibeTier(claimed, total) {
+  if (total === 0 || claimed === 0) return { tier: "vibe-tier-low", label: "Sin comenzar" };
+  const ratio = claimed / total;
+  if (ratio >= 1) return { tier: "vibe-tier-max", label: "Completado" };
+  if (ratio >= 0.5) return { tier: "vibe-tier-high", label: "Casi listo" };
+  return { tier: "vibe-tier-mid", label: "En marcha" };
 }
 
 function createPlanCardElement(collab, catClass) {
@@ -1305,35 +1477,71 @@ function createPlanCardElement(collab, catClass) {
   const totalCount = collab.items.length;
   const isComplete = totalCount > 0 && claimedCount === totalCount;
   const hasVolunteers = claimedCount > 0;
-  const isMine = currentUser && (
-    (collab.authorEmail && collab.authorEmail.toLowerCase() === currentUser.email.toLowerCase()) ||
-    (collab.author && collab.author.toLowerCase() === currentUser.name.toLowerCase())
-  );
+  const canManage = canManagePlan(collab);
+  const isMine = canManage;
+  const isExpanded = expandedPlanIds.has(collab.id);
+
+  const isFood = (collab.category || "").toLowerCase().includes("comida") || (collab.category || "").toLowerCase().includes("bebida");
+  const itemsNoun = isFood ? "ingredientes" : "cosas necesarias";
+  const addItemPlaceholder = isFood ? "+ Sumar otro ingrediente o insumo..." : "+ Sumar otra cosa o tarea necesaria...";
+  const addBtnLabel = isFood ? "Sumar" : "Agregar";
+
+  const vibe = getCollabVibeTier(claimedCount, totalCount);
 
   const card = document.createElement("div");
-  card.className = `plan-item-card ${catClass} ${isComplete ? 'is-complete' : (hasVolunteers ? 'has-traction' : '')}`;
+  card.id = `planCard_${collab.id}`;
+  card.className = `plan-item-card ${catClass} ${vibe.tier} ${isComplete ? 'is-complete' : (hasVolunteers ? 'has-traction' : '')} ${isExpanded ? 'is-expanded' : 'is-collapsed'}`;
 
   let itemsHtml = "";
   collab.items.forEach(item => {
     const isClaimed = Boolean(item.claimedBy);
     const ownerObj = attendeesList.find(u => u.email.toLowerCase() === (item.claimedByEmail || "").toLowerCase());
     const miniSvg = ownerObj ? renderRobotSVG(ownerObj.robot, null, null, true) : "";
+    const isEditing = editingSubItem && editingSubItem.collabId === collab.id && String(editingSubItem.itemId) === String(item.id);
 
-    itemsHtml += `
-      <div class="task-row ${isClaimed ? 'claimed' : ''}">
-        <span class="task-name">${item.name}</span>
-        ${
-          isClaimed
-            ? `<button type="button" class="task-assignee" onclick="toggleClaimItem(${collab.id}, '${item.id}')" title="Asignado a ${item.claimedBy}. Clic para liberar si es tuyo.">
-                 <span class="task-assignee-icon">${miniSvg}</span>
-                 <span>${item.claimedBy}</span>
-               </button>`
-            : `<button type="button" class="claim-btn" onclick="toggleClaimItem(${collab.id}, '${item.id}')">
-                 Yo lo llevo
-               </button>`
-        }
-      </div>
-    `;
+    if (isEditing) {
+      itemsHtml += `
+        <div class="task-row is-editing-subitem">
+          <form class="edit-subitem-form" onsubmit="event.preventDefault(); saveEditSubItem(${collab.id}, '${item.id}');">
+            <input type="text" id="editSubItemInput_${collab.id}_${item.id}" class="edit-subitem-input" value="${item.name.replace(/"/g, '&quot;')}" required />
+            <div class="edit-subitem-actions">
+              <button type="submit" class="btn-subitem-icon save" title="Guardar cambios">✔</button>
+              <button type="button" class="btn-subitem-icon cancel" onclick="cancelEditSubItem()" title="Cancelar">✕</button>
+            </div>
+          </form>
+        </div>
+      `;
+    } else {
+      const manageControls = canManage ? `
+        <div class="subitem-manage-btns">
+          <button type="button" class="subitem-btn-icon edit" onclick="startEditSubItem(${collab.id}, '${item.id}')" title="Modificar este elemento">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button type="button" class="subitem-btn-icon delete" onclick="deleteSubItem(${collab.id}, '${item.id}')" title="Eliminar este elemento">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </div>
+      ` : "";
+
+      itemsHtml += `
+        <div class="task-row ${isClaimed ? 'claimed' : ''}">
+          <div class="task-info-wrap">
+            <span class="task-name">${item.name}</span>
+            ${manageControls}
+          </div>
+          ${
+            isClaimed
+              ? `<button type="button" class="task-assignee" onclick="toggleClaimItem(${collab.id}, '${item.id}')" title="Asignado a ${item.claimedBy}. Clic para liberar si es tuyo.">
+                   <span class="task-assignee-icon">${miniSvg}</span>
+                   <span>${item.claimedBy}</span>
+                 </button>`
+              : `<button type="button" class="claim-btn" onclick="toggleClaimItem(${collab.id}, '${item.id}')">
+                   Yo lo llevo
+                 </button>`
+          }
+        </div>
+      `;
+    }
   });
 
   const isGrowing = activeGrowPlanId === collab.id;
@@ -1356,10 +1564,23 @@ function createPlanCardElement(collab, catClass) {
   };
   const stageName = stageLabels[collab.stage] || "Posada";
 
+  // Puntitos indicadores de progreso estilo coche
+  let dotsHtml = "";
+  const maxDots = Math.min(totalCount, 8);
+  for (let idx = 0; idx < maxDots; idx++) {
+    const isTaken = idx < claimedCount;
+    dotsHtml += `<span class="plan-seat-dot ${isTaken ? 'dot-taken' : 'dot-free'}"></span>`;
+  }
+  if (totalCount > 8) {
+    dotsHtml += `<span style="font-size:0.68rem; font-weight:700; margin-left:2px; opacity:0.8;">+${totalCount - 8}</span>`;
+  }
+
   card.innerHTML = `
-    ${isMine ? `<button type="button" class="plan-delete-corner-btn" onclick="deleteCollab(${collab.id})" title="Eliminar este plan que propusiste">&times;</button>` : ''}
-    <div class="plan-card-head">
-      <div>
+    ${isMine ? `<button type="button" class="plan-delete-corner-btn" onclick="event.stopPropagation(); deleteCollab(${collab.id})" title="Eliminar este plan que propusiste">&times;</button>` : ''}
+    
+    <!-- Encabezado compacto / interactivo -->
+    <div class="plan-card-head" onclick="togglePlanCollapse(${collab.id})" title="Clic para expandir o contraer">
+      <div style="flex:1; min-width:0;">
         <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
           <span class="plan-cat-pill">${collab.category}</span>
           <span class="plan-stage-pill">&bull; ${stageName}</span>
@@ -1367,41 +1588,50 @@ function createPlanCardElement(collab, catClass) {
         <h4 class="plan-card-title">${collab.title}</h4>
         <div class="plan-card-author">Propuesto por ${collab.author}</div>
       </div>
-      <div style="display:flex; align-items:center; gap:8px;">
-        <span class="plan-progress-pill ${isComplete ? 'is-ready' : ''}">${claimedCount}/${totalCount} cubiertos</span>
+      <div class="plan-head-right-status">
+        <span class="plan-vibe-pill ${vibe.tier}">${vibe.label} &bull; ${claimedCount}/${totalCount}</span>
+        <div class="plan-progress-dots">
+          ${dotsHtml}
+        </div>
+        <button type="button" class="plan-toggle-expand-btn" aria-label="Expandir o contraer">
+          <svg class="chevron-expand-icon ${isExpanded ? 'rotated' : ''}" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
       </div>
     </div>
 
-    <div class="plan-insumos-list">
-      ${itemsHtml}
-    </div>
+    <!-- Cuerpo expandible con los insumos/tareas completas -->
+    <div class="plan-body-collapsible ${isExpanded ? 'open' : 'closed'}">
+      <div class="plan-insumos-list">
+        ${itemsHtml}
+      </div>
 
-    <form class="add-subitem-row" onsubmit="addCustomSubItem(event, ${collab.id})">
-      <input type="text" class="add-subitem-input" placeholder="+ Sumar otro insumo a este plan..." required>
-      <button type="submit" class="btn btn-sm">Sumar</button>
-    </form>
+      <form class="add-subitem-row" onsubmit="addCustomSubItem(event, ${collab.id})">
+        <input type="text" class="add-subitem-input" placeholder="${addItemPlaceholder}" required>
+        <button type="submit" class="btn btn-sm">${addBtnLabel}</button>
+      </form>
 
-    <div class="ai-grow-bar">
-      <button type="button" class="ai-grow-trigger" onclick="toggleGrowPlan(${collab.id})">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-        <span>${isGrowing ? 'Ocultar sugerencias pus.io' : 'Desarrollar esta idea con <strong>pus.io</strong>'}</span>
-      </button>
-      ${
-        isGrowing
-          ? `<div class="ai-grow-suggestions">
-               <span style="font-size:0.75rem; color:var(--ink-secondary); font-weight:600;">Sugerencias para sumar en 1 clic:</span>
-               ${
-                 available.length > 0
-                   ? available.map(sug => `
-                       <button type="button" class="ai-suggestion-chip" onclick="addSuggestedItemToCollab(${collab.id}, '${sug.replace(/'/g, "\'")}')">
-                         <span>+</span> <span>${sug}</span>
-                       </button>
-                     `).join("")
-                   : `<span style="font-size:0.75rem; color:var(--ink-muted);">Plan completo con los insumos clave.</span>`
-               }
-             </div>`
-          : ""
-      }
+      <div class="ai-grow-bar">
+        <button type="button" class="ai-grow-trigger" onclick="toggleGrowPlan(${collab.id})">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+          <span>${isGrowing ? 'Ocultar sugerencias pus.io' : 'Desarrollar esta idea con <strong>pus.io</strong>'}</span>
+        </button>
+        ${
+          isGrowing
+            ? `<div class="ai-grow-suggestions">
+                 <span style="font-size:0.75rem; color:var(--ink-secondary); font-weight:600;">Sugerencias para sumar en 1 clic:</span>
+                 ${
+                   available.length > 0
+                     ? available.map(sug => `
+                         <button type="button" class="ai-suggestion-chip" onclick="addSuggestedItemToCollab(${collab.id}, '${sug.replace(/'/g, "\'")}')">
+                           <span>+</span> <span>${sug}</span>
+                         </button>
+                       `).join("")
+                     : `<span style="font-size:0.75rem; color:var(--ink-muted);">Plan completo con los elementos clave.</span>`
+                 }
+               </div>`
+            : ""
+        }
+      </div>
     </div>
   `;
 
@@ -1534,12 +1764,8 @@ function deleteCollab(collabId) {
   if (!requireAuth()) return;
   const targetPlan = collaborations.find(c => c.id === collabId);
   if (targetPlan) {
-    const isMine = currentUser && (
-      (targetPlan.authorEmail && targetPlan.authorEmail.toLowerCase() === currentUser.email.toLowerCase()) ||
-      (targetPlan.author && targetPlan.author.toLowerCase() === currentUser.name.toLowerCase())
-    );
-    if (!isMine) {
-      showToast("Solo quien propuso esta idea puede eliminarla.");
+    if (!canManagePlan(targetPlan)) {
+      showToast("Solo quien propuso esta idea o Tito (Admin) puede eliminarla.");
       return;
     }
   }
@@ -1583,41 +1809,23 @@ function handlePusioMessage(rawText) {
     return;
   }
 
-  const newCollab = {
-    id: Date.now(),
+  // En lugar de guardar directo al tablero general, lo dejamos como propuesta en preview
+  pendingPlanProposal = {
     title: plan.title,
     category: plan.category,
     stage: plan.stage || "stage2",
-    author: currentUser.name,
-    authorEmail: currentUser.email,
-    items: plan.items.map((name, idx) => ({
-      id: `t_${Date.now()}_${idx}`,
-      name: name,
-      claimedBy: null,
-      claimedByEmail: null
-    }))
+    items: [...plan.items]
   };
 
-  collaborations.unshift(newCollab);
-  lastCreatedPlanId = newCollab.id;
-  saveState();
-  renderAll();
+  renderInlineRecentPlan();
 
-  // Scroll suave hacia la columna correspondiente en escritorio, o hacia el plan recién añadido en móvil
+  // Scroll suave al preview justo bajo el input en cualquier pantalla si es necesario
   const inlineSlot = document.getElementById("pusioInlineRecentPlan");
-  if (window.innerWidth <= 860 && inlineSlot) {
-    inlineSlot.scrollIntoView({ behavior: "smooth", block: "center" });
-  } else {
-    const targetCol = plan.category.toLowerCase().includes("comida")
-      ? document.getElementById("foodBoardContainer")
-      : document.getElementById("activityBoardContainer");
-
-    if (targetCol) {
-      targetCol.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }
+  if (inlineSlot) {
+    inlineSlot.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
-  showToast(`Plan creado con pus.io: ${plan.title}`);
+  showToast(`Propuesta generada para: ${plan.title}`);
 }
 
 function decomposeProposalIntoTasks(text) {
