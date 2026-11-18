@@ -480,11 +480,17 @@ function renderSessionHeader() {
   if (currentUser) {
     avatarWrap.innerHTML = renderRobotSVG(currentUser.robot);
     nameEl.textContent = currentUser.name;
-    statusEl.textContent = "Sesión verificada";
+    if (statusEl) {
+      statusEl.textContent = "Sesión verificada";
+      statusEl.style.display = "block";
+    }
   } else {
     avatarWrap.innerHTML = renderRobotSVG(createBotConfig(198, 0, 0, 0, 0, 0));
     nameEl.textContent = "Iniciar sesión";
-    statusEl.textContent = "Identifícate";
+    if (statusEl) {
+      statusEl.textContent = "";
+      statusEl.style.display = "none";
+    }
   }
 }
 
