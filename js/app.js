@@ -2054,6 +2054,8 @@ function setupMobileTabs() {
   // Activar pestaña inicial si estamos en resolución móvil
   switchMobileTab("tab-pusio");
 }
+
+function showToast(msg) {
   const toast = document.getElementById("toastNotice");
   if (!toast) return;
   toast.textContent = msg;

@@ -353,17 +353,17 @@ body {
   /* Control de visibilidad de paneles en móvil */
   .summary-panel [data-mobile-pane],
   [data-mobile-pane]#mainAgendaSection {
-    display: none;
+    display: none !important;
   }
 
-  .summary-panel [data-mobile-pane].mobile-active,
-  [data-mobile-pane]#mainAgendaSection.mobile-active {
-    display: flex;
+  .summary-panel [data-mobile-pane].mobile-active {
+    display: flex !important;
     animation: mobilePaneFade 0.22s ease-out;
   }
 
   [data-mobile-pane]#mainAgendaSection.mobile-active {
-    display: block;
+    display: block !important;
+    animation: mobilePaneFade 0.22s ease-out;
   }
 
   @keyframes mobilePaneFade {
