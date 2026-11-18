@@ -1188,6 +1188,8 @@ function addCustomSubItem(e, collabId) {
   showToast(`Insumo sumado a ${collab.title}`);
 }
 
+let lastDeletedPlanCache = null;
+
 function deleteCollab(collabId) {
   if (!requireAuth()) return;
   const targetPlan = collaborations.find(c => c.id === collabId);
@@ -1202,13 +1204,32 @@ function deleteCollab(collabId) {
     }
   }
 
-  collaborations = collaborations.filter(c => c.id !== collabId);
+  const targetIdx = collaborations.findIndex(c => c.id === collabId);
+  if (targetIdx === -1) return;
+  const removedPlan = collaborations[targetIdx];
+
+  collaborations.splice(targetIdx, 1);
   if (lastCreatedPlanId === collabId) {
     lastCreatedPlanId = null;
   }
   saveState();
   renderAll();
-  showToast("Plan eliminado");
+
+  lastDeletedPlanCache = {
+    plan: removedPlan,
+    index: targetIdx
+  };
+
+  showToast("Plan eliminado", "Deshacer", () => {
+    if (!lastDeletedPlanCache) return;
+    const { plan, index } = lastDeletedPlanCache;
+    const insertAt = Math.min(index, collaborations.length);
+    collaborations.splice(insertAt, 0, plan);
+    lastDeletedPlanCache = null;
+    saveState();
+    renderAll();
+    showToast("Plan restaurado");
+  }, 7000);
 }
 
 function handlePusioMessage(rawText) {
@@ -2160,13 +2181,35 @@ function setupMobileTabs() {
   switchMobileTab("tab-pusio");
 }
 
-function showToast(msg) {
+function showToast(msg, actionLabel = null, actionCallback = null, duration = 2600) {
   const toast = document.getElementById("toastNotice");
   if (!toast) return;
-  toast.textContent = msg;
-  toast.classList.add("show");
+
   clearTimeout(window._toastTimer);
-  window._toastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
+  toast.innerHTML = "";
+
+  const textSpan = document.createElement("span");
+  textSpan.textContent = msg;
+  toast.appendChild(textSpan);
+
+  if (actionLabel && typeof actionCallback === "function") {
+    const actionBtn = document.createElement("button");
+    actionBtn.type = "button";
+    actionBtn.className = "toast-action-btn";
+    actionBtn.textContent = actionLabel;
+    actionBtn.onclick = (e) => {
+      e.stopPropagation();
+      clearTimeout(window._toastTimer);
+      toast.classList.remove("show");
+      actionCallback();
+    };
+    toast.appendChild(actionBtn);
+  }
+
+  toast.classList.add("show");
+  window._toastTimer = setTimeout(() => {
+    toast.classList.remove("show");
+  }, duration);
 }
 
 function openModal(id) {
