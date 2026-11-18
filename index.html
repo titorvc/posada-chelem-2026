@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>El pusio 2026</title>
 
-  <link rel="stylesheet" href="css/style.css?v=20261117_2320">
+  <link rel="stylesheet" href="css/style.css?v=20261117_2345">
 
   <meta property="og:title" content="El pusio 2026">
   <meta property="og:description" content="Organización colaborativa para la posada en Chelem.">
@@ -62,8 +62,18 @@
       </div>
     </div>
 
+    <!-- SECCIÓN EJECUTIVA: MI RESUMEN & GUÍA DE IDENTIFICACIÓN -->
+    <div id="mySummarySection" class="my-summary-card" data-mobile-pane="tab-summary">
+      <!-- Contenido renderizado dinámicamente según si hay sesión iniciada o no -->
+      <div id="mySummaryContent"></div>
+    </div>
+
     <!-- BARRA DE PESTAÑAS MÓVIL MINIMALISTA (SOLO PANTALLAS PEQUEÑAS) -->
     <nav class="mobile-tabs-bar" aria-label="Navegación móvil de la posada">
+      <button type="button" class="mobile-tab-btn" data-mobile-tab="tab-summary">
+        <span class="mobile-tab-dot"></span>
+        <span class="mobile-tab-label">Mi Resumen</span>
+      </button>
       <button type="button" class="mobile-tab-btn active" data-mobile-tab="tab-pusio">
         <span class="mobile-tab-dot"></span>
         <span class="mobile-tab-label">Pus.io</span>
@@ -598,6 +608,6 @@
   <div id="toastNotice" class="toast-notice">Guardado</div>
 
   <script src="js/bottts_parts.js"></script>
-  <script src="js/app.js?v=20261117_2325"></script>
+  <script src="js/app.js?v=20261117_2345"></script>
 </body>
 </html>

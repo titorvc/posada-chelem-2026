@@ -292,6 +292,221 @@ body {
 }
 
 /* ==========================================================================
+   MI RESUMEN & GUÍA DE IDENTIFICACIÓN (DESPUÉS DEL CONTADOR)
+   ========================================================================== */
+.my-summary-card {
+  max-width: 960px;
+  margin: 0 auto 28px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+  transition: all 0.22s var(--ease);
+}
+
+.my-summary-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
+}
+
+/* Vista Invitado / Sin Sesión */
+.my-summary-guest-box {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.my-summary-guest-visual {
+  flex-shrink: 0;
+}
+
+.guest-avatar-preview {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: var(--bg-subtle);
+  border: 2px dashed var(--border-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: grayscale(100%) opacity(55%);
+}
+
+.my-summary-guest-info {
+  flex: 1;
+}
+
+.my-summary-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--teal-accent);
+  display: block;
+  margin-bottom: 3px;
+}
+
+.my-summary-title {
+  font-family: var(--font-serif);
+  font-size: 1.45rem;
+  font-weight: 400;
+  color: var(--ink);
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+
+.my-summary-desc {
+  font-size: 0.82rem;
+  color: var(--ink-secondary);
+  line-height: 1.45;
+  margin-bottom: 14px;
+  max-width: 640px;
+}
+
+.my-summary-guest-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Vista Usuario Autenticado / Mi Resumen */
+.my-summary-user-box {
+  display: grid;
+  grid-template-columns: 220px 1fr 240px;
+  gap: 20px;
+  align-items: center;
+}
+
+.my-summary-user-profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-right: 1px solid var(--border);
+  padding-right: 14px;
+}
+
+.user-summary-avatar-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--bg-page);
+  border: 2px solid #3B82F6;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+  position: relative;
+  cursor: pointer;
+  padding: 4px;
+  transition: transform 0.18s ease;
+}
+
+.user-summary-avatar-wrap:hover {
+  transform: scale(1.05);
+}
+
+.user-summary-avatar-wrap svg {
+  width: 100%;
+  height: 100%;
+}
+
+.user-summary-edit-badge {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  background: var(--ink);
+  color: #FFFFFF;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  padding: 1px 5px;
+  border-radius: var(--radius-pill);
+}
+
+.user-summary-name {
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.my-summary-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px 14px;
+}
+
+.my-summary-stat-tile {
+  background: var(--bg-page);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-tile-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  letter-spacing: 0.04em;
+}
+
+.stat-tile-value {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.my-summary-action-col {
+  border-left: 1px solid var(--border);
+  padding-left: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.my-summary-action-title {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink-secondary);
+}
+
+@media (max-width: 860px) {
+  .my-summary-guest-box {
+    flex-direction: column;
+    text-align: center;
+    gap: 14px;
+  }
+
+  .my-summary-user-box {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .my-summary-user-profile {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding-right: 0;
+    padding-bottom: 12px;
+    justify-content: center;
+  }
+
+  .my-summary-action-col {
+    border-left: none;
+    border-top: 1px solid var(--border);
+    padding-left: 0;
+    padding-top: 12px;
+  }
+}
+
+/* ==========================================================================
    BARRA DE PESTAÑAS MÓVIL (MINIMALISTA • SOLO EN PANTALLAS PEQUEÑAS)
    ========================================================================== */
 .mobile-tabs-bar {
@@ -352,11 +567,13 @@ body {
 
   /* Control de visibilidad de paneles en móvil */
   .summary-panel [data-mobile-pane],
+  .my-summary-card[data-mobile-pane],
   [data-mobile-pane]#mainAgendaSection {
     display: none !important;
   }
 
-  .summary-panel [data-mobile-pane].mobile-active {
+  .summary-panel [data-mobile-pane].mobile-active,
+  .my-summary-card[data-mobile-pane].mobile-active {
     display: flex !important;
     animation: mobilePaneFade 0.22s ease-out;
   }
