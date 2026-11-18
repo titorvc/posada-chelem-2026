@@ -30,12 +30,11 @@
   <!-- HERO EDITORIAL LIMPIO CON TOQUES SUTILES DE COLOR -->
   <section class="hero-clean container">
     <h1 class="hero-headline">
-      El <em>pusio</em>
+      Posada <em>Chelem</em>
     </h1>
 
     <div class="hero-meta-pill">
-      <span class="meta-dot"></span>
-      <span id="heroMetaText">Casa de Reyvell &bull; Sábado 19 de Diciembre, 2026</span>
+      <span id="heroMetaText">Casa de Reyvell &bull; Sábado 19/DIC/26</span>
     </div>
 
     <p class="hero-dek">
@@ -63,17 +62,13 @@
     </div>
 
     <!-- SECCIÓN EJECUTIVA: MI RESUMEN & GUÍA DE IDENTIFICACIÓN -->
-    <div id="mySummarySection" class="my-summary-card" data-mobile-pane="tab-summary">
+    <div id="mySummarySection" class="my-summary-card">
       <!-- Contenido renderizado dinámicamente según si hay sesión iniciada o no -->
       <div id="mySummaryContent"></div>
     </div>
 
     <!-- BARRA DE PESTAÑAS MÓVIL MINIMALISTA (SOLO PANTALLAS PEQUEÑAS) -->
     <nav class="mobile-tabs-bar" aria-label="Navegación móvil de la posada">
-      <button type="button" class="mobile-tab-btn" data-mobile-tab="tab-summary">
-        <span class="mobile-tab-dot"></span>
-        <span class="mobile-tab-label">Mi Resumen</span>
-      </button>
       <button type="button" class="mobile-tab-btn active" data-mobile-tab="tab-pusio">
         <span class="mobile-tab-dot"></span>
         <span class="mobile-tab-label">Pus.io</span>
@@ -97,7 +92,6 @@
         <div class="summary-card-header">
           <span class="summary-eyebrow">Asistencia</span>
           <h2 class="summary-title">¿Quiénes vamos?</h2>
-          <p class="summary-caption">Verde: confirmado. Amarillo: pendiente. Rojo: no voy. Azul: en línea. Dorado: VIP.</p>
         </div>
 
         <!-- Barra rápida de confirmación de asistencia del usuario activo -->
@@ -108,6 +102,7 @@
           </div>
           <div class="attendance-toggle-pills">
             <button type="button" class="attend-btn btn-attend-confirmed" onclick="setAttendanceStatus('confirmed')">Confirmar</button>
+            <button type="button" class="attend-btn btn-attend-seen" onclick="setAttendanceStatus('seen')">Visto</button>
             <button type="button" class="attend-btn btn-attend-pending" onclick="setAttendanceStatus('pending')">Pendiente</button>
             <button type="button" class="attend-btn btn-attend-declined" onclick="setAttendanceStatus('declined')">No voy</button>
           </div>
@@ -349,6 +344,10 @@
               <button type="button" class="studio-status-pill status-pill-confirmed" data-status="confirmed" onclick="setStudioAttendance('confirmed')">
                 <span class="status-indicator-dot dot-green"></span>
                 <span>Confirmado</span>
+              </button>
+              <button type="button" class="studio-status-pill status-pill-seen" data-status="seen" onclick="setStudioAttendance('seen')">
+                <span class="status-indicator-dot dot-blue"></span>
+                <span>Visto</span>
               </button>
               <button type="button" class="studio-status-pill status-pill-pending" data-status="pending" onclick="setStudioAttendance('pending')">
                 <span class="status-indicator-dot dot-yellow"></span>
@@ -602,6 +601,23 @@
         <button type="button" class="btn btn-secondary" onclick="confirmDiscardAndCloseStudio()">Descartar cambios</button>
         <button type="button" class="btn" style="background:transparent; border:none; color:var(--ink-muted); font-size:0.8rem;" onclick="closeModal('modalConfirmUnsavedStudio')">Seguir editando</button>
       </div>
+    </div>
+  </div>
+
+  <!-- MODAL EXCLUSIVO: MI RESUMEN PERSONAL & ASISTENCIA -->
+  <div id="modalUserSummary" class="modal-overlay hidden">
+    <div class="modal-box modal-box-summary">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">Mi <em>resumen</em></h3>
+          <p class="modal-subtitle" style="font-size:0.85rem; color:var(--ink-secondary); margin-top:4px;">
+            Tu rol, transporte asignado, planes propuestos e insumos.
+          </p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('modalUserSummary')" title="Cerrar">&times;</button>
+      </div>
+
+      <div id="modalUserSummaryBody"></div>
     </div>
   </div>
 

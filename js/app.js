@@ -228,7 +228,7 @@ function initCountdown() {
   const elMins = document.getElementById("cdMins");
   const elSecs = document.getElementById("cdSecs");
 
-  if (elMeta) elMeta.innerHTML = "Casa de Reyvell &bull; S&aacute;bado 19 de Diciembre, 2026";
+  if (elMeta) elMeta.innerHTML = "Casa de Reyvell &bull; S&aacute;bado 19/DIC/26";
 
   function update() {
     const now = new Date().getTime();
@@ -341,128 +341,136 @@ function renderAll() {
 }
 
 function renderMySummary() {
-  const container = document.getElementById("mySummaryContent");
-  if (!container) return;
+  const desktopContainer = document.getElementById("mySummaryContent");
+  const modalContainer = document.getElementById("modalUserSummaryBody");
 
-  if (!currentUser) {
-    // Estado NO AUTENTICADO: Guía limpia y motivadora para identificarse y confirmar
-    container.innerHTML = `
-      <div class="my-summary-guest-box">
-        <div class="my-summary-guest-visual">
-          <div class="guest-avatar-preview">
-            ${renderRobotSVG(createBotConfig(198, 0, 0, 0, 0, 0), null, null, true)}
+  const buildHTML = (isModal = false) => {
+    if (!currentUser) {
+      // Estado NO AUTENTICADO
+      return `
+        <div class="my-summary-guest-box">
+          <div class="my-summary-guest-visual">
+            <div class="guest-avatar-preview">
+              ${renderRobotSVG(createBotConfig(198, 0, 0, 0, 0, 0), null, null, true)}
+            </div>
+          </div>
+          <div class="my-summary-guest-info">
+            <span class="my-summary-eyebrow">Paso 1: Identifícate en la Posada</span>
+            <h3 class="my-summary-title">Verifica tu asistencia y dale estilo a tu personaje</h3>
+            <p class="my-summary-desc">
+              Todos los muñequitos empiezan apagados en gris. Inicia sesión con tu correo para encender tu robot en azul (visto), confirmar si irás a Chelem y desbloquear tus propuestas.
+            </p>
+            <div class="my-summary-guest-actions">
+              <button type="button" class="btn btn-pusio" onclick="${isModal ? 'closeModal(\'modalUserSummary\'); ' : ''}openModal('modalAuth')">
+                Iniciar sesión / Entrar con mi PIN
+              </button>
+            </div>
           </div>
         </div>
-        <div class="my-summary-guest-info">
-          <span class="my-summary-eyebrow">Paso 1: Identifícate en la Posada</span>
-          <h3 class="my-summary-title">Verifica tu asistencia y dale estilo a tu personaje</h3>
-          <p class="my-summary-desc">
-            Todos los muñequitos empiezan apagados en gris. Inicia sesión con tu correo para encender tu robot en azul, confirmar si irás a Chelem y desbloquear tus propuestas.
-          </p>
-          <div class="my-summary-guest-actions">
-            <button type="button" class="btn btn-pusio" onclick="openModal('modalAuth')">
-              Iniciar sesión / Entrar con mi PIN
-            </button>
+      `;
+    }
+
+    // Estado AUTENTICADO: Resumen personalizado
+    const isVIP = currentUser.puedo_dar_coche === 1;
+    const currentAtt = currentUser.attendance || "seen";
+
+    let statusBadgeLabel = "Visto";
+    let statusBadgeClass = "status-seen";
+    if (currentAtt === "confirmed") {
+      statusBadgeLabel = "Confirmado";
+      statusBadgeClass = "status-confirmed";
+    } else if (currentAtt === "declined") {
+      statusBadgeLabel = "No voy";
+      statusBadgeClass = "status-declined";
+    } else if (currentAtt === "pending") {
+      statusBadgeLabel = "Pendiente";
+      statusBadgeClass = "status-pending";
+    }
+
+    // En qué auto viaja (conductor o pasajero)
+    const driverCar = carsList.find(c => c.driverEmail.toLowerCase() === currentUser.email.toLowerCase());
+    const passengerCar = carsList.find(c => Array.isArray(c.passengers) && c.passengers.some(p => p.email && p.email.toLowerCase() === currentUser.email.toLowerCase()));
+
+    let transportSummary = "Sin auto asignado todavía";
+    if (driverCar) {
+      const passCount = (driverCar.passengers || []).length;
+      transportSummary = `Conductor de ${driverCar.model} (${passCount}/${driverCar.seats} ocupados)`;
+    } else if (passengerCar) {
+      transportSummary = `Pasajero en auto de ${passengerCar.driver} (${passengerCar.model})`;
+    }
+
+    // Contar planes e insumos
+    const userPlans = collaborations.filter(c =>
+      (c.authorEmail && c.authorEmail.toLowerCase() === currentUser.email.toLowerCase()) ||
+      (c.author && c.author.toLowerCase() === currentUser.name.toLowerCase())
+    );
+
+    let claimedItemsCount = 0;
+    collaborations.forEach(c => {
+      (c.items || []).forEach(it => {
+        if (it.claimedByEmail && it.claimedByEmail.toLowerCase() === currentUser.email.toLowerCase()) {
+          claimedItemsCount++;
+        }
+      });
+    });
+
+    const totalAttendeesConfirmed = attendeesList.filter(u => u.attendance === "confirmed").length;
+    const totalCarsActive = carsList.length;
+
+    return `
+      <div class="my-summary-user-box ${isModal ? 'modal-user-box-layout' : ''}">
+        <!-- Columna izquierda: Avatar y personalización directa -->
+        <div class="my-summary-user-profile">
+          <div class="user-summary-avatar-wrap" onclick="${isModal ? 'closeModal(\'modalUserSummary\'); ' : ''}selectUserForCustomization(${currentUser.id})" title="Clic para editar tu muñequito">
+            ${renderRobotSVG(currentUser.robot, null, null, true)}
+            <span class="user-summary-edit-badge" title="Editar diseño">Editar</span>
           </div>
+          <div class="user-summary-meta">
+            <h3 class="user-summary-name">${currentUser.name}</h3>
+            <span class="attendance-badge ${statusBadgeClass}">${statusBadgeLabel}</span>
+            ${isVIP ? '<span class="avatar-vip-badge" style="position:static; display:inline-block; margin-top:4px;">VIP</span>' : ''}
+          </div>
+        </div>
+
+        <!-- Columna central: Mis eventos y roles -->
+        <div class="my-summary-details-grid">
+          <div class="my-summary-stat-tile">
+            <span class="stat-tile-label">Tu Transporte</span>
+            <strong class="stat-tile-value">${transportSummary}</strong>
+          </div>
+          <div class="my-summary-stat-tile">
+            <span class="stat-tile-label">Tus Planes Propuestos</span>
+            <strong class="stat-tile-value">${userPlans.length} planes creados</strong>
+          </div>
+          <div class="my-summary-stat-tile">
+            <span class="stat-tile-label">Insumos que llevas</span>
+            <strong class="stat-tile-value">${claimedItemsCount} insumos asignados</strong>
+          </div>
+          <div class="my-summary-stat-tile">
+            <span class="stat-tile-label">Evento General</span>
+            <strong class="stat-tile-value">${totalAttendeesConfirmed} confirmados • ${totalCarsActive} autos</strong>
+          </div>
+        </div>
+
+        <!-- Columna derecha: Acciones rápidas de confirmación -->
+        <div class="my-summary-action-col">
+          <span class="my-summary-action-title">Cambiar tu asistencia:</span>
+          <div class="attendance-toggle-pills" style="width:100%;">
+            <button type="button" class="attend-btn btn-attend-confirmed ${currentAtt === 'confirmed' ? 'active' : ''}" onclick="setAttendanceStatus('confirmed')">Confirmar</button>
+            <button type="button" class="attend-btn btn-attend-seen ${currentAtt === 'seen' ? 'active' : ''}" onclick="setAttendanceStatus('seen')">Visto</button>
+            <button type="button" class="attend-btn btn-attend-pending ${currentAtt === 'pending' ? 'active' : ''}" onclick="setAttendanceStatus('pending')">Pendiente</button>
+            <button type="button" class="attend-btn btn-attend-declined ${currentAtt === 'declined' ? 'active' : ''}" onclick="setAttendanceStatus('declined')">No voy</button>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" style="margin-top:8px; width:100%;" onclick="${isModal ? 'closeModal(\'modalUserSummary\'); ' : ''}selectUserForCustomization(${currentUser.id})">
+            Personalizar mi personaje
+          </button>
         </div>
       </div>
     `;
-    return;
-  }
+  };
 
-  // Estado AUTENTICADO: Resumen personalizado (Mi información y Eventos generales)
-  const isVIP = currentUser.puedo_dar_coche === 1;
-  const currentAtt = currentUser.attendance || "pending";
-
-  let statusBadgeLabel = "Pendiente";
-  let statusBadgeClass = "status-pending";
-  if (currentAtt === "confirmed") {
-    statusBadgeLabel = "Confirmado";
-    statusBadgeClass = "status-confirmed";
-  } else if (currentAtt === "declined") {
-    statusBadgeLabel = "No voy";
-    statusBadgeClass = "status-declined";
-  }
-
-  // Verificar en qué auto viaja (como chofer o pasajero)
-  const driverCar = carsList.find(c => c.driverEmail.toLowerCase() === currentUser.email.toLowerCase());
-  const passengerCar = carsList.find(c => Array.isArray(c.passengers) && c.passengers.some(p => p.email && p.email.toLowerCase() === currentUser.email.toLowerCase()));
-
-  let transportSummary = "Sin auto asignado todavía";
-  if (driverCar) {
-    const passCount = (driverCar.passengers || []).length;
-    transportSummary = `Conductor de ${driverCar.model} (${passCount}/${driverCar.seats} ocupados)`;
-  } else if (passengerCar) {
-    transportSummary = `Pasajero en el auto de ${passengerCar.driver} (${passengerCar.model})`;
-  }
-
-  // Contar planes e insumos donde participa el usuario
-  const userPlans = collaborations.filter(c =>
-    (c.authorEmail && c.authorEmail.toLowerCase() === currentUser.email.toLowerCase()) ||
-    (c.author && c.author.toLowerCase() === currentUser.name.toLowerCase())
-  );
-
-  let claimedItemsCount = 0;
-  collaborations.forEach(c => {
-    (c.items || []).forEach(it => {
-      if (it.claimedByEmail && it.claimedByEmail.toLowerCase() === currentUser.email.toLowerCase()) {
-        claimedItemsCount++;
-      }
-    });
-  });
-
-  const totalAttendeesConfirmed = attendeesList.filter(u => u.attendance === "confirmed").length;
-  const totalCarsActive = carsList.length;
-
-  container.innerHTML = `
-    <div class="my-summary-user-box">
-      <!-- Columna izquierda: Avatar y personalización directa -->
-      <div class="my-summary-user-profile">
-        <div class="user-summary-avatar-wrap" onclick="selectUserForCustomization(${currentUser.id})" title="Clic para editar tu muñequito">
-          ${renderRobotSVG(currentUser.robot, null, null, true)}
-          <span class="user-summary-edit-badge" title="Editar diseño">Editar</span>
-        </div>
-        <div class="user-summary-meta">
-          <h3 class="user-summary-name">${currentUser.name}</h3>
-          <span class="attendance-badge ${statusBadgeClass}">${statusBadgeLabel}</span>
-          ${isVIP ? '<span class="avatar-vip-badge" style="position:static; display:inline-block; margin-top:4px;">VIP</span>' : ''}
-        </div>
-      </div>
-
-      <!-- Columna central: Mis eventos y roles -->
-      <div class="my-summary-details-grid">
-        <div class="my-summary-stat-tile">
-          <span class="stat-tile-label">Tu Transporte</span>
-          <strong class="stat-tile-value">${transportSummary}</strong>
-        </div>
-        <div class="my-summary-stat-tile">
-          <span class="stat-tile-label">Tus Planes Propuestos</span>
-          <strong class="stat-tile-value">${userPlans.length} planes creados</strong>
-        </div>
-        <div class="my-summary-stat-tile">
-          <span class="stat-tile-label">Insumos que llevas</span>
-          <strong class="stat-tile-value">${claimedItemsCount} insumos asignados</strong>
-        </div>
-        <div class="my-summary-stat-tile">
-          <span class="stat-tile-label">Evento General</span>
-          <strong class="stat-tile-value">${totalAttendeesConfirmed} confirmados • ${totalCarsActive} autos</strong>
-        </div>
-      </div>
-
-      <!-- Columna derecha: Acciones rápidas de confirmación -->
-      <div class="my-summary-action-col">
-        <span class="my-summary-action-title">Cambiar tu asistencia:</span>
-        <div class="attendance-toggle-pills" style="width:100%;">
-          <button type="button" class="attend-btn btn-attend-confirmed ${currentAtt === 'confirmed' ? 'active' : ''}" onclick="setAttendanceStatus('confirmed')">Confirmar</button>
-          <button type="button" class="attend-btn btn-attend-pending ${currentAtt === 'pending' ? 'active' : ''}" onclick="setAttendanceStatus('pending')">Pendiente</button>
-          <button type="button" class="attend-btn btn-attend-declined ${currentAtt === 'declined' ? 'active' : ''}" onclick="setAttendanceStatus('declined')">No voy</button>
-        </div>
-        <button type="button" class="btn btn-secondary btn-sm" style="margin-top:8px; width:100%;" onclick="selectUserForCustomization(${currentUser.id})">
-          Personalizar mi personaje
-        </button>
-      </div>
-    </div>
-  `;
+  if (desktopContainer) desktopContainer.innerHTML = buildHTML(false);
+  if (modalContainer) modalContainer.innerHTML = buildHTML(true);
 }
 
 function renderSessionHeader() {
@@ -487,8 +495,11 @@ function setAttendanceStatus(status) {
   currentUser.attendanceSetByUser = true;
   saveState();
   renderAll();
-  const label = status === "confirmed" ? "confirmada" : (status === "declined" ? "cancelada (no voy)" : "en pendiente");
-  showToast(`Asistencia de ${currentUser.name} marcada como ${label}`);
+  let label = "en pendiente";
+  if (status === "confirmed") label = "confirmada";
+  else if (status === "declined") label = "cancelada (no voy)";
+  else if (status === "seen") label = "como visto";
+  showToast(`Asistencia de ${currentUser.name} marcada ${label}`);
 }
 
 function setStudioAttendance(status) {
@@ -613,16 +624,19 @@ function renderSummaryPanel() {
   if (myActionBox && myBadge) {
     if (currentUser) {
       myActionBox.style.display = "block";
-      const att = currentUser.attendance || "pending";
+      const att = currentUser.attendance || "seen";
       myBadge.className = `attendance-badge status-${att}`;
       if (att === "confirmed") myBadge.textContent = "Confirmado";
       else if (att === "declined") myBadge.textContent = "No voy";
+      else if (att === "seen") myBadge.textContent = "Visto";
       else myBadge.textContent = "Pendiente";
 
       const btnConf = myActionBox.querySelector(".btn-attend-confirmed");
+      const btnSeen = myActionBox.querySelector(".btn-attend-seen");
       const btnPend = myActionBox.querySelector(".btn-attend-pending");
       const btnDecl = myActionBox.querySelector(".btn-attend-declined");
       if (btnConf) btnConf.classList.toggle("active", att === "confirmed");
+      if (btnSeen) btnSeen.classList.toggle("active", att === "seen");
       if (btnPend) btnPend.classList.toggle("active", att === "pending");
       if (btnDecl) btnDecl.classList.toggle("active", att === "declined");
     } else {
@@ -630,7 +644,7 @@ function renderSummaryPanel() {
     }
   }
 
-  // 1. Lado izquierdo: Avatares con estados de color (azul al iniciar sesión, verde/amarillo/rojo por asistencia, dorado VIP)
+  // 1. Lado izquierdo: Avatares con estados de color (azul/visto al entrar, verde/amarillo/rojo por asistencia, dorado VIP)
   const avatarsGrid = document.getElementById("summaryAvatarsGrid");
   if (avatarsGrid) {
     avatarsGrid.innerHTML = "";
@@ -638,12 +652,12 @@ function renderSummaryPanel() {
       const isMe = currentUser && currentUser.email.toLowerCase() === person.email.toLowerCase();
       const hasSession = Boolean(person.pinHash);
       const isVIP = person.puedo_dar_coche === 1;
-      const att = person.attendance || (person.pinHash ? "confirmed" : "pending");
+      const att = person.attendance || (person.pinHash ? "seen" : "unanswered");
 
       let statusClass = "status-unanswered";
       let statusText = "Sin entrar";
 
-      // Si la persona nunca ha iniciado sesión / configurado su cuenta, se muestra en gris (apagado)
+      // Si la persona nunca ha iniciado sesión ni configurado cuenta, permanece en gris (apagado)
       if (!hasSession && !person.attendanceSetByUser) {
         statusClass = "status-unanswered";
         statusText = "Sin entrar";
@@ -653,6 +667,9 @@ function renderSummaryPanel() {
       } else if (att === "declined") {
         statusClass = "status-declined";
         statusText = "No voy";
+      } else if (att === "seen") {
+        statusClass = "status-seen";
+        statusText = "Visto";
       } else {
         statusClass = "status-pending";
         statusText = "Pendiente";
@@ -664,7 +681,6 @@ function renderSummaryPanel() {
 
       const btn = document.createElement("button");
       btn.type = "button";
-      // Si el usuario tiene sesión activa en este navegador, iluminar de azul vibrante con clase is-logged-in
       const loggedClass = isMe ? "is-logged-in" : "";
       const vipClass = isVIP ? "is-vip" : "";
       btn.className = `avatar-token ${statusClass} ${vipClass} ${loggedClass}`;
@@ -2071,7 +2087,8 @@ function setupEventListeners() {
 
   document.getElementById("btnOpenAuthModal").onclick = () => {
     if (currentUser) {
-      selectUserForCustomization(currentUser.id);
+      renderMySummary();
+      openModal("modalUserSummary");
       return;
     }
     document.getElementById("authErrorMsg").style.display = "none";
@@ -2129,12 +2146,18 @@ function setupEventListeners() {
       if (nameVal && nameVal.trim()) {
         existing.name = nameVal.trim();
       }
+      if (!existing.attendance || (!existing.attendanceSetByUser && existing.attendance !== "confirmed" && existing.attendance !== "declined")) {
+        existing.attendance = "seen";
+      }
       currentUser = existing;
     } else if (pendingClaimedMatch) {
       // Reclamar el perfil del participante existente (evitando duplicado)
       pendingClaimedMatch.email = emailVal;
       pendingClaimedMatch.name = nameVal;
       pendingClaimedMatch.pinHash = candidateHash;
+      if (!pendingClaimedMatch.attendance || (!pendingClaimedMatch.attendanceSetByUser && pendingClaimedMatch.attendance !== "confirmed" && pendingClaimedMatch.attendance !== "declined")) {
+        pendingClaimedMatch.attendance = "seen";
+      }
       currentUser = pendingClaimedMatch;
       pendingClaimedMatch = null;
     } else {
@@ -2144,6 +2167,9 @@ function setupEventListeners() {
         autoMatch.email = emailVal;
         autoMatch.name = nameVal;
         autoMatch.pinHash = candidateHash;
+        if (!autoMatch.attendance || (!autoMatch.attendanceSetByUser && autoMatch.attendance !== "confirmed" && autoMatch.attendance !== "declined")) {
+          autoMatch.attendance = "seen";
+        }
         currentUser = autoMatch;
       } else {
         const rndHue = Math.floor(Math.random() * 360);
@@ -2152,7 +2178,8 @@ function setupEventListeners() {
           name: nameVal,
           email: emailVal,
           pinHash: candidateHash,
-          attendance: "confirmed",
+          attendance: "seen",
+          attendanceSetByUser: false,
           travelMode: null,
           puedo_dar_coche: 0,
           robot: createBotConfig(rndHue, 0, 0, 0, 0, 0)

@@ -479,6 +479,10 @@ body {
 }
 
 @media (max-width: 860px) {
+  .my-summary-card {
+    display: none !important;
+  }
+
   .my-summary-guest-box {
     flex-direction: column;
     text-align: center;
@@ -934,7 +938,8 @@ body {
   filter: grayscale(60%) opacity(75%);
 }
 
-/* 1. Sesión activa: Muñequito iluminado en azul vibrante (Ya entró) */
+/* 1. Sesión activa / Visto: Muñequito iluminado en azul vibrante (Ya entró, no decidió) */
+.avatar-token.status-seen .avatar-svg-wrap,
 .avatar-token.is-logged-in .avatar-svg-wrap {
   filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.75)) drop-shadow(0 0 3px rgba(37, 99, 235, 0.9));
   animation: loggedInPulse 3s ease-in-out infinite;
@@ -949,6 +954,7 @@ body {
   }
 }
 
+.avatar-token.status-seen .avatar-token-status,
 .avatar-token.is-logged-in .avatar-token-status {
   color: #2563EB;
   font-weight: 700;
@@ -1083,6 +1089,12 @@ body {
   letter-spacing: 0.04em;
 }
 
+.attendance-badge.status-seen {
+  background: rgba(59, 130, 246, 0.15);
+  color: #2563EB;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
 .attendance-badge.status-confirmed {
   background: rgba(16, 185, 129, 0.15);
   color: #059669;
@@ -1103,8 +1115,8 @@ body {
 
 .attendance-toggle-pills {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
 }
 
 .attend-btn {
@@ -1131,6 +1143,13 @@ body {
   color: #FFFFFF;
   border-color: #059669;
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+}
+
+.attend-btn.active.btn-attend-seen {
+  background: #3B82F6;
+  color: #FFFFFF;
+  border-color: #2563EB;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
 }
 
 .attend-btn.active.btn-attend-pending {
@@ -1192,6 +1211,7 @@ body {
 }
 
 .status-indicator-dot.dot-green  { background: #10B981; }
+.status-indicator-dot.dot-blue   { background: #3B82F6; }
 .status-indicator-dot.dot-yellow { background: #EAB308; }
 .status-indicator-dot.dot-red    { background: #EF4444; }
 
@@ -3805,6 +3825,38 @@ body {
   max-width: 400px !important;
   text-align: center;
   padding: 24px 22px;
+}
+
+.modal-box-summary {
+  max-width: 660px !important;
+  width: 95vw;
+  max-height: 88vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  padding: 24px 24px;
+}
+
+.modal-user-box-layout {
+  grid-template-columns: 1fr !important;
+  gap: 16px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.modal-user-box-layout .my-summary-user-profile {
+  border-right: none !important;
+  border-bottom: 1px solid var(--border) !important;
+  padding-right: 0 !important;
+  padding-bottom: 14px !important;
+  justify-content: flex-start !important;
+}
+
+.modal-user-box-layout .my-summary-action-col {
+  border-left: none !important;
+  border-top: 1px solid var(--border) !important;
+  padding-left: 0 !important;
+  padding-top: 14px !important;
 }
 
 .confirm-dialog-actions {
