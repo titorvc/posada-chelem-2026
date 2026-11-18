@@ -332,7 +332,7 @@ function renderSessionHeader() {
   } else {
     avatarWrap.innerHTML = renderRobotSVG(createBotConfig(198, 0, 0, 0, 0, 0));
     nameEl.textContent = "Iniciar sesión";
-    statusEl.textContent = "Toca para identificarte";
+    statusEl.textContent = "Identifícate";
   }
 }
 
