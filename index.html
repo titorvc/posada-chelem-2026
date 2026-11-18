@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Posada Chelem 2026</title>
 
-  <link rel="stylesheet" href="css/style.css?v=20261117_1715">
+  <link rel="stylesheet" href="css/style.css?v=20261117_2045">
 
   <meta property="og:title" content="Posada Chelem 2026">
   <meta property="og:description" content="Organización colaborativa para la posada en Chelem.">
@@ -62,12 +62,32 @@
       </div>
     </div>
 
+    <!-- BARRA DE PESTAÑAS MÓVIL MINIMALISTA (SOLO PANTALLAS PEQUEÑAS) -->
+    <nav class="mobile-tabs-bar" aria-label="Navegación móvil de la posada">
+      <button type="button" class="mobile-tab-btn active" data-mobile-tab="tab-pusio">
+        <span class="mobile-tab-dot"></span>
+        <span class="mobile-tab-label">Pus.io</span>
+      </button>
+      <button type="button" class="mobile-tab-btn" data-mobile-tab="tab-attendees">
+        <span class="mobile-tab-dot"></span>
+        <span class="mobile-tab-label">Asistencia</span>
+      </button>
+      <button type="button" class="mobile-tab-btn" data-mobile-tab="tab-transport">
+        <span class="mobile-tab-dot"></span>
+        <span class="mobile-tab-label">Transporte</span>
+      </button>
+      <button type="button" class="mobile-tab-btn" data-mobile-tab="tab-agenda">
+        <span class="mobile-tab-dot"></span>
+        <span class="mobile-tab-label">Planes</span>
+      </button>
+    </nav>
+
     <!-- ====================================================================
-         PANEL DE RESUMEN (3 COLUMNAS: ASISTENCIA • TRANSPORTE • PUS.IO)
+         PANEL DE RESUMEN (3 COLUMNAS EN ESCRITORIO • CONMUTABLE EN MÓVIL)
          ==================================================================== -->
     <div class="summary-panel">
       <!-- Columna Izquierda: ¿Quiénes vamos? -->
-      <div class="summary-card summary-attendees">
+      <div id="colAttendees" class="summary-card summary-attendees" data-mobile-pane="tab-attendees">
         <div class="summary-card-header">
           <span class="summary-eyebrow">Asistencia</span>
           <h2 class="summary-title">¿Quiénes vamos?</h2>
@@ -77,7 +97,7 @@
       </div>
 
       <!-- Columna Central: Transporte VIP -->
-      <div class="summary-card summary-transport">
+      <div id="colTransport" class="summary-card summary-transport" data-mobile-pane="tab-transport">
         <div class="summary-card-header">
           <span class="summary-eyebrow">Logística Mérida &bull; Chelem</span>
           <h2 class="summary-title">Transporte (5 Cupos de Autos)</h2>
@@ -119,7 +139,7 @@
       </div>
 
       <!-- Columna Derecha: Asistente de Posada (Pus.io) -->
-      <div class="summary-card summary-pusio-card">
+      <div id="colPusio" class="summary-card summary-pusio-card" data-mobile-pane="tab-pusio">
         <div class="summary-card-header pusio-card-header">
           <div class="pusio-header-text">
             <span class="summary-eyebrow">Asistente de Posada &bull; Pus.io</span>
@@ -197,9 +217,9 @@
   </section>
 
   <!-- ====================================================================
-       SECCIÓN CENTRAL: BANQUETE, DINÁMICAS Y CRONOGRAMA VIVO DE LA POSADA
+       SECCIÓN CENTRAL: COMIDA, DINÁMICAS Y CRONOGRAMA VIVO DE LA POSADA
        ==================================================================== -->
-  <main class="container plans-agenda-section">
+  <main id="mainAgendaSection" class="container plans-agenda-section" data-mobile-pane="tab-agenda">
 
 
     <!-- TABLERO A 2 COLUMNAS: COMIDA Y BEBIDA vs JUEGOS & ACTIVIDADES -->
@@ -513,6 +533,6 @@
   <div id="toastNotice" class="toast-notice">Guardado</div>
 
   <script src="js/bottts_parts.js"></script>
-  <script src="js/app.js?v=20261117_1715"></script>
+  <script src="js/app.js?v=20261117_2045"></script>
 </body>
 </html>

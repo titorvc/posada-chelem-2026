@@ -109,6 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderAll();
   setupEventListeners();
   setupModernHueWheel();
+  setupMobileTabs();
 });
 
 function hslStr(c) {
@@ -2020,7 +2021,39 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
-function showToast(msg) {
+// ==========================================================================
+// CONTROL DE PESTAÑAS MÓVILES (VISTA EJECUTIVA SIN SCROLL EN MÓVILES)
+// ==========================================================================
+let activeMobileTab = "tab-pusio";
+
+function setupMobileTabs() {
+  const tabs = document.querySelectorAll(".mobile-tab-btn");
+  if (!tabs.length) return;
+
+  function switchMobileTab(tabKey) {
+    activeMobileTab = tabKey;
+
+    // Actualizar botones de pestaña
+    tabs.forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.mobileTab === tabKey);
+    });
+
+    // Actualizar paneles correspondientes
+    document.querySelectorAll("[data-mobile-pane]").forEach(pane => {
+      const match = pane.getAttribute("data-mobile-pane") === tabKey;
+      pane.classList.toggle("mobile-active", match);
+    });
+  }
+
+  tabs.forEach(btn => {
+    btn.onclick = () => {
+      switchMobileTab(btn.dataset.mobileTab);
+    };
+  });
+
+  // Activar pestaña inicial si estamos en resolución móvil
+  switchMobileTab("tab-pusio");
+}
   const toast = document.getElementById("toastNotice");
   if (!toast) return;
   toast.textContent = msg;

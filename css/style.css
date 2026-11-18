@@ -292,6 +292,145 @@ body {
 }
 
 /* ==========================================================================
+   BARRA DE PESTAÑAS MÓVIL (MINIMALISTA • SOLO EN PANTALLAS PEQUEÑAS)
+   ========================================================================== */
+.mobile-tabs-bar {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .mobile-tabs-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    padding: 4px;
+    margin: 0 auto 20px;
+    max-width: 440px;
+    width: 100%;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .mobile-tab-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    padding: 8px 10px;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ink-secondary);
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+
+  .mobile-tab-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: transparent;
+    transition: all 0.18s ease;
+  }
+
+  .mobile-tab-btn.active {
+    background: var(--ink);
+    color: #FFFFFF;
+    box-shadow: 0 2px 6px rgba(17, 18, 20, 0.2);
+  }
+
+  .mobile-tab-btn.active .mobile-tab-dot {
+    background: var(--teal-accent);
+  }
+
+  /* Control de visibilidad de paneles en móvil */
+  .summary-panel [data-mobile-pane],
+  [data-mobile-pane]#mainAgendaSection {
+    display: none;
+  }
+
+  .summary-panel [data-mobile-pane].mobile-active,
+  [data-mobile-pane]#mainAgendaSection.mobile-active {
+    display: flex;
+    animation: mobilePaneFade 0.22s ease-out;
+  }
+
+  [data-mobile-pane]#mainAgendaSection.mobile-active {
+    display: block;
+  }
+
+  @keyframes mobilePaneFade {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Optimización visual de Pus.io en móvil */
+  .summary-pusio-card {
+    padding: 18px 16px;
+    gap: 12px;
+  }
+
+  .pusio-title {
+    font-size: 1.18rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .pusio-portrait-avatar {
+    width: 68px;
+    height: 68px;
+    padding: 4px;
+  }
+
+  .pusio-profile-center {
+    margin: 2px 0 6px;
+    gap: 4px;
+  }
+
+  .pusio-input-wrap {
+    flex-direction: row !important;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .pusio-input-field {
+    padding: 8px 14px;
+    font-size: 0.82rem;
+  }
+
+  .btn-pusio-submit {
+    width: 32px;
+    height: 32px;
+  }
+
+  .suggestions-conversational-title {
+    font-size: 0.76rem;
+    margin-bottom: 2px;
+  }
+
+  .sparks-grid {
+    gap: 6px;
+  }
+
+  .spark-chip {
+    padding: 5px 10px;
+    font-size: 0.72rem;
+  }
+}
+
+/* ==========================================================================
    PANEL DE RESUMEN (3 COLUMNAS: ASISTENCIA • TRANSPORTE • PUS.IO)
    ========================================================================== */
 .summary-panel {
