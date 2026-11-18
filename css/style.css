@@ -693,6 +693,28 @@ body {
     font-size: 0.72rem;
   }
 
+  /* Ajuste de márgenes y paddings para evitar desbordes en pantalla chica */
+  .container {
+    padding: 0 14px;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .hero-clean {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .agenda-column {
+    padding: 16px 14px;
+  }
+
+  .timeline-section {
+    padding: 16px 14px;
+  }
+}
+
   /* Ranura de propuesta en preview generada por Pus.io */
 .pusio-inline-plan-slot {
   width: 100%;
@@ -1018,28 +1040,6 @@ body {
   padding-top: 12px;
   border-top: 1px dashed var(--border);
   animation: fadeIn 0.2s ease forwards;
-}
-
-  /* Ajuste de márgenes y paddings para evitar desbordes en pantalla chica */
-  .container {
-    padding: 0 14px;
-    box-sizing: border-box;
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .hero-clean {
-    padding-left: 14px;
-    padding-right: 14px;
-  }
-
-  .agenda-column {
-    padding: 16px 14px;
-  }
-
-  .timeline-section {
-    padding: 16px 14px;
-  }
 }
 
 /* ==========================================================================
@@ -2601,21 +2601,6 @@ body {
   flex: 1;
 }
 
-/* Tarjeta individual de plan dentro de columna */
-.plan-item-card {
-  background: var(--bg-page);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 16px 18px;
-  position: relative;
-  transition: all 0.2s var(--ease);
-}
-
-.plan-item-card:hover {
-  border-color: var(--border-hover);
-  box-shadow: var(--shadow-sm);
-}
-
 /* Botón tachita en la esquina superior derecha del plan */
 .plan-delete-corner-btn {
   position: absolute;
@@ -2646,10 +2631,6 @@ body {
   color: #FFFFFF;
   border-color: var(--berry);
   transform: scale(1.08);
-}
-
-.plan-card-head {
-  padding-right: 32px;
 }
 
 .plan-item-header {

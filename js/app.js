@@ -1469,6 +1469,42 @@ function calculateCollabTraction(collab) {
   return (claimed / total) * 100 + (claimed * 10);
 }
 
+function renderAgendaBoards() {
+  const foodContainer = document.getElementById("foodBoardContainer");
+  const activityContainer = document.getElementById("activityBoardContainer");
+  const badgeFood = document.getElementById("badgeFoodCount");
+  const badgeActivity = document.getElementById("badgeActivityCount");
+
+  if (!foodContainer || !activityContainer) return;
+
+  const foodPlans = collaborations
+    .filter(c => (c.category || "").toLowerCase().includes("comida") || (c.category || "").toLowerCase().includes("bebida"))
+    .sort((a, b) => calculateCollabTraction(b) - calculateCollabTraction(a));
+
+  const activityPlans = collaborations
+    .filter(c => !(c.category || "").toLowerCase().includes("comida") && !(c.category || "").toLowerCase().includes("bebida"))
+    .sort((a, b) => calculateCollabTraction(b) - calculateCollabTraction(a));
+
+  if (badgeFood) badgeFood.textContent = String(foodPlans.length);
+  if (badgeActivity) badgeActivity.textContent = String(activityPlans.length);
+
+  foodContainer.innerHTML = foodPlans.length === 0
+    ? `<div class="empty-column-notice">Sin propuestas de comida o bebida aún.</div>`
+    : "";
+
+  activityContainer.innerHTML = activityPlans.length === 0
+    ? `<div class="empty-column-notice">Sin dinámicas propuestas aún.</div>`
+    : "";
+
+  foodPlans.forEach(plan => {
+    foodContainer.appendChild(createPlanCardElement(plan, "cat-food"));
+  });
+
+  activityPlans.forEach(plan => {
+    activityContainer.appendChild(createPlanCardElement(plan, "cat-activity"));
+  });
+}
+
 function getCollabVibeTier(claimed, total) {
   if (total === 0 || claimed === 0) return { tier: "vibe-tier-low", label: "Sin comenzar" };
   const ratio = claimed / total;
