@@ -397,17 +397,22 @@ function renderInlineRecentPlan() {
     return;
   }
 
+  const isMine = currentUser && (
+    (plan.authorEmail && plan.authorEmail.toLowerCase() === currentUser.email.toLowerCase()) ||
+    (plan.author && plan.author.toLowerCase() === currentUser.name.toLowerCase())
+  );
+
   const itemsPreview = plan.items.slice(0, 4).map(i => `<span class="inline-plan-item-pill">${i.name}</span>`).join("");
   const moreCount = plan.items.length > 4 ? `<span class="inline-plan-item-pill">+${plan.items.length - 4} más</span>` : "";
 
   slot.innerHTML = `
     <div class="inline-plan-card plan-enter-anim">
+      ${isMine ? `<button type="button" class="inline-plan-close-btn" onclick="dismissInlineRecentPlan(${plan.id})" title="Eliminar este plan que propusiste">&times;</button>` : ''}
       <div class="inline-plan-head">
         <div>
           <span class="inline-plan-badge">${plan.category}</span>
           <h4 class="inline-plan-title">${plan.title}</h4>
         </div>
-        <button type="button" class="inline-plan-close-btn" onclick="dismissInlineRecentPlan(${plan.id})" title="Eliminar este plan recién creado">&times;</button>
       </div>
       <div class="inline-plan-items">
         ${itemsPreview}
@@ -955,6 +960,10 @@ function createPlanCardElement(collab, catClass) {
   const totalCount = collab.items.length;
   const isComplete = totalCount > 0 && claimedCount === totalCount;
   const hasVolunteers = claimedCount > 0;
+  const isMine = currentUser && (
+    (collab.authorEmail && collab.authorEmail.toLowerCase() === currentUser.email.toLowerCase()) ||
+    (collab.author && collab.author.toLowerCase() === currentUser.name.toLowerCase())
+  );
 
   const card = document.createElement("div");
   card.className = `plan-item-card ${catClass} ${isComplete ? 'is-complete' : (hasVolunteers ? 'has-traction' : '')}`;
@@ -1003,6 +1012,7 @@ function createPlanCardElement(collab, catClass) {
   const stageName = stageLabels[collab.stage] || "Posada";
 
   card.innerHTML = `
+    ${isMine ? `<button type="button" class="plan-delete-corner-btn" onclick="deleteCollab(${collab.id})" title="Eliminar este plan que propusiste">&times;</button>` : ''}
     <div class="plan-card-head">
       <div>
         <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
@@ -1014,7 +1024,6 @@ function createPlanCardElement(collab, catClass) {
       </div>
       <div style="display:flex; align-items:center; gap:8px;">
         <span class="plan-progress-pill ${isComplete ? 'is-ready' : ''}">${claimedCount}/${totalCount} cubiertos</span>
-        <button type="button" class="modal-close-btn" style="width:26px; height:26px; font-size:0.9rem;" onclick="deleteCollab(${collab.id})" title="Eliminar plan">&times;</button>
       </div>
     </div>
 
@@ -1030,7 +1039,7 @@ function createPlanCardElement(collab, catClass) {
     <div class="ai-grow-bar">
       <button type="button" class="ai-grow-trigger" onclick="toggleGrowPlan(${collab.id})">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-        <span>${isGrowing ? 'Ocultar sugerencias pus.io' : 'Hacer crecer este plan con pus.io'}</span>
+        <span>${isGrowing ? 'Ocultar sugerencias pus.io' : 'Desarrollar esta idea con <strong>pus.io</strong>'}</span>
       </button>
       ${
         isGrowing
@@ -1176,7 +1185,22 @@ function addCustomSubItem(e, collabId) {
 
 function deleteCollab(collabId) {
   if (!requireAuth()) return;
+  const targetPlan = collaborations.find(c => c.id === collabId);
+  if (targetPlan) {
+    const isMine = currentUser && (
+      (targetPlan.authorEmail && targetPlan.authorEmail.toLowerCase() === currentUser.email.toLowerCase()) ||
+      (targetPlan.author && targetPlan.author.toLowerCase() === currentUser.name.toLowerCase())
+    );
+    if (!isMine) {
+      showToast("Solo quien propuso esta idea puede eliminarla.");
+      return;
+    }
+  }
+
   collaborations = collaborations.filter(c => c.id !== collabId);
+  if (lastCreatedPlanId === collabId) {
+    lastCreatedPlanId = null;
+  }
   saveState();
   renderAll();
   showToast("Plan eliminado");
@@ -1199,6 +1223,7 @@ function handlePusioMessage(rawText) {
     category: plan.category,
     stage: plan.stage || "stage2",
     author: currentUser.name,
+    authorEmail: currentUser.email,
     items: plan.items.map((name, idx) => ({
       id: `t_${Date.now()}_${idx}`,
       name: name,
@@ -1761,8 +1786,18 @@ function leaveCar(carId) {
 function retireCar(id) {
   if (!requireAuth()) return;
   const car = carsList.find(c => c.id === id);
-  const driverEmail = car ? car.driverEmail : (currentUser ? currentUser.email : "");
+  if (!car) return;
 
+  const isMine = currentUser && (
+    (car.driverEmail && car.driverEmail.toLowerCase() === currentUser.email.toLowerCase()) ||
+    (car.driver && car.driver.toLowerCase() === currentUser.name.toLowerCase())
+  );
+  if (!isMine) {
+    showToast("Solo quien registró este auto puede retirarlo.");
+    return;
+  }
+
+  const driverEmail = car.driverEmail || currentUser.email;
   carsList = carsList.filter(c => c.id !== id);
 
   // Actualizar conductor tanto en currentUser como en attendeesList

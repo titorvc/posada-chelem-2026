@@ -464,9 +464,10 @@ body {
     background: #FFFFFF;
     border: 1.5px solid var(--border-hover);
     border-radius: var(--radius-md);
-    padding: 12px 14px;
+    padding: 14px 16px;
     box-shadow: 0 4px 14px rgba(17, 18, 20, 0.08);
     position: relative;
+    box-sizing: border-box;
   }
 
   .plan-enter-anim {
@@ -490,6 +491,7 @@ body {
     justify-content: space-between;
     gap: 8px;
     margin-bottom: 8px;
+    padding-right: 28px;
   }
 
   .inline-plan-badge {
@@ -517,10 +519,13 @@ body {
   }
 
   .inline-plan-close-btn {
-    width: 26px;
-    height: 26px;
-    min-width: 26px;
-    min-height: 26px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    min-height: 24px;
     border-radius: 50%;
     border: 1px solid var(--border);
     background: var(--bg-subtle);
@@ -533,6 +538,7 @@ body {
     cursor: pointer;
     transition: all 0.18s ease;
     flex-shrink: 0;
+    z-index: 2;
   }
 
   .inline-plan-close-btn:hover {
@@ -555,6 +561,27 @@ body {
     font-size: 0.72rem;
     padding: 3px 8px;
     color: var(--ink-secondary);
+  }
+
+  /* Ajuste de márgenes y paddings para evitar desbordes en pantalla chica */
+  .container {
+    padding: 0 14px;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .hero-clean {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .agenda-column {
+    padding: 16px 14px;
+  }
+
+  .timeline-section {
+    padding: 16px 14px;
   }
 }
 
@@ -997,22 +1024,23 @@ body {
 
 .car-retire-quick-btn {
   position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 20px;
-  height: 20px;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border);
   background: #FFFFFF;
   color: var(--berry);
-  font-size: 0.75rem;
+  font-size: 1rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  opacity: 0.75;
-  transition: all 0.15s ease;
+  opacity: 0.9;
+  transition: all 0.18s ease;
+  z-index: 3;
 }
 
 .car-retire-quick-btn:hover {
@@ -1639,6 +1667,44 @@ body {
   padding-bottom: 60px;
 }
 
+.plans-section-intro {
+  margin-top: 10px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.plans-section-title {
+  font-family: var(--font-serif);
+  font-size: 2.1rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin: 0 0 6px;
+  line-height: 1.1;
+}
+
+.plans-section-subtitle {
+  font-size: 0.88rem;
+  color: var(--ink-secondary);
+  margin: 0;
+}
+
+@media (max-width: 860px) {
+  .plans-section-intro {
+    margin-top: 6px;
+    margin-bottom: 18px;
+    padding: 0 2px;
+  }
+
+  .plans-section-title {
+    font-size: 1.7rem;
+  }
+
+  .plans-section-subtitle {
+    font-size: 0.82rem;
+  }
+}
+
 .agenda-composer-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -1791,12 +1857,49 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 16px 18px;
+  position: relative;
   transition: all 0.2s var(--ease);
 }
 
 .plan-item-card:hover {
   border-color: var(--border-hover);
   box-shadow: var(--shadow-sm);
+}
+
+/* Botón tachita en la esquina superior derecha del plan */
+.plan-delete-corner-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  min-height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: #FFFFFF;
+  color: var(--ink-secondary);
+  font-size: 1.1rem;
+  font-weight: 400;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  z-index: 2;
+  padding: 0;
+}
+
+.plan-delete-corner-btn:hover {
+  background: var(--berry);
+  color: #FFFFFF;
+  border-color: var(--berry);
+  transform: scale(1.08);
+}
+
+.plan-card-head {
+  padding-right: 32px;
 }
 
 .plan-item-header {
