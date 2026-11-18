@@ -55,19 +55,19 @@ function createBotConfig(hue, fIdx, eIdx, mIdx, tIdx, sIdx, txIdx = 0) {
 }
 
 const DEFAULT_ATTENDEES = [
-  { id: 1,  name: "Reyvell", email: "reyvelljk87@gmail.com",          pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(38,  0, 1,  1, 0, 4, 0) },
-  { id: 2,  name: "Tito",    email: "titorvc08@gmail.com",            pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(198, 2, 0,  0, 1, 0, 1) },
-  { id: 3,  name: "Shory",   email: "fjvc091002@gmail.com",           pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(332, 1, 11, 3, 6, 4, 0) },
-  { id: 4,  name: "Luis",    email: "mendoza.lpinzon@gmail.com",      pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(350, 3, 2,  0, 2, 1, 0) },
-  { id: 5,  name: "Alex",    email: "alejandroaltamiranopuc@gmail.com",pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(265, 0, 4,  4, 4, 4, 2) },
-  { id: 6,  name: "Choro",   email: "joserikb@gmail.com",             pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(22,  4, 5,  5, 5, 0, 0) },
-  { id: 7,  name: "Rubén",   email: "ivan.raygosa@gmail.com",         pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(184, 2, 6,  1, 0, 3, 1) },
-  { id: 8,  name: "Beto",    email: "cplus.lat@gmail.com",            pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(212, 5, 7,  7, 7, 5, 2) },
-  { id: 9,  name: "Daniel",  email: "danielitoestabonito16@gmail.com",pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(162, 1, 3,  2, 3, 2, 0) },
-  { id: 10, name: "César",   email: "cesar.amigo@posadachelem.com",   pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(140, 2, 8,  6, 3, 2, 1) },
-  { id: 11, name: "Aldo",    email: "aldo.amigo@posadachelem.com",    pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(280, 4, 9,  4, 1, 3, 0) },
-  { id: 12, name: "Noé",     email: "noe.amigo@posadachelem.com",     pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(45,  1, 10, 2, 5, 0, 2) },
-  { id: 13, name: "Andrés",  email: "andres.amigo@posadachelem.com",  pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(200, 3, 12, 5, 2, 4, 0) }
+  { id: 1,  name: "Roybolas",  email: "reyvelljk87@gmail.com",          pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(38,  0, 1,  1, 0, 4, 0) },
+  { id: 2,  name: "Tito",      email: "titorvc08@gmail.com",            pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(198, 2, 0,  0, 1, 0, 1) },
+  { id: 3,  name: "Diarrea",   email: "fjvc091002@gmail.com",           pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(332, 1, 11, 3, 6, 4, 0) },
+  { id: 4,  name: "Luis",      email: "mendoza.lpinzon@gmail.com",      pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(350, 3, 2,  0, 2, 1, 0) },
+  { id: 5,  name: "Alex",      email: "alejandroaltamiranopuc@gmail.com",pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(265, 0, 4,  4, 4, 4, 2) },
+  { id: 6,  name: "Joserik",   email: "joserikb@gmail.com",             pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(22,  4, 5,  5, 5, 0, 0) },
+  { id: 7,  name: "Rubén",     email: "ivan.raygosa@gmail.com",         pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(184, 2, 6,  1, 0, 3, 1) },
+  { id: 9,  name: "Papaddzul", email: "danielitoestabonito16@gmail.com",pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(162, 1, 3,  2, 3, 2, 0) },
+  { id: 10, name: "César",     email: "cesar.amigo@posadachelem.com",   pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(140, 2, 8,  6, 3, 2, 1) },
+  { id: 12, name: "Noé",       email: "noe.amigo@posadachelem.com",     pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(45,  1, 10, 2, 5, 0, 2) },
+  { id: 1795018647356, name: "Otis",      email: "alberto34188@gmail.com",         pinHash: null, attendance: "seen", travelMode: "driver", puedo_dar_coche: 1, robot: createBotConfig(150, 0, 1, 0, 3, 2, 0) },
+  { id: 1795019785482, name: "Shalom",    email: "ayorasuasteandresmiguel@gmai.com",pinHash: null, attendance: "confirmed", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(51, 1, 3, 2, 1, 0, 0) },
+  { id: 1795022352684, name: "Alpaquiña", email: "aldopantoja2002@gmail.com",       pinHash: null, attendance: "seen", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(166, 0, 1, 0, 3, 2, 0) }
 ];
 
 // Tablero inicial completamente limpio y vacío para la versión final de producción
