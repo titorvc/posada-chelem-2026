@@ -257,7 +257,99 @@ function initCountdown() {
   setInterval(update, 1000);
 }
 
-// ----------------- Estado Local (v10: Producción Limpia & Concurso Pus.io) ----------------- //
+// ----------------- Estado Local & Nube (Supabase Sync) ----------------- //
+const SUPABASE_URL = "https://zrxingfpnczypophqbai.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_kRulPNGJbnmw-Gj8FG_ljg_RWMFbzL2";
+
+let syncDebounceTimer = null;
+
+async function syncFetchFromCloud() {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/posada_sync?key=eq.global_state&select=data`, {
+      headers: {
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+      }
+    });
+    if (!res.ok) return;
+    const rows = await res.json();
+    if (rows && rows.length > 0 && rows[0].data) {
+      const cloud = rows[0].data;
+
+      // Fusionar lista de participantes conservando los datos más recientes
+      if (Array.isArray(cloud.attendees) && cloud.attendees.length > 0) {
+        attendeesList = cloud.attendees.map(u => ({
+          ...u,
+          attendance: u.attendance || (u.pinHash ? "seen" : "unanswered")
+        }));
+        localStorage.setItem("posada_attendees_v10", JSON.stringify(attendeesList));
+      }
+
+      if (Array.isArray(cloud.cars)) {
+        carsList = cloud.cars;
+        localStorage.setItem("posada_cars_v10", JSON.stringify(carsList));
+      }
+
+      if (Array.isArray(cloud.collabs)) {
+        collaborations = cloud.collabs;
+        localStorage.setItem("posada_collabs_v10", JSON.stringify(collaborations));
+      }
+
+      if (cloud.pusioRobot) {
+        pusioRobot = cloud.pusioRobot;
+        localStorage.setItem("posada_pusio_robot_v10", JSON.stringify(pusioRobot));
+      }
+
+      if (cloud.pusioContest) {
+        pusioContest = cloud.pusioContest;
+        localStorage.setItem("posada_pusio_contest_v10", JSON.stringify(pusioContest));
+      }
+
+      // Re-vincular sesión activa del usuario local
+      const savedEmail = localStorage.getItem("posada_active_email_v10");
+      if (savedEmail) {
+        currentUser = attendeesList.find(u => u.email.toLowerCase() === savedEmail.toLowerCase()) || currentUser;
+      }
+
+      renderAll();
+    }
+  } catch (err) {
+    console.warn("Supabase fetch warning:", err);
+  }
+}
+
+async function syncPushToCloud() {
+  clearTimeout(syncDebounceTimer);
+  syncDebounceTimer = setTimeout(async () => {
+    try {
+      const payload = {
+        key: "global_state",
+        data: {
+          attendees: attendeesList,
+          cars: carsList,
+          collabs: collaborations,
+          pusioRobot: pusioRobot,
+          pusioContest: pusioContest,
+          lastUpdated: Date.now()
+        }
+      };
+
+      await fetch(`${SUPABASE_URL}/rest/v1/posada_sync`, {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+          "Content-Type": "application/json",
+          "Prefer": "resolution=merge-duplicates"
+        },
+        body: JSON.stringify(payload)
+      });
+    } catch (err) {
+      console.warn("Supabase push warning:", err);
+    }
+  }, 400);
+}
+
 function loadState() {
   const savedAttendees = localStorage.getItem("posada_attendees_v10");
   if (savedAttendees) {
@@ -266,7 +358,7 @@ function loadState() {
       if (Array.isArray(parsed) && parsed.length > 0) {
         attendeesList = parsed.map(u => ({
           ...u,
-          attendance: u.attendance || (u.pinHash ? "confirmed" : "pending")
+          attendance: u.attendance || (u.pinHash ? "seen" : "unanswered")
         }));
       } else {
         attendeesList = JSON.parse(JSON.stringify(DEFAULT_ATTENDEES));
@@ -303,6 +395,9 @@ function loadState() {
       pusioContest = { submissions: [], rewardIdeas: [...DEFAULT_REWARD_IDEAS], votes: {} };
     }
   }
+
+  // Cargar estado actualizado desde la nube Supabase de inmediato
+  syncFetchFromCloud();
 }
 
 function saveState() {
@@ -316,6 +411,9 @@ function saveState() {
     localStorage.setItem("posada_pusio_robot_v10", JSON.stringify(pusioRobot));
   }
   localStorage.setItem("posada_pusio_contest_v10", JSON.stringify(pusioContest));
+
+  // Sincronizar en segundo plano hacia Supabase
+  syncPushToCloud();
 }
 
 function switchTab(tabId) {
