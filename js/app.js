@@ -341,10 +341,10 @@ function renderAll() {
 }
 
 function renderMySummary() {
-  const desktopContainer = document.getElementById("mySummaryContent");
   const modalContainer = document.getElementById("modalUserSummaryBody");
+  if (!modalContainer) return;
 
-  const buildHTML = (isModal = false) => {
+  const buildHTML = () => {
     if (!currentUser) {
       // Estado NO AUTENTICADO
       return `
@@ -361,7 +361,7 @@ function renderMySummary() {
               Todos los muñequitos empiezan apagados en gris. Inicia sesión con tu correo para encender tu robot en azul (visto), confirmar si irás a Chelem y desbloquear tus propuestas.
             </p>
             <div class="my-summary-guest-actions">
-              <button type="button" class="btn btn-pusio" onclick="${isModal ? 'closeModal(\'modalUserSummary\'); ' : ''}openModal('modalAuth')">
+              <button type="button" class="btn btn-pusio" onclick="closeModal('modalUserSummary'); openModal('modalAuth')">
                 Iniciar sesión / Entrar con mi PIN
               </button>
             </div>
@@ -418,10 +418,10 @@ function renderMySummary() {
     const totalCarsActive = carsList.length;
 
     return `
-      <div class="my-summary-user-box ${isModal ? 'modal-user-box-layout' : ''}">
+      <div class="my-summary-user-box modal-user-box-layout">
         <!-- Columna izquierda: Avatar y personalización directa -->
         <div class="my-summary-user-profile">
-          <div class="user-summary-avatar-wrap" onclick="${isModal ? 'closeModal(\'modalUserSummary\'); ' : ''}selectUserForCustomization(${currentUser.id})" title="Clic para editar tu muñequito">
+          <div class="user-summary-avatar-wrap" onclick="closeModal('modalUserSummary'); selectUserForCustomization(${currentUser.id})" title="Clic para editar tu muñequito">
             ${renderRobotSVG(currentUser.robot, null, null, true)}
             <span class="user-summary-edit-badge" title="Editar diseño">Editar</span>
           </div>
@@ -461,7 +461,7 @@ function renderMySummary() {
             <button type="button" class="attend-btn btn-attend-pending ${currentAtt === 'pending' ? 'active' : ''}" onclick="setAttendanceStatus('pending')">Pendiente</button>
             <button type="button" class="attend-btn btn-attend-declined ${currentAtt === 'declined' ? 'active' : ''}" onclick="setAttendanceStatus('declined')">No voy</button>
           </div>
-          <button type="button" class="btn btn-secondary btn-sm" style="margin-top:8px; width:100%;" onclick="${isModal ? 'closeModal(\'modalUserSummary\'); ' : ''}selectUserForCustomization(${currentUser.id})">
+          <button type="button" class="btn btn-secondary btn-sm" style="margin-top:8px; width:100%;" onclick="closeModal('modalUserSummary'); selectUserForCustomization(${currentUser.id})">
             Personalizar mi personaje
           </button>
         </div>
@@ -469,8 +469,7 @@ function renderMySummary() {
     `;
   };
 
-  if (desktopContainer) desktopContainer.innerHTML = buildHTML(false);
-  if (modalContainer) modalContainer.innerHTML = buildHTML(true);
+  modalContainer.innerHTML = buildHTML();
 }
 
 function renderSessionHeader() {
