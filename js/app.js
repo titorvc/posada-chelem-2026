@@ -260,7 +260,23 @@ function initCountdown() {
 // ----------------- Estado Local (v10: Producción Limpia & Concurso Pus.io) ----------------- //
 function loadState() {
   const savedAttendees = localStorage.getItem("posada_attendees_v10");
-  attendeesList = savedAttendees ? JSON.parse(savedAttendees) : JSON.parse(JSON.stringify(DEFAULT_ATTENDEES));
+  if (savedAttendees) {
+    try {
+      const parsed = JSON.parse(savedAttendees);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        attendeesList = parsed.map(u => ({
+          ...u,
+          attendance: u.attendance || (u.pinHash ? "confirmed" : "pending")
+        }));
+      } else {
+        attendeesList = JSON.parse(JSON.stringify(DEFAULT_ATTENDEES));
+      }
+    } catch (e) {
+      attendeesList = JSON.parse(JSON.stringify(DEFAULT_ATTENDEES));
+    }
+  } else {
+    attendeesList = JSON.parse(JSON.stringify(DEFAULT_ATTENDEES));
+  }
 
   const savedCars = localStorage.getItem("posada_cars_v10");
   carsList = savedCars ? JSON.parse(savedCars) : [];
@@ -360,20 +376,19 @@ function selectUserForCustomization(personId) {
   const person = attendeesList.find(u => u.id === personId);
   if (!person) return;
 
-  // Si la cuenta tiene clave establecida y no coincide con la sesión activa, pedir autenticación
-  if (person.pinHash && (!currentUser || currentUser.email.toLowerCase() !== person.email.toLowerCase())) {
+  // Si la cuenta tiene clave establecida o el usuario actual no tiene sesión, pedir autenticación
+  if (!currentUser || currentUser.email.toLowerCase() !== person.email.toLowerCase()) {
     document.getElementById("authErrorMsg").style.display = "none";
     document.getElementById("authInputEmail").value = person.email;
     document.getElementById("authInputName").value = person.name;
     document.getElementById("authInputPin").value = "";
     checkAuthDeduplication();
     openModal("modalAuth");
-    showToast(`Cuenta de ${person.name} protegida con PIN. Inicia sesión para modificar su diseño.`);
+    showToast(`Inicia sesión con tu PIN para personalizar el perfil y estado de ${person.name}.`);
     return;
   }
 
   editingTarget = "user";
-  currentUser = person;
   // Guardar snapshot original antes de cualquier modificación
   studioOriginalState = {
     target: "user",
@@ -1978,7 +1993,9 @@ function setupEventListeners() {
         return;
       }
       existing.pinHash = candidateHash;
-      existing.name = nameVal;
+      if (nameVal && nameVal.trim()) {
+        existing.name = nameVal.trim();
+      }
       currentUser = existing;
     } else if (pendingClaimedMatch) {
       // Reclamar el perfil del participante existente (evitando duplicado)
