@@ -76,7 +76,7 @@ const DEFAULT_COLLABORATIONS = [];
 // Recompensas iniciales sugeridas para el concurso de personalización de Pus.io
 const DEFAULT_REWARD_IDEAS = [
   "Elegir la primera canción que sonará al llegar a la casa de Chelem",
-  "El primer corte de carne servido en el asador de la tarde",
+  "El primer plato servido en la comida del atardecer",
   "Inmunidad y pase directo a la final en el torneo de Smash",
   "Derecho a elegir la película de la madrugada en la sala",
   "Título honorario de Capitán de Playa Chelem 2026",
