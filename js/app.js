@@ -55,15 +55,33 @@ function createBotConfig(hue, fIdx, eIdx, mIdx, tIdx, sIdx, txIdx = 0) {
 }
 
 const DEFAULT_ATTENDEES = [
-  { id: 1, name: "Reyvell",   email: "reyvelljk87@gmail.com",          pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(38,  0, 1, 1, 0, 4, 0) },
-  { id: 2, name: "Roberto",   email: "titorvc08@gmail.com",            pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(198, 2, 0, 0, 1, 0, 1) },
-  { id: 3, name: "Daniel",    email: "danielitoestabonito16@gmail.com",pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(162, 1, 3, 2, 3, 2, 0) },
-  { id: 4, name: "Pinzón",    email: "mendoza.lpinzon@gmail.com",      pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(350, 3, 2, 0, 2, 1, 0) },
-  { id: 5, name: "Alejandro", email: "alejandroaltamiranopuc@gmail.com",pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(265, 0, 4, 4, 4, 4, 2) },
-  { id: 6, name: "Erik",      email: "joserikb@gmail.com",             pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(22,  4, 5, 5, 5, 0, 0) },
-  { id: 7, name: "Iván",      email: "ivan.raygosa@gmail.com",         pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(184, 2, 6, 1, 0, 3, 1) },
-  { id: 8, name: "Francisco", email: "fjvc091002@gmail.com",           pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(332, 1, 11, 3, 6, 4, 0) },
-  { id: 9, name: "Carlos",    email: "cplus.lat@gmail.com",            pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(212, 5, 7, 7, 7, 5, 2) }
+  { id: 1,  name: "Reyvell", email: "reyvelljk87@gmail.com",          pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(38,  0, 1,  1, 0, 4, 0) },
+  { id: 2,  name: "Tito",    email: "titorvc08@gmail.com",            pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(198, 2, 0,  0, 1, 0, 1) },
+  { id: 3,  name: "Shory",   email: "fjvc091002@gmail.com",           pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(332, 1, 11, 3, 6, 4, 0) },
+  { id: 4,  name: "Luis",    email: "mendoza.lpinzon@gmail.com",      pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(350, 3, 2,  0, 2, 1, 0) },
+  { id: 5,  name: "Alex",    email: "alejandroaltamiranopuc@gmail.com",pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(265, 0, 4,  4, 4, 4, 2) },
+  { id: 6,  name: "Choro",   email: "joserikb@gmail.com",             pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(22,  4, 5,  5, 5, 0, 0) },
+  { id: 7,  name: "Rubén",   email: "ivan.raygosa@gmail.com",         pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(184, 2, 6,  1, 0, 3, 1) },
+  { id: 8,  name: "Beto",    email: "cplus.lat@gmail.com",            pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(212, 5, 7,  7, 7, 5, 2) },
+  { id: 9,  name: "Daniel",  email: "danielitoestabonito16@gmail.com",pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(162, 1, 3,  2, 3, 2, 0) },
+  { id: 10, name: "César",   email: "cesar.amigo@posadachelem.com",   pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(140, 2, 8,  6, 3, 2, 1) },
+  { id: 11, name: "Aldo",    email: "aldo.amigo@posadachelem.com",    pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(280, 4, 9,  4, 1, 3, 0) },
+  { id: 12, name: "Noé",     email: "noe.amigo@posadachelem.com",     pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(45,  1, 10, 2, 5, 0, 2) },
+  { id: 13, name: "Andrés",  email: "andres.amigo@posadachelem.com",  pinHash: null, travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(200, 3, 12, 5, 2, 4, 0) }
+];
+
+// Tablero inicial completamente limpio y vacío para la versión final de producción
+const DEFAULT_COLLABORATIONS = [];
+
+// Recompensas iniciales sugeridas para el concurso de personalización de Pus.io
+const DEFAULT_REWARD_IDEAS = [
+  "Elegir la primera canción que sonará al llegar a la casa de Chelem",
+  "El primer corte de carne servido en el asador de la tarde",
+  "Inmunidad y pase directo a la final en el torneo de Smash",
+  "Derecho a elegir la película de la madrugada en la sala",
+  "Título honorario de Capitán de Playa Chelem 2026",
+  "El mejor asiento frente al ventilador en la terraza",
+  "No lavar platos ni vasos en todo el fin de semana"
 ];
 
 let currentUser = null;
@@ -72,7 +90,17 @@ let activeColorChannel = "pri"; // "pri" o "sec"
 let attendeesList = [];
 let carsList = [];
 let collaborations = [];
+let pusioRobot = null;
+let editingTarget = "user"; // "user" o "pusio"
+let pusioContest = {
+  submissions: [],
+  rewardIdeas: [...DEFAULT_REWARD_IDEAS],
+  votes: {} // email -> submissionId
+};
 let uidCounter = 1;
+
+// Configuración por defecto de Pus.io: robot alegre, amigable y cómico
+const DEFAULT_PUSIO_ROBOT = createBotConfig(165, 0, 1, 0, 3, 2, 0);
 
 document.addEventListener("DOMContentLoaded", () => {
   initCountdown();
@@ -105,7 +133,7 @@ function computePinHash(email, pin) {
 // ==========================================================================
 // ENSAMBLADOR SVG AUTÉNTICO DE BOTTTS CON COLORES INDEPENDIENTES POR CAPA
 // ==========================================================================
-function renderRobotSVG(robotCfg, overridePart = null, overrideShape = null) {
+function renderRobotSVG(robotCfg, overridePart = null, overrideShape = null, noBackground = false) {
   const lib = window.BOTTTS_LIBRARY;
   if (!lib) return `<svg viewBox="0 0 180 180"></svg>`;
 
@@ -116,20 +144,23 @@ function renderRobotSVG(robotCfg, overridePart = null, overrideShape = null) {
 
   const uid = "u" + (uidCounter++);
 
-  // 1. Fondo personalizado
-  const bgPri = hslStr(r.bg.pri);
-  const bgSec = hslStr(r.bg.sec);
-  let bgSvg = `<rect width="180" height="180" fill="${bgPri}"/>`;
-  if (r.bg.shape === "linear") {
-    bgSvg = `<defs><linearGradient id="bg_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${bgPri}"/><stop offset="100%" stop-color="${bgSec}"/></linearGradient></defs><rect width="180" height="180" fill="url(#bg_${uid})"/>`;
-  } else if (r.bg.shape === "radial") {
-    bgSvg = `<rect width="180" height="180" fill="${bgPri}"/><circle cx="90" cy="95" r="68" fill="${bgSec}"/>`;
-  } else if (r.bg.shape === "rings") {
-    bgSvg = `<rect width="180" height="180" fill="${bgPri}"/><circle cx="90" cy="95" r="72" fill="none" stroke="${bgSec}" stroke-width="10"/><circle cx="90" cy="95" r="50" fill="none" stroke="${bgSec}" stroke-width="6"/>`;
-  } else if (r.bg.shape === "grid") {
-    bgSvg = `<rect width="180" height="180" fill="${bgPri}"/><path d="M0 45 H180 M0 90 H180 M0 135 H180 M45 0 V180 M90 0 V180 M135 0 V180" stroke="${bgSec}" stroke-width="2.5"/>`;
-  } else if (r.bg.shape === "split") {
-    bgSvg = `<rect width="180" height="180" fill="${bgPri}"/><polygon points="0,180 180,0 180,180" fill="${bgSec}"/>`;
+  // 1. Fondo personalizado (omitido si noBackground es true)
+  let bgSvg = "";
+  if (!noBackground) {
+    const bgPri = hslStr(r.bg.pri);
+    const bgSec = hslStr(r.bg.sec);
+    bgSvg = `<rect width="180" height="180" fill="${bgPri}"/>`;
+    if (r.bg.shape === "linear") {
+      bgSvg = `<defs><linearGradient id="bg_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${bgPri}"/><stop offset="100%" stop-color="${bgSec}"/></linearGradient></defs><rect width="180" height="180" fill="url(#bg_${uid})"/>`;
+    } else if (r.bg.shape === "radial") {
+      bgSvg = `<rect width="180" height="180" fill="${bgPri}"/><circle cx="90" cy="95" r="68" fill="${bgSec}"/>`;
+    } else if (r.bg.shape === "rings") {
+      bgSvg = `<rect width="180" height="180" fill="${bgPri}"/><circle cx="90" cy="95" r="72" fill="none" stroke="${bgSec}" stroke-width="10"/><circle cx="90" cy="95" r="50" fill="none" stroke="${bgSec}" stroke-width="6"/>`;
+    } else if (r.bg.shape === "grid") {
+      bgSvg = `<rect width="180" height="180" fill="${bgPri}"/><path d="M0 45 H180 M0 90 H180 M0 135 H180 M45 0 V180 M90 0 V180 M135 0 V180" stroke="${bgSec}" stroke-width="2.5"/>`;
+    } else if (r.bg.shape === "split") {
+      bgSvg = `<rect width="180" height="180" fill="${bgPri}"/><polygon points="0,180 180,0 180,180" fill="${bgSec}"/>`;
+    }
   }
 
   // 2. Laterales (sides)
@@ -194,12 +225,13 @@ function initCountdown() {
   const elMins = document.getElementById("cdMins");
   const elSecs = document.getElementById("cdSecs");
 
+  if (elMeta) elMeta.innerHTML = "Casa de Reyvell &bull; S&aacute;bado 19 de Diciembre, 2026";
+
   function update() {
     const now = new Date().getTime();
     const diff = EVENT_DATE - now;
 
     if (diff <= 0) {
-      if (elMeta) elMeta.innerHTML = "Chelem Puerto, Yucatán &bull; ¡Es hoy la Posada!";
       if (elDays) elDays.textContent = "00";
       if (elHours) elHours.textContent = "00";
       if (elMins) elMins.textContent = "00";
@@ -212,7 +244,6 @@ function initCountdown() {
     const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const s = Math.floor((diff % (1000 * 60)) / 1000);
 
-    if (elMeta) elMeta.innerHTML = `Chelem Puerto, Yucatán &bull; Sábado 19 Dic 2026 &bull; Faltan ${d} días`;
     if (elDays) elDays.textContent = String(d).padStart(2, "0");
     if (elHours) elHours.textContent = String(h).padStart(2, "0");
     if (elMins) elMins.textContent = String(m).padStart(2, "0");
@@ -223,30 +254,49 @@ function initCountdown() {
   setInterval(update, 1000);
 }
 
-// ----------------- Estado Local (v8 con Bottts Auténticos + HSL por Pieza) ----------------- //
+// ----------------- Estado Local (v10: Producción Limpia & Concurso Pus.io) ----------------- //
 function loadState() {
-  const savedAttendees = localStorage.getItem("posada_attendees_v8");
-  attendeesList = savedAttendees ? JSON.parse(savedAttendees) : DEFAULT_ATTENDEES;
+  const savedAttendees = localStorage.getItem("posada_attendees_v10");
+  attendeesList = savedAttendees ? JSON.parse(savedAttendees) : JSON.parse(JSON.stringify(DEFAULT_ATTENDEES));
 
-  const savedCars = localStorage.getItem("posada_cars_v8");
+  const savedCars = localStorage.getItem("posada_cars_v10");
   carsList = savedCars ? JSON.parse(savedCars) : [];
 
-  const savedCollabs = localStorage.getItem("posada_collabs_v8");
+  const savedCollabs = localStorage.getItem("posada_collabs_v10");
   collaborations = savedCollabs ? JSON.parse(savedCollabs) : [];
 
-  const savedSessionEmail = localStorage.getItem("posada_active_email_v8");
+  const savedSessionEmail = localStorage.getItem("posada_active_email_v10");
   if (savedSessionEmail) {
     currentUser = attendeesList.find(u => u.email.toLowerCase() === savedSessionEmail.toLowerCase()) || null;
+  }
+
+  const savedPusio = localStorage.getItem("posada_pusio_robot_v10");
+  pusioRobot = savedPusio ? JSON.parse(savedPusio) : JSON.parse(JSON.stringify(DEFAULT_PUSIO_ROBOT));
+
+  const savedContest = localStorage.getItem("posada_pusio_contest_v10");
+  if (savedContest) {
+    try {
+      pusioContest = JSON.parse(savedContest);
+      if (!Array.isArray(pusioContest.rewardIdeas) || pusioContest.rewardIdeas.length === 0) {
+        pusioContest.rewardIdeas = [...DEFAULT_REWARD_IDEAS];
+      }
+    } catch (e) {
+      pusioContest = { submissions: [], rewardIdeas: [...DEFAULT_REWARD_IDEAS], votes: {} };
+    }
   }
 }
 
 function saveState() {
-  localStorage.setItem("posada_attendees_v8", JSON.stringify(attendeesList));
-  localStorage.setItem("posada_cars_v8", JSON.stringify(carsList));
-  localStorage.setItem("posada_collabs_v8", JSON.stringify(collaborations));
+  localStorage.setItem("posada_attendees_v10", JSON.stringify(attendeesList));
+  localStorage.setItem("posada_cars_v10", JSON.stringify(carsList));
+  localStorage.setItem("posada_collabs_v10", JSON.stringify(collaborations));
   if (currentUser) {
-    localStorage.setItem("posada_active_email_v8", currentUser.email);
+    localStorage.setItem("posada_active_email_v10", currentUser.email);
   }
+  if (pusioRobot) {
+    localStorage.setItem("posada_pusio_robot_v10", JSON.stringify(pusioRobot));
+  }
+  localStorage.setItem("posada_pusio_contest_v10", JSON.stringify(pusioContest));
 }
 
 function switchTab(tabId) {
@@ -261,11 +311,12 @@ function switchTab(tabId) {
 // ----------------- Renderizado General ----------------- //
 function renderAll() {
   renderSessionHeader();
-  renderHeroStats();
-  renderCollabBoard();
+  renderSummaryPanel();
+  renderPusioMascot();
+  renderAgendaBoards();
+  renderDynamicTimeline();
   renderRobotStudio();
   renderWhosGoing();
-  renderTransportSection();
 }
 
 function renderSessionHeader() {
@@ -284,14 +335,232 @@ function renderSessionHeader() {
   }
 }
 
-function renderHeroStats() {
-  const planesSub = document.getElementById("heroPlanesSub");
-  if (planesSub) {
-    const totalTasks = collaborations.reduce((acc, c) => acc + c.items.length, 0);
-    const coveredTasks = collaborations.reduce((acc, c) => acc + c.items.filter(i => i.claimedBy).length, 0);
-    planesSub.textContent = collaborations.length > 0
-      ? `${collaborations.length} ${collaborations.length === 1 ? 'plan' : 'planes'} &bull; ${coveredTasks}/${totalTasks} insumos cubiertos`
-      : "0 planes activos &bull; Proponer el primero";
+function selectUserForCustomization(personId) {
+  const person = attendeesList.find(u => u.id === personId);
+  if (!person) return;
+
+  // Si la cuenta tiene clave establecida y no coincide con la sesión activa, pedir autenticación
+  if (person.pinHash && (!currentUser || currentUser.email.toLowerCase() !== person.email.toLowerCase())) {
+    document.getElementById("authErrorMsg").style.display = "none";
+    document.getElementById("authInputEmail").value = person.email;
+    document.getElementById("authInputName").value = person.name;
+    document.getElementById("authInputPin").value = "";
+    checkAuthDeduplication();
+    openModal("modalAuth");
+    showToast(`Cuenta de ${person.name} protegida con PIN. Inicia sesión para modificar su diseño.`);
+    return;
+  }
+
+  editingTarget = "user";
+  currentUser = person;
+  saveState();
+  renderRobotStudio();
+  openModal("modalRobotStudio");
+  showToast(`Personalizando a ${person.name}. Toca las piezas para editar.`);
+}
+
+function selectPusioForCustomization() {
+  editingTarget = "pusio";
+  if (!pusioRobot) {
+    pusioRobot = JSON.parse(JSON.stringify(DEFAULT_PUSIO_ROBOT));
+  }
+  renderRobotStudio();
+  openModal("modalRobotStudio");
+  showToast("Personalizando el avatar de Pus.io. Toca las piezas para cambiar su estilo.");
+}
+
+function renderPusioMascot() {
+  const mascotWrap = document.getElementById("pusioMascotWrap");
+  if (!mascotWrap) return;
+  const cfg = pusioRobot || DEFAULT_PUSIO_ROBOT;
+  // Render sin fondo plano para que se fusione con la insignia suave
+  mascotWrap.innerHTML = renderRobotSVG(cfg, null, null, true);
+}
+
+function renderSummaryPanel() {
+  // 1. Lado izquierdo: Avatares en gris (no confirmados) o con brillo (confirmados)
+  const avatarsGrid = document.getElementById("summaryAvatarsGrid");
+  if (avatarsGrid) {
+    avatarsGrid.innerHTML = "";
+    attendeesList.forEach(person => {
+      const isConfirmed = Boolean(person.pinHash);
+      const isVIP = person.puedo_dar_coche === 1;
+      const isMe = currentUser && currentUser.email.toLowerCase() === person.email.toLowerCase();
+
+      let statusText = "Pendiente";
+      if (isVIP) statusText = "Conductor VIP";
+      else if (isConfirmed) statusText = "Confirmado";
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = `avatar-token ${isVIP ? 'is-vip' : (isConfirmed ? 'is-confirmed' : 'is-unconfirmed')}`;
+      btn.title = `${person.name}: ${statusText}. Clic para personalizar.`;
+      btn.onclick = () => selectUserForCustomization(person.id);
+
+      // Render robot sin fondo (únicamente los íconos vectoriales)
+      const svgIcon = renderRobotSVG(person.robot, null, null, true);
+
+      btn.innerHTML = `
+        <div class="avatar-svg-wrap">
+          ${svgIcon}
+          ${isVIP ? '<span class="avatar-vip-badge">VIP</span>' : ''}
+        </div>
+        <span class="avatar-token-name">${person.name}${isMe ? ' (Tú)' : ''}</span>
+        <span class="avatar-token-status">${statusText}</span>
+      `;
+      avatarsGrid.appendChild(btn);
+    });
+
+    // Botón para sumar nuevo participante a la lista
+    const addToken = document.createElement("button");
+    addToken.type = "button";
+    addToken.className = "avatar-token avatar-token-add";
+    addToken.title = "No votaste en la encuesta o eres nuevo? Haz clic para unirte a la posada.";
+    addToken.onclick = () => {
+      document.getElementById("authErrorMsg").style.display = "none";
+      document.getElementById("authInputEmail").value = "";
+      document.getElementById("authInputName").value = "";
+      document.getElementById("authInputPin").value = "";
+      openModal("modalAuth");
+      showToast("Ingresa tu correo, nombre y un PIN de 4 dígitos para sumarte.");
+    };
+    addToken.innerHTML = `
+      <div class="avatar-svg-wrap avatar-add-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      </div>
+      <span class="avatar-token-name">+ Unirme</span>
+      <span class="avatar-token-status">Nuevo</span>
+    `;
+    avatarsGrid.appendChild(addToken);
+  }
+
+  // 2. Lado central: 5 siluetas de vehículos y medidor de capacidad para 13 participantes
+  const capacityStats = document.getElementById("transportCapacityStats");
+  const capacityFill = document.getElementById("transportCapacityFill");
+
+  let totalCarCapacity = 0;
+  let totalCarTaken = 0;
+
+  carsList.forEach(c => {
+    const s = Number(c.seats) || 3;
+    const p = Array.isArray(c.passengers) ? c.passengers.length : 0;
+    totalCarCapacity += (s + 1); // conductor + pasajeros
+    totalCarTaken += (p + 1);
+  });
+
+  if (capacityStats) {
+    capacityStats.textContent = `${totalCarTaken} / 13 asientos`;
+  }
+  if (capacityFill) {
+    const pct = Math.min(100, Math.round((totalCarTaken / 13) * 100));
+    capacityFill.style.width = `${pct}%`;
+  }
+
+  const carsGrid = document.getElementById("summaryCarsGrid");
+  if (carsGrid) {
+    carsGrid.innerHTML = "";
+    const maxCars = 5;
+    for (let i = 0; i < maxCars; i++) {
+      const car = carsList[i] || null;
+      const isMine = car && currentUser && car.driverEmail.toLowerCase() === currentUser.email.toLowerCase();
+
+      if (car) {
+        const totalSeats = Number(car.seats) || 3;
+        const passengers = Array.isArray(car.passengers) ? car.passengers : [];
+        const takenPassengerSeats = passengers.length;
+        const freePassengerSeats = Math.max(0, totalSeats - takenPassengerSeats);
+
+        const totalCapacity = totalSeats + 1; // contando al conductor
+        const totalPeople = takenPassengerSeats + 1;
+        const fillPercent = Math.round((totalPeople / totalCapacity) * 100);
+
+        let vibeTier = "vibe-tier-low";
+        let vibeLabel = "Solo piloto";
+
+        if (freePassengerSeats === 0) {
+          vibeTier = "vibe-tier-max";
+          vibeLabel = "Auto completo • Fiesta";
+        } else if (takenPassengerSeats >= 2 || (takenPassengerSeats / totalSeats) >= 0.5) {
+          vibeTier = "vibe-tier-high";
+          vibeLabel = `${freePassengerSeats} libre${freePassengerSeats > 1 ? 's' : ''} • Casi lleno`;
+        } else if (takenPassengerSeats >= 1) {
+          vibeTier = "vibe-tier-mid";
+          vibeLabel = `${freePassengerSeats} libre${freePassengerSeats > 1 ? 's' : ''} • Buena vibra`;
+        } else {
+          vibeTier = "vibe-tier-low";
+          vibeLabel = `${freePassengerSeats} lugares libres`;
+        }
+
+        const slot = document.createElement("div");
+        slot.className = `car-slot filled ${vibeTier} ${isMine ? 'is-mine' : ''}`;
+
+        // Generar puntitos de visualización:
+        // 1er punto: Conductor (siempre lleno con ámbar/dorado)
+        // Siguientes puntos: Pasajeros (lleno o vacío)
+        let dotsHtml = `<span class="seat-dot driver-dot" title="Conductor: ${car.driver}"></span>`;
+        for (let s = 0; s < totalSeats; s++) {
+          if (s < takenPassengerSeats) {
+            const pName = passengers[s] ? passengers[s].name : "Pasajero";
+            dotsHtml += `<span class="seat-dot dot-taken" title="Ocupado por ${pName}"></span>`;
+          } else {
+            dotsHtml += `<span class="seat-dot dot-free" title="Asiento libre para pasajero"></span>`;
+          }
+        }
+
+        slot.title = `Auto de ${car.driver}: ${vibeLabel} (${totalPeople}/${totalCapacity} a bordo). Clic para ver detalles.`;
+        slot.onclick = (e) => {
+          // Si hace clic en el botón de quitar, no abrir modal
+          if (e.target.closest(".car-retire-quick-btn")) return;
+          openCarDetailModal(car.id);
+        };
+
+        slot.innerHTML = `
+          ${isMine ? `<button type="button" class="car-retire-quick-btn" title="Quitar mi auto" onclick="retireCar(${car.id})">&times;</button>` : ''}
+          <div class="car-card-top-row">
+            <svg class="car-silhouette-svg" viewBox="0 0 44 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 17h36v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5z"/>
+              <path d="M8 17l4-9h20l4 9"/>
+              <circle cx="12" cy="22" r="2.5" fill="currentColor"/>
+              <circle cx="32" cy="22" r="2.5" fill="currentColor"/>
+            </svg>
+            <span class="car-zone-tag">${car.zone || 'Mérida'}</span>
+          </div>
+          <span class="car-slot-title">${car.driver}</span>
+          <div class="car-vibe-bar">
+            <div class="car-vibe-fill" style="width:${fillPercent}%;"></div>
+          </div>
+          <div class="car-seats-dots">
+            ${dotsHtml}
+          </div>
+          <span class="car-slot-desc">${car.model}</span>
+          <span class="car-status-pill">${vibeLabel}</span>
+        `;
+        carsGrid.appendChild(slot);
+      } else {
+        const slot = document.createElement("div");
+        slot.className = "car-slot empty";
+        slot.title = `Cupo libre ${i + 1}. Clic para registrar tu coche y ser Conductor VIP.`;
+        slot.onclick = () => {
+          if (!requireAuth()) return;
+          openModal("modalCar");
+        };
+        slot.innerHTML = `
+          <svg class="car-silhouette-svg" viewBox="0 0 44 28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="3 3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 17h36v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5z"/>
+            <path d="M8 17l4-9h20l4 9"/>
+            <circle cx="12" cy="22" r="2"/>
+            <circle cx="32" cy="22" r="2"/>
+          </svg>
+          <span class="car-slot-title">Auto ${i + 1} libre</span>
+          <span class="car-slot-desc">Llevaré mi coche</span>
+          <span class="car-action-hint">+ Activar VIP</span>
+        `;
+        carsGrid.appendChild(slot);
+      }
+    }
   }
 }
 
@@ -299,6 +568,10 @@ function renderHeroStats() {
 // ESTUDIO MODERNO DE PERSONAJE (BOTTTS + RUEDA DE HUES UNIFICADA)
 // ==========================================================================
 function getEditingRobot() {
+  if (editingTarget === "pusio") {
+    if (!pusioRobot) pusioRobot = JSON.parse(JSON.stringify(DEFAULT_PUSIO_ROBOT));
+    return pusioRobot;
+  }
   if (currentUser) return currentUser.robot;
   return attendeesList[1].robot;
 }
@@ -314,7 +587,7 @@ function initQuickSwatches() {
     btn.className = "mini-swatch";
     btn.style.backgroundColor = hslStr(sw);
     btn.onclick = () => {
-      if (!requireAuth()) return;
+      if (editingTarget !== "pusio" && !requireAuth()) return;
       const r = getEditingRobot();
       r[activePart][activeColorChannel] = { h: sw.h, s: sw.s, l: sw.l };
       if (activePart === "texture") {
@@ -324,6 +597,7 @@ function initQuickSwatches() {
       renderRobotStudio();
       renderSessionHeader();
       renderWhosGoing();
+      renderPusioMascot();
     };
     row.appendChild(btn);
   });
@@ -337,14 +611,24 @@ function renderRobotStudio() {
 
   if (canvasWrap) canvasWrap.innerHTML = renderRobotSVG(r);
   if (nameInput && document.activeElement !== nameInput) {
-    nameInput.value = currentUser ? currentUser.name : "";
-    nameInput.disabled = !currentUser;
-    nameInput.placeholder = currentUser ? "Tu nombre..." : "Inicia sesión para editar";
+    if (editingTarget === "pusio") {
+      nameInput.value = "Pus.io (Asistente Oficial)";
+      nameInput.disabled = true;
+      nameInput.placeholder = "Pus.io";
+    } else {
+      nameInput.value = currentUser ? currentUser.name : "";
+      nameInput.disabled = !currentUser;
+      nameInput.placeholder = currentUser ? "Tu nombre..." : "Inicia sesión para editar";
+    }
   }
   if (hintEl) {
-    hintEl.textContent = currentUser
-      ? `Editando el robot de ${currentUser.name} (${currentUser.email})`
-      : "Vista previa libre. Inicia sesión arriba para guardar en tu perfil.";
+    if (editingTarget === "pusio") {
+      hintEl.textContent = "Personalizando el avatar oficial de Pus.io. Se actualizará en la tarjeta de actividades.";
+    } else {
+      hintEl.textContent = currentUser
+        ? `Editando el robot de ${currentUser.name} (${currentUser.email})`
+        : "Vista previa libre. Inicia sesión arriba para guardar en tu perfil.";
+    }
   }
 
   const meta = PART_LABELS[activePart];
@@ -377,7 +661,7 @@ function renderRobotStudio() {
     }
 
     tile.onclick = () => {
-      if (!requireAuth()) return;
+      if (editingTarget !== "pusio" && !requireAuth()) return;
       r[activePart].shape = shapeKey;
       triggerCanvasPop();
       saveState();
@@ -430,7 +714,7 @@ function setupModernHueWheel() {
   let dragging = false;
 
   function updateHueFromPointer(e) {
-    if (!requireAuth()) return;
+    if (editingTarget !== "pusio" && !requireAuth()) return;
     const rect = wheel.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
@@ -449,6 +733,7 @@ function setupModernHueWheel() {
     renderRobotStudio();
     renderSessionHeader();
     renderWhosGoing();
+    renderPusioMascot();
   }
 
   wheel.addEventListener("mousedown", (e) => { dragging = true; updateHueFromPointer(e); });
@@ -470,7 +755,7 @@ function setupModernHueWheel() {
 
   // Sliders de Saturación y Brillo
   document.getElementById("sliderSat").addEventListener("input", (e) => {
-    if (!requireAuth()) return;
+    if (editingTarget !== "pusio" && !requireAuth()) return;
     const r = getEditingRobot();
     r[activePart][activeColorChannel].s = Number(e.target.value);
     if (activePart === "texture") r.face.sec.s = r.texture.pri.s;
@@ -478,10 +763,11 @@ function setupModernHueWheel() {
     renderRobotStudio();
     renderSessionHeader();
     renderWhosGoing();
+    renderPusioMascot();
   });
 
   document.getElementById("sliderLight").addEventListener("input", (e) => {
-    if (!requireAuth()) return;
+    if (editingTarget !== "pusio" && !requireAuth()) return;
     const r = getEditingRobot();
     r[activePart][activeColorChannel].l = Number(e.target.value);
     if (activePart === "texture") r.face.sec.l = r.texture.pri.l;
@@ -489,6 +775,7 @@ function setupModernHueWheel() {
     renderRobotStudio();
     renderSessionHeader();
     renderWhosGoing();
+    renderPusioMascot();
   });
 }
 
@@ -554,7 +841,7 @@ let activeGrowPlanId = null;
 function toggleGrowPlan(collabId) {
   if (!requireAuth()) return;
   activeGrowPlanId = activeGrowPlanId === collabId ? null : collabId;
-  renderCollabBoard();
+  renderAgendaBoards();
 }
 
 function addSuggestedItemToCollab(collabId, itemName) {
@@ -574,137 +861,211 @@ function addSuggestedItemToCollab(collabId, itemName) {
   showToast(`Sumado a ${collab.title}: ${itemName}`);
 }
 
-function renderCollabBoard() {
-  const container = document.getElementById("collabBoardContainer");
-  const badgeCount = document.getElementById("badgePlanesCount");
+function calculateCollabTraction(collab) {
+  const total = collab.items.length || 1;
+  const claimed = collab.items.filter(i => i.claimedBy).length;
+  // Prioridad: mayor cobertura y mayor número de colaboradores confirmados
+  return (claimed / total) * 10 + (claimed * 3);
+}
 
-  if (badgeCount) badgeCount.textContent = String(collaborations.length);
-  container.innerHTML = "";
+function renderAgendaBoards() {
+  const foodContainer = document.getElementById("foodBoardContainer");
+  const activityContainer = document.getElementById("activityBoardContainer");
+  const badgeFood = document.getElementById("badgeFoodCount");
+  const badgeActivity = document.getElementById("badgeActivityCount");
 
-  if (collaborations.length === 0) {
-    container.innerHTML = `
-      <div class="empty-board">
-        <h3 class="empty-board-title">Aún no hay planes ni propuestas</h3>
-        <p class="empty-board-desc">
-          Escribe arriba lo que quieras comer o hacer, o elige alguna de las ideas para que <strong>pus.io</strong> desglose los insumos y podamos irlos creciendo entre todos.
-        </p>
-        <button type="button" class="btn btn-pusio" onclick="switchTab('tabPusio')">Abrir chat pus.io</button>
-      </div>
-    `;
-    return;
-  }
+  if (!foodContainer || !activityContainer) return;
 
-  const list = document.createElement("div");
-  list.className = "collab-list";
+  const foodPlans = collaborations
+    .filter(c => (c.category || "").toLowerCase().includes("comida") || (c.category || "").toLowerCase().includes("bebida"))
+    .sort((a, b) => calculateCollabTraction(b) - calculateCollabTraction(a));
 
-  collaborations.forEach(collab => {
-    const claimedCount = collab.items.filter(i => i.claimedBy).length;
-    const totalCount = collab.items.length;
+  const activityPlans = collaborations
+    .filter(c => !(c.category || "").toLowerCase().includes("comida") && !(c.category || "").toLowerCase().includes("bebida"))
+    .sort((a, b) => calculateCollabTraction(b) - calculateCollabTraction(a));
 
-    const lower = (collab.title + " " + collab.category).toLowerCase();
-    let catClass = "cat-other";
-    let growthKey = "default";
+  if (badgeFood) badgeFood.textContent = String(foodPlans.length);
+  if (badgeActivity) badgeActivity.textContent = String(activityPlans.length);
 
-    if (lower.includes("pastor") || lower.includes("taco") || lower.includes("taquiza")) {
-      catClass = "cat-food";
-      growthKey = "pastor";
-    } else if (lower.includes("asado") || lower.includes("carne") || lower.includes("parrillada")) {
-      catClass = "cat-food";
-      growthKey = "asado";
-    } else if (lower.includes("hamburguesa") || lower.includes("burger")) {
-      catClass = "cat-food";
-      growthKey = "hamburguesa";
-    } else if (lower.includes("ceviche") || lower.includes("aguachile") || lower.includes("marisco")) {
-      catClass = "cat-food";
-      growthKey = "ceviche";
-    } else if (lower.includes("smash") || lower.includes("mario") || lower.includes("juego") || lower.includes("torneo")) {
-      catClass = "cat-activity";
-      growthKey = "smash";
-    } else if (lower.includes("hielera") || lower.includes("bebida") || lower.includes("cerveza") || lower.includes("hielo")) {
-      catClass = "cat-drinks";
-      growthKey = "bebida";
-    }
+  foodContainer.innerHTML = foodPlans.length === 0
+    ? `<div class="empty-column-notice">Sin propuestas de comida o bebida aún.</div>`
+    : "";
 
-    const card = document.createElement("div");
-    card.className = `collab-card ${catClass}`;
+  activityContainer.innerHTML = activityPlans.length === 0
+    ? `<div class="empty-column-notice">Sin dinámicas propuestas aún.</div>`
+    : "";
 
-    let itemsHtml = "";
-    collab.items.forEach(item => {
-      const isClaimed = Boolean(item.claimedBy);
-      const ownerObj = attendeesList.find(u => u.email.toLowerCase() === (item.claimedByEmail || "").toLowerCase());
-      const miniSvg = ownerObj ? renderRobotSVG(ownerObj.robot) : "";
+  foodPlans.forEach(plan => {
+    foodContainer.appendChild(createPlanCardElement(plan, "cat-food"));
+  });
 
-      itemsHtml += `
-        <div class="task-row ${isClaimed ? 'claimed' : ''}">
-          <span class="task-name">${item.name}</span>
-          ${
-            isClaimed
-              ? `<button type="button" class="task-assignee" onclick="toggleClaimItem(${collab.id}, '${item.id}')">
-                   <span class="task-assignee-icon">${miniSvg}</span>
-                   <span>${item.claimedBy}</span>
-                 </button>`
-              : `<button type="button" class="claim-btn" onclick="toggleClaimItem(${collab.id}, '${item.id}')">
-                   Yo lo llevo
-                 </button>`
-          }
-        </div>
-      `;
-    });
+  activityPlans.forEach(plan => {
+    activityContainer.appendChild(createPlanCardElement(plan, "cat-activity"));
+  });
+}
 
-    const isGrowing = activeGrowPlanId === collab.id;
-    const pool = SMART_GROWTH_SUGGESTIONS[growthKey] || SMART_GROWTH_SUGGESTIONS.default;
-    const available = pool.filter(p => !collab.items.some(i => i.name.toLowerCase() === p.toLowerCase())).slice(0, 3);
+function createPlanCardElement(collab, catClass) {
+  const claimedCount = collab.items.filter(i => i.claimedBy).length;
+  const totalCount = collab.items.length;
+  const isComplete = totalCount > 0 && claimedCount === totalCount;
+  const hasVolunteers = claimedCount > 0;
 
-    card.innerHTML = `
-      <div class="collab-card-head">
-        <div>
-          <span class="collab-cat-badge">${collab.category}</span>
-          <h3 class="collab-title">${collab.title}</h3>
-          <div class="collab-author">Propuesto por ${collab.author}</div>
-        </div>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span class="collab-progress-pill">${claimedCount}/${totalCount} cubiertos</span>
-          <button type="button" class="modal-close-btn" style="width:26px; height:26px; font-size:0.9rem;" onclick="deleteCollab(${collab.id})" title="Eliminar plan">&times;</button>
-        </div>
-      </div>
+  const card = document.createElement("div");
+  card.className = `plan-item-card ${catClass} ${isComplete ? 'is-complete' : (hasVolunteers ? 'has-traction' : '')}`;
 
-      <div class="checklist-items">
-        ${itemsHtml}
-      </div>
+  let itemsHtml = "";
+  collab.items.forEach(item => {
+    const isClaimed = Boolean(item.claimedBy);
+    const ownerObj = attendeesList.find(u => u.email.toLowerCase() === (item.claimedByEmail || "").toLowerCase());
+    const miniSvg = ownerObj ? renderRobotSVG(ownerObj.robot, null, null, true) : "";
 
-      <form class="add-subitem-row" onsubmit="addCustomSubItem(event, ${collab.id})">
-        <input type="text" class="add-subitem-input" placeholder="+ Agregar otro insumo a este plan..." required>
-        <button type="submit" class="btn btn-sm">Sumar</button>
-      </form>
-
-      <div class="ai-grow-bar">
-        <button type="button" class="ai-grow-trigger" onclick="toggleGrowPlan(${collab.id})">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-          <span>${isGrowing ? 'Ocultar sugerencias de IA' : 'Hacer crecer este plan con pus.io'}</span>
-        </button>
+    itemsHtml += `
+      <div class="task-row ${isClaimed ? 'claimed' : ''}">
+        <span class="task-name">${item.name}</span>
         ${
-          isGrowing
-            ? `<div class="ai-grow-suggestions">
-                 <span style="font-size:0.75rem; color:var(--ink-secondary); font-weight:600;">Sugerencias para sumar con un toque:</span>
-                 ${
-                   available.length > 0
-                     ? available.map(sug => `
-                         <button type="button" class="ai-suggestion-chip" onclick="addSuggestedItemToCollab(${collab.id}, '${sug.replace(/'/g, "\\'")}')">
-                           <span>+</span> <span>${sug}</span>
-                         </button>
-                       `).join("")
-                     : `<span style="font-size:0.75rem; color:var(--ink-muted);">¡Plan completo con todas las sugerencias clave!</span>`
-                 }
-               </div>`
-            : ""
+          isClaimed
+            ? `<button type="button" class="task-assignee" onclick="toggleClaimItem(${collab.id}, '${item.id}')" title="Asignado a ${item.claimedBy}. Clic para liberar si es tuyo.">
+                 <span class="task-assignee-icon">${miniSvg}</span>
+                 <span>${item.claimedBy}</span>
+               </button>`
+            : `<button type="button" class="claim-btn" onclick="toggleClaimItem(${collab.id}, '${item.id}')">
+                 Yo lo llevo
+               </button>`
         }
       </div>
     `;
-
-    list.appendChild(card);
   });
 
-  container.appendChild(list);
+  const isGrowing = activeGrowPlanId === collab.id;
+  const lower = (collab.title + " " + collab.category).toLowerCase();
+  let growthKey = "default";
+  if (lower.includes("pastor") || lower.includes("taco")) growthKey = "pastor";
+  else if (lower.includes("asado") || lower.includes("carne")) growthKey = "asado";
+  else if (lower.includes("hamburguesa") || lower.includes("burger")) growthKey = "hamburguesa";
+  else if (lower.includes("ceviche") || lower.includes("aguachile")) growthKey = "ceviche";
+  else if (lower.includes("smash") || lower.includes("mario") || lower.includes("torneo")) growthKey = "smash";
+  else if (lower.includes("hielera") || lower.includes("bebida") || lower.includes("cerveza")) growthKey = "bebida";
+
+  const pool = SMART_GROWTH_SUGGESTIONS[growthKey] || SMART_GROWTH_SUGGESTIONS.default;
+  const available = pool.filter(p => !collab.items.some(i => i.name.toLowerCase() === p.toLowerCase())).slice(0, 3);
+
+  const stageLabels = {
+    stage1: "Tarde de Sol",
+    stage2: "Atardecer & Fuego",
+    stage3: "Noche Estelar"
+  };
+  const stageName = stageLabels[collab.stage] || "Posada";
+
+  card.innerHTML = `
+    <div class="plan-card-head">
+      <div>
+        <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+          <span class="plan-cat-pill">${collab.category}</span>
+          <span class="plan-stage-pill">&bull; ${stageName}</span>
+        </div>
+        <h4 class="plan-card-title">${collab.title}</h4>
+        <div class="plan-card-author">Propuesto por ${collab.author}</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span class="plan-progress-pill ${isComplete ? 'is-ready' : ''}">${claimedCount}/${totalCount} cubiertos</span>
+        <button type="button" class="modal-close-btn" style="width:26px; height:26px; font-size:0.9rem;" onclick="deleteCollab(${collab.id})" title="Eliminar plan">&times;</button>
+      </div>
+    </div>
+
+    <div class="plan-insumos-list">
+      ${itemsHtml}
+    </div>
+
+    <form class="add-subitem-row" onsubmit="addCustomSubItem(event, ${collab.id})">
+      <input type="text" class="add-subitem-input" placeholder="+ Sumar otro insumo a este plan..." required>
+      <button type="submit" class="btn btn-sm">Sumar</button>
+    </form>
+
+    <div class="ai-grow-bar">
+      <button type="button" class="ai-grow-trigger" onclick="toggleGrowPlan(${collab.id})">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        <span>${isGrowing ? 'Ocultar sugerencias pus.io' : 'Hacer crecer este plan con pus.io'}</span>
+      </button>
+      ${
+        isGrowing
+          ? `<div class="ai-grow-suggestions">
+               <span style="font-size:0.75rem; color:var(--ink-secondary); font-weight:600;">Sugerencias para sumar en 1 clic:</span>
+               ${
+                 available.length > 0
+                   ? available.map(sug => `
+                       <button type="button" class="ai-suggestion-chip" onclick="addSuggestedItemToCollab(${collab.id}, '${sug.replace(/'/g, "\'")}')">
+                         <span>+</span> <span>${sug}</span>
+                       </button>
+                     `).join("")
+                   : `<span style="font-size:0.75rem; color:var(--ink-muted);">Plan completo con los insumos clave.</span>`
+               }
+             </div>`
+          : ""
+      }
+    </div>
+  `;
+
+  return card;
+}
+
+function renderDynamicTimeline() {
+  const s1 = document.getElementById("timelineStage1");
+  const s2 = document.getElementById("timelineStage2");
+  const s3 = document.getElementById("timelineStage3");
+
+  if (!s1 || !s2 || !s3) return;
+
+  s1.innerHTML = "";
+  s2.innerHTML = "";
+  s3.innerHTML = "";
+
+  // Agrupar colaboraciones según su etapa o inferencia
+  collaborations.forEach(collab => {
+    let targetStage = collab.stage || "stage2";
+    const lower = (collab.title + " " + collab.category).toLowerCase();
+
+    if (!collab.stage) {
+      if (lower.includes("smash") || lower.includes("regalo") || lower.includes("película") || lower.includes("cine")) {
+        targetStage = "stage3";
+      } else if (lower.includes("ceviche") || lower.includes("bienvenida") || lower.includes("llegada") || lower.includes("playa") || lower.includes("voleibol")) {
+        targetStage = "stage1";
+      } else {
+        targetStage = "stage2";
+      }
+    }
+
+    const claimedCount = collab.items.filter(i => i.claimedBy).length;
+    const totalCount = collab.items.length;
+    const isPromoted = claimedCount > 0;
+
+    const row = document.createElement("div");
+    row.className = `timeline-plan-row ${isPromoted ? 'is-promoted' : ''}`;
+
+    row.innerHTML = `
+      <div class="timeline-plan-info">
+        <span class="timeline-plan-title">${collab.title}</span>
+        <span class="timeline-plan-meta">&bull; ${collab.author}</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span class="timeline-plan-pill ${isPromoted ? 'promoted-badge' : ''}">${claimedCount}/${totalCount} cubiertos</span>
+      </div>
+    `;
+
+    if (targetStage === "stage1") s1.appendChild(row);
+    else if (targetStage === "stage3") s3.appendChild(row);
+    else s2.appendChild(row);
+  });
+
+  // Mostrar mensaje de aliento si alguna etapa no tiene aún planes
+  [
+    { container: s1, text: "Sin actividades aún" },
+    { container: s2, text: "Sin dinámicas aún" },
+    { container: s3, text: "Sin actividades aún" }
+  ].forEach(stage => {
+    if (stage.container.children.length === 0) {
+      stage.container.innerHTML = `<div class="empty-stage-hint">${stage.text}</div>`;
+    }
+  });
 }
 
 function requireAuth() {
@@ -780,39 +1141,40 @@ function handlePusioMessage(rawText) {
   const text = rawText.trim();
   if (!text) return;
 
-  appendChatMsg(text, "user");
+  const plan = decomposeProposalIntoTasks(text);
+  if (!plan.isActionable) {
+    showToast(plan.reply);
+    return;
+  }
 
-  setTimeout(() => {
-    const plan = decomposeProposalIntoTasks(text);
-    if (!plan.isActionable) {
-      appendChatMsg(plan.reply, "bot");
-      return;
-    }
+  const newCollab = {
+    id: Date.now(),
+    title: plan.title,
+    category: plan.category,
+    stage: plan.stage || "stage2",
+    author: currentUser.name,
+    items: plan.items.map((name, idx) => ({
+      id: `t_${Date.now()}_${idx}`,
+      name: name,
+      claimedBy: null,
+      claimedByEmail: null
+    }))
+  };
 
-    const newCollab = {
-      id: Date.now(),
-      title: plan.title,
-      category: plan.category,
-      author: currentUser.name,
-      items: plan.items.map((name, idx) => ({
-        id: `t_${Date.now()}_${idx}`,
-        name: name,
-        claimedBy: null,
-        claimedByEmail: null
-      }))
-    };
+  collaborations.unshift(newCollab);
+  saveState();
+  renderAll();
 
-    collaborations.unshift(newCollab);
-    saveState();
-    renderAll();
+  // Scroll suave hacia la columna correspondiente
+  const targetCol = plan.category.toLowerCase().includes("comida")
+    ? document.getElementById("foodBoardContainer")
+    : document.getElementById("activityBoardContainer");
 
-    appendChatMsg(
-      `Listo, ${currentUser.name}. Agregué "${plan.title}" en Planes y propuestas dividido en: ${plan.items.join(", ")}.`,
-      "bot"
-    );
+  if (targetCol) {
+    targetCol.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
 
-    showToast(`Plan creado: ${plan.title}`);
-  }, 280);
+  showToast(`Plan creado con pus.io: ${plan.title}`);
 }
 
 function decomposeProposalIntoTasks(text) {
@@ -829,7 +1191,8 @@ function decomposeProposalIntoTasks(text) {
     return {
       isActionable: true,
       title: "Nachos de pastor",
-      category: "Comida colaborativa",
+      category: "Comida",
+      stage: "stage2",
       items: [
         "Carne al pastor (1.5 kg)",
         "Totopos / Tostadas (3 bolsas)",
@@ -844,7 +1207,8 @@ function decomposeProposalIntoTasks(text) {
     return {
       isActionable: true,
       title: "Nachos preparados",
-      category: "Comida colaborativa",
+      category: "Comida",
+      stage: "stage1",
       items: [
         "Totopos / Tostadas grandes",
         "Carne o arrachera picada",
@@ -859,7 +1223,8 @@ function decomposeProposalIntoTasks(text) {
     return {
       isActionable: true,
       title: "Tacos al pastor / Taquiza",
-      category: "Comida colaborativa",
+      category: "Comida",
+      stage: "stage2",
       items: [
         "Carne al pastor / bistec (2 kg)",
         "Tortillas taqueras y piña",
@@ -874,7 +1239,8 @@ function decomposeProposalIntoTasks(text) {
     return {
       isActionable: true,
       title: "Hamburguesas al carbón",
-      category: "Comida colaborativa",
+      category: "Comida",
+      stage: "stage2",
       items: [
         "Carne para hamburguesa y tocino",
         "Pan para hamburguesa y queso americano",
@@ -889,7 +1255,8 @@ function decomposeProposalIntoTasks(text) {
     return {
       isActionable: true,
       title: "Carne asada en la terraza",
-      category: "Comida colaborativa",
+      category: "Comida",
+      stage: "stage2",
       items: [
         "Cortes de carne para asar",
         "Chorizo, queso y cebollitas",
@@ -904,7 +1271,8 @@ function decomposeProposalIntoTasks(text) {
     return {
       isActionable: true,
       title: lower.includes("aguachile") ? "Aguachile playero" : "Ceviche frente al mar",
-      category: "Comida colaborativa",
+      category: "Comida",
+      stage: "stage1",
       items: [
         "Camarón / pescado fresco limpio",
         "Limones (1 kg)",
@@ -920,7 +1288,8 @@ function decomposeProposalIntoTasks(text) {
     return {
       isActionable: true,
       title: gameName,
-      category: "Actividad / Torneo",
+      category: "Actividad",
+      stage: "stage3",
       items: [
         "Consola Nintendo Switch con el juego",
         "Dock, cable HDMI y proyector / TV",
@@ -935,7 +1304,8 @@ function decomposeProposalIntoTasks(text) {
     return {
       isActionable: true,
       title: "Hieleras y bebidas",
-      category: "Bebidas",
+      category: "Comida",
+      stage: "stage1",
       items: [
         "Hielera grande",
         "Bolsas de hielo (4 bolsas)",
@@ -953,12 +1323,19 @@ function decomposeProposalIntoTasks(text) {
   cleanTitle = cleanTitle.charAt(0).toUpperCase() + cleanTitle.slice(1);
   if (cleanTitle.endsWith(".")) cleanTitle = cleanTitle.slice(0, -1);
 
-  const isFood = lower.includes("comer") || lower.includes("cena") || lower.includes("botana") || lower.includes("postre") || lower.includes("pizza");
+  const isFood = lower.includes("comer") || lower.includes("cena") || lower.includes("botana") || lower.includes("postre") || lower.includes("pizza") || lower.includes("carne");
+  const isNight = lower.includes("smash") || lower.includes("noche") || lower.includes("torneo") || lower.includes("regalo") || lower.includes("cine");
+  const isAfternoon = lower.includes("llegada") || lower.includes("bienvenida") || lower.includes("alberca") || lower.includes("playa") || lower.includes("ceviche");
+
+  let deducedStage = "stage2";
+  if (isAfternoon) deducedStage = "stage1";
+  else if (isNight) deducedStage = "stage3";
 
   return {
     isActionable: true,
     title: cleanTitle,
-    category: isFood ? "Comida colaborativa" : "Actividad grupal",
+    category: isFood ? "Comida" : "Actividad",
+    stage: deducedStage,
     items: isFood
       ? [
           `Ingrediente principal para ${cleanTitle.toLowerCase()}`,
@@ -976,17 +1353,9 @@ function decomposeProposalIntoTasks(text) {
   };
 }
 
-function appendChatMsg(text, role) {
-  const area = document.getElementById("pusioChatArea");
-  const div = document.createElement("div");
-  div.className = `chat-msg ${role}`;
-  div.textContent = text;
-  area.appendChild(div);
-  area.scrollTop = area.scrollHeight;
-}
-
 function renderWhosGoing() {
   const grid = document.getElementById("whosGoingGrid");
+  if (!grid) return;
   grid.innerHTML = "";
 
   attendeesList.forEach((person, idx) => {
@@ -1022,49 +1391,343 @@ function renderWhosGoing() {
   });
 }
 
-function renderTransportSection() {
-  const container = document.getElementById("carsContainer");
-  container.innerHTML = "";
+function normalizeStr(str) {
+  return (str || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]/g, "");
+}
 
-  if (carsList.length === 0) return;
+function findPotentialMatch(inputEmail, inputName) {
+  const normEmail = (inputEmail || "").toLowerCase().trim();
+  const emailPrefix = normEmail.split("@")[0].replace(/[^a-z0-9]/g, "");
+  const normName = normalizeStr(inputName);
 
-  const list = document.createElement("div");
-  list.className = "collab-list";
+  if (!emailPrefix && !normName) return null;
 
-  carsList.forEach(car => {
-    const isMine = currentUser && car.driverEmail.toLowerCase() === currentUser.email.toLowerCase();
-    const item = document.createElement("div");
-    item.className = "collab-card";
+  // Buscar entre los participantes que aún NO tienen PIN configurado (personajes pendientes de reclamar)
+  const unconfirmed = attendeesList.filter(u => !u.pinHash);
 
-    item.innerHTML = `
-      <div class="collab-card-head" style="margin-bottom:0; border-bottom:none; padding-bottom:0;">
-        <div>
-          <span class="collab-cat-badge">Auto disponible (${car.seats} lugares)</span>
-          <h3 class="collab-title">${car.driver} &mdash; ${car.model}</h3>
-          <div class="collab-author">Salida: ${car.zone} a las ${car.time}</div>
+  for (const candidate of unconfirmed) {
+    const candEmailNorm = candidate.email.toLowerCase();
+    const candPrefix = candEmailNorm.split("@")[0].replace(/[^a-z0-9]/g, "");
+    const candNameNorm = normalizeStr(candidate.name);
+
+    // Coincidencia exacta de correo
+    if (normEmail && candEmailNorm === normEmail) {
+      return candidate;
+    }
+
+    // Coincidencia por prefijo del correo (ej: 'cesar.amigo' con 'cesar123@gmail.com')
+    if (candPrefix.length >= 3 && emailPrefix.length >= 3) {
+      if (candPrefix.includes(emailPrefix) || emailPrefix.includes(candPrefix)) {
+        return candidate;
+      }
+    }
+
+    // Coincidencia por nombre (ej: ingresa 'Cesar' o 'Noe' o 'Beto')
+    if (normName.length >= 3 && candNameNorm.length >= 3) {
+      if (candNameNorm.includes(normName) || normName.includes(candNameNorm)) {
+        return candidate;
+      }
+    }
+  }
+
+  return null;
+}
+
+let pendingClaimedMatch = null;
+
+function checkAuthDeduplication() {
+  const emailInput = document.getElementById("authInputEmail");
+  const nameInput = document.getElementById("authInputName");
+  const banner = document.getElementById("claimMatchBanner");
+  const bannerAvatar = document.getElementById("claimMatchAvatar");
+  const bannerName = document.getElementById("claimMatchName");
+
+  if (!emailInput || !nameInput || !banner) return;
+
+  const emailVal = emailInput.value.trim().toLowerCase();
+  const nameVal = nameInput.value.trim();
+
+  // Si el correo ya pertenece exactamente a un usuario existente, no mostramos banner de "reclamar"
+  const exact = attendeesList.find(u => u.email.toLowerCase() === emailVal);
+  if (exact && exact.pinHash) {
+    banner.style.display = "none";
+    pendingClaimedMatch = null;
+    return;
+  }
+
+  const match = findPotentialMatch(emailVal, nameVal);
+
+  if (match && (!exact || !exact.pinHash)) {
+    pendingClaimedMatch = match;
+    bannerAvatar.innerHTML = renderRobotSVG(match.robot, null, null, true);
+    bannerName.textContent = `¿Eres ${match.name}?`;
+    banner.style.display = "flex";
+  } else {
+    pendingClaimedMatch = null;
+    banner.style.display = "none";
+  }
+}
+
+function openCarDetailModal(carId) {
+  const car = carsList.find(c => c.id === carId);
+  if (!car) return;
+
+  const totalSeats = Number(car.seats) || 3;
+  const passengers = Array.isArray(car.passengers) ? car.passengers : [];
+  const takenPassengerSeats = passengers.length;
+  const freePassengerSeats = Math.max(0, totalSeats - takenPassengerSeats);
+  const isMine = currentUser && car.driverEmail.toLowerCase() === currentUser.email.toLowerCase();
+  const amIPassenger = currentUser && passengers.some(p => p.email && p.email.toLowerCase() === currentUser.email.toLowerCase());
+
+  // Nivel de llenado y semáforo de vibra correspondiente
+  let vibeTier = "vibe-tier-low";
+  let vibeStatusColor = "#0284C7";
+  let vibeStatusText = `${freePassengerSeats} lugares libres`;
+
+  if (freePassengerSeats === 0) {
+    vibeTier = "vibe-tier-max";
+    vibeStatusColor = "#7C3AED";
+    vibeStatusText = "Auto completo • Fiesta total";
+  } else if (takenPassengerSeats >= 2 || (takenPassengerSeats / totalSeats) >= 0.5) {
+    vibeTier = "vibe-tier-high";
+    vibeStatusColor = "#D97706";
+    vibeStatusText = `${freePassengerSeats} libre${freePassengerSeats > 1 ? 's' : ''} • Casi lleno`;
+  } else if (takenPassengerSeats >= 1) {
+    vibeTier = "vibe-tier-mid";
+    vibeStatusColor = "#059669";
+    vibeStatusText = `${freePassengerSeats} libre${freePassengerSeats > 1 ? 's' : ''} • Buena vibra`;
+  }
+
+  // Título y subtítulo limpios (usando carácter de punto real · en lugar de entidad literal)
+  document.getElementById("carDetailTitle").innerHTML = `${car.model} &bull; ${car.driver}`;
+  document.getElementById("carDetailSubtitle").innerHTML = `Salida desde ${car.zone} &bull; ${car.time || 'Horario por acordar'}`;
+
+  // Puntitos con el color del semáforo de la casilla
+  let dotsHtml = `<span class="seat-dot driver-dot" title="Conductor: ${car.driver}"></span>`;
+  for (let s = 0; s < totalSeats; s++) {
+    if (s < takenPassengerSeats) {
+      dotsHtml += `<span class="seat-dot dot-taken" style="background:${vibeStatusColor}; box-shadow:0 0 0 2px ${vibeStatusColor}33;"></span>`;
+    } else {
+      dotsHtml += `<span class="seat-dot dot-free" style="border-color:${vibeStatusColor};"></span>`;
+    }
+  }
+
+  let passengersListHtml = `
+    <div class="car-passenger-item car-passenger-driver">
+      <div>
+        <strong style="color:var(--ink);">${car.driver}</strong>
+        <span style="font-size:0.75rem; color:var(--ink-secondary); display:block;">Conductor VIP &bull; ${car.driverEmail}</span>
+      </div>
+      <span class="avatar-vip-badge" style="position:static;">VIP</span>
+    </div>
+  `;
+
+  if (passengers.length === 0) {
+    passengersListHtml += `
+      <div style="font-size:0.8rem; color:var(--ink-muted); padding:10px; text-align:center; border:1px dashed var(--border); border-radius:var(--radius-sm);">
+        Aún no hay pasajeros registrados en este auto.
+      </div>
+    `;
+  } else {
+    passengers.forEach(p => {
+      const isThisMe = currentUser && p.email && p.email.toLowerCase() === currentUser.email.toLowerCase();
+      passengersListHtml += `
+        <div class="car-passenger-item">
+          <div>
+            <strong>${p.name}${isThisMe ? ' (Tú)' : ''}</strong>
+            <span style="font-size:0.72rem; color:var(--ink-muted); display:block;">Pasajero confirmado</span>
+          </div>
+          ${isThisMe ? `<button type="button" class="btn btn-secondary btn-sm" onclick="leaveCar(${car.id})">Bajarme</button>` : ''}
         </div>
-        <div>
-          ${
-            isMine
-              ? `<button type="button" class="btn btn-secondary btn-sm" onclick="retireCar(${car.id})">Retirar</button>`
-              : `<button type="button" class="btn btn-pusio btn-sm" onclick="showToast('Lugar solicitado con ${car.driver}')">Pedir lugar</button>`
-          }
+      `;
+    });
+  }
+
+  // Menú desplegable para unirse al viaje si hay espacio libre
+  let joinDropdownHtml = "";
+  if (freePassengerSeats > 0 && !isMine) {
+    // Lista de candidatos: participantes que no sean el conductor de este auto ni pasajeros actuales de él
+    const existingEmails = new Set(passengers.map(p => (p.email || "").toLowerCase()));
+    existingEmails.add(car.driverEmail.toLowerCase());
+
+    const availableAttendees = attendeesList.filter(u => !existingEmails.has(u.email.toLowerCase()));
+
+    const optionsHtml = availableAttendees.map(u => {
+      const isSelected = currentUser && currentUser.email.toLowerCase() === u.email.toLowerCase();
+      return `<option value="${u.id}" ${isSelected ? 'selected' : ''}>${u.name} (${u.email})</option>`;
+    }).join("");
+
+    joinDropdownHtml = `
+      <div class="car-join-select-box">
+        <label for="selectJoinCarAttendee">Elegir quién se suma a este auto (${freePassengerSeats} disponible${freePassengerSeats > 1 ? 's' : ''}):</label>
+        <div class="car-join-row">
+          <select id="selectJoinCarAttendee" class="car-join-select">
+            ${optionsHtml}
+          </select>
+          <button type="button" class="btn btn-pusio btn-sm" onclick="joinCarSelectedPerson(${car.id})">Unirse al viaje</button>
         </div>
       </div>
     `;
-    list.appendChild(item);
+  }
+
+  const detailBody = document.getElementById("carDetailBody");
+  detailBody.innerHTML = `
+    <div class="car-detail-info-block">
+      <div class="car-detail-route-row">
+        <span>Punto de partida:</span>
+        <strong style="color:var(--ink);">${car.zone} (Mérida)</strong>
+      </div>
+      <div class="car-detail-route-row">
+        <span>Hora de salida:</span>
+        <strong style="color:var(--ink);">${car.time || 'Por definir'}</strong>
+      </div>
+      <div class="car-detail-route-row">
+        <span>Capacidad y estado:</span>
+        <strong style="color:${vibeStatusColor};">${vibeStatusText}</strong>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+        <span style="font-size:0.75rem; color:var(--ink-secondary);">Ocupación:</span>
+        <div class="car-seats-dots" style="margin:0;">
+          ${dotsHtml}
+        </div>
+      </div>
+    </div>
+
+    <h4 class="car-passengers-title">Quiénes viajan en este auto</h4>
+    <div class="car-passengers-list">
+      ${passengersListHtml}
+    </div>
+
+    <div class="car-action-buttons">
+      ${
+        isMine
+          ? `<button type="button" class="btn btn-secondary" style="width:100%; border-color:var(--berry); color:var(--berry);" onclick="retireCar(${car.id})">Quitar mi auto</button>`
+          : (
+              amIPassenger
+                ? `<button type="button" class="btn btn-secondary" style="width:100%;" onclick="leaveCar(${car.id})">Bajarme de este auto</button>`
+                : (
+                    freePassengerSeats > 0
+                      ? joinDropdownHtml
+                      : `<button type="button" class="btn btn-secondary" style="width:100%;" disabled>Auto lleno (sin lugares disponibles)</button>`
+                  )
+            )
+      }
+    </div>
+  `;
+
+  openModal("modalCarDetail");
+}
+
+function joinCarSelectedPerson(carId) {
+  const selEl = document.getElementById("selectJoinCarAttendee");
+  if (!selEl) return;
+  const personId = Number(selEl.value);
+  const person = attendeesList.find(u => u.id === personId);
+  if (!person) return;
+
+  const car = carsList.find(c => c.id === carId);
+  if (!car) return;
+
+  if (!Array.isArray(car.passengers)) car.passengers = [];
+  const totalSeats = Number(car.seats) || 3;
+  if (car.passengers.length >= totalSeats) {
+    showToast("Este auto ya no tiene lugares disponibles");
+    return;
+  }
+
+  // Quitar de cualquier otro auto
+  carsList.forEach(c => {
+    if (Array.isArray(c.passengers)) {
+      c.passengers = c.passengers.filter(p => p.email && p.email.toLowerCase() !== person.email.toLowerCase());
+    }
   });
 
-  container.appendChild(list);
+  car.passengers.push({
+    name: person.name,
+    email: person.email
+  });
+
+  person.travelMode = "passenger";
+  if (currentUser && currentUser.email.toLowerCase() === person.email.toLowerCase()) {
+    currentUser.travelMode = "passenger";
+  }
+
+  saveState();
+  renderAll();
+  openCarDetailModal(car.id);
+  showToast(`${person.name} se unió al viaje con ${car.driver}`);
+}
+
+function joinCarAsPassenger(carId) {
+  if (!requireAuth()) return;
+  const car = carsList.find(c => c.id === carId);
+  if (!car) return;
+
+  if (!Array.isArray(car.passengers)) car.passengers = [];
+  const totalSeats = Number(car.seats) || 3;
+  if (car.passengers.length >= totalSeats) {
+    showToast("Este auto ya no tiene lugares disponibles");
+    return;
+  }
+
+  // Quitar de cualquier otro auto
+  carsList.forEach(c => {
+    if (Array.isArray(c.passengers)) {
+      c.passengers = c.passengers.filter(p => p.email && p.email.toLowerCase() !== currentUser.email.toLowerCase());
+    }
+  });
+
+  car.passengers.push({
+    name: currentUser.name,
+    email: currentUser.email
+  });
+
+  currentUser.travelMode = "passenger";
+  saveState();
+  renderAll();
+  openCarDetailModal(car.id);
+  showToast(`Te sumaste al auto de ${car.driver}`);
+}
+
+function leaveCar(carId) {
+  if (!currentUser) return;
+  const car = carsList.find(c => c.id === carId);
+  if (car && Array.isArray(car.passengers)) {
+    car.passengers = car.passengers.filter(p => p.email && p.email.toLowerCase() !== currentUser.email.toLowerCase());
+  }
+  currentUser.travelMode = null;
+  saveState();
+  renderAll();
+  openCarDetailModal(carId);
+  showToast("Te has bajado del auto");
 }
 
 function retireCar(id) {
   if (!requireAuth()) return;
+  const car = carsList.find(c => c.id === id);
+  const driverEmail = car ? car.driverEmail : (currentUser ? currentUser.email : "");
+
   carsList = carsList.filter(c => c.id !== id);
-  currentUser.puedo_dar_coche = 0;
+
+  // Actualizar conductor tanto en currentUser como en attendeesList
+  const driver = attendeesList.find(u => u.email.toLowerCase() === driverEmail.toLowerCase());
+  if (driver) {
+    driver.puedo_dar_coche = 0;
+    driver.travelMode = null;
+  }
+  if (currentUser && currentUser.email.toLowerCase() === driverEmail.toLowerCase()) {
+    currentUser.puedo_dar_coche = 0;
+    currentUser.travelMode = null;
+  }
+
   saveState();
+  closeModal("modalCarDetail");
   renderAll();
-  showToast("Coche retirado");
+  showToast("Vehículo retirado y rango VIP cancelado");
 }
 
 function setupEventListeners() {
@@ -1078,13 +1741,37 @@ function setupEventListeners() {
       document.getElementById("authInputEmail").value = currentUser.email;
       document.getElementById("authInputName").value = currentUser.name;
     }
+    checkAuthDeduplication();
     openModal("modalAuth");
   };
 
-  document.getElementById("btnOpenCarModal").onclick = () => {
-    if (!requireAuth()) return;
-    openModal("modalCar");
-  };
+  // Escuchar tipeo en email y nombre para detectar coincidencias al instante
+  const emailInput = document.getElementById("authInputEmail");
+  const nameInput = document.getElementById("authInputName");
+  if (emailInput) emailInput.addEventListener("input", checkAuthDeduplication);
+  if (nameInput) nameInput.addEventListener("input", checkAuthDeduplication);
+
+  // Botón para reclamar personaje coincidente
+  const btnClaim = document.getElementById("btnClaimMatch");
+  if (btnClaim) {
+    btnClaim.onclick = () => {
+      if (pendingClaimedMatch) {
+        if (!nameInput.value.trim()) {
+          nameInput.value = pendingClaimedMatch.name;
+        }
+        showToast(`Personaje vinculado: ${pendingClaimedMatch.name}. Elige tu apodo y PIN.`);
+        nameInput.focus();
+      }
+    };
+  }
+
+  const btnOpenCar = document.getElementById("btnOpenCarModal");
+  if (btnOpenCar) {
+    btnOpenCar.onclick = () => {
+      if (!requireAuth()) return;
+      openModal("modalCar");
+    };
+  }
 
   document.getElementById("secureAuthForm").onsubmit = (e) => {
     e.preventDefault();
@@ -1107,23 +1794,40 @@ function setupEventListeners() {
       existing.pinHash = candidateHash;
       existing.name = nameVal;
       currentUser = existing;
+    } else if (pendingClaimedMatch) {
+      // Reclamar el perfil del participante existente (evitando duplicado)
+      pendingClaimedMatch.email = emailVal;
+      pendingClaimedMatch.name = nameVal;
+      pendingClaimedMatch.pinHash = candidateHash;
+      currentUser = pendingClaimedMatch;
+      pendingClaimedMatch = null;
     } else {
-      const rndHue = Math.floor(Math.random() * 360);
-      const newUser = {
-        id: Date.now(),
-        name: nameVal,
-        email: emailVal,
-        pinHash: candidateHash,
-        travelMode: null,
-        puedo_dar_coche: 0,
-        robot: createBotConfig(rndHue, 0, 0, 0, 0, 0)
-      };
-      attendeesList.push(newUser);
-      currentUser = newUser;
+      // Si no hay reclamo explícito, hacer un último chequeo de coincidencia por prefijo/nombre
+      const autoMatch = findPotentialMatch(emailVal, nameVal);
+      if (autoMatch) {
+        autoMatch.email = emailVal;
+        autoMatch.name = nameVal;
+        autoMatch.pinHash = candidateHash;
+        currentUser = autoMatch;
+      } else {
+        const rndHue = Math.floor(Math.random() * 360);
+        const newUser = {
+          id: Date.now(),
+          name: nameVal,
+          email: emailVal,
+          pinHash: candidateHash,
+          travelMode: null,
+          puedo_dar_coche: 0,
+          robot: createBotConfig(rndHue, 0, 0, 0, 0, 0)
+        };
+        attendeesList.push(newUser);
+        currentUser = newUser;
+      }
     }
 
     errEl.style.display = "none";
     document.getElementById("authInputPin").value = "";
+    document.getElementById("claimMatchBanner").style.display = "none";
     saveState();
     renderAll();
     closeModal("modalAuth");
@@ -1153,9 +1857,9 @@ function setupEventListeners() {
 
   // Mezclar al azar con diseños Bottts reales
   document.getElementById("btnRandomRobot").onclick = () => {
-    if (!requireAuth()) return;
+    if (editingTarget !== "pusio" && !requireAuth()) return;
     const hue = Math.floor(Math.random() * 360);
-    currentUser.robot = createBotConfig(
+    const newCfg = createBotConfig(
       hue,
       Math.floor(Math.random() * 6),
       Math.floor(Math.random() * 14),
@@ -1164,49 +1868,76 @@ function setupEventListeners() {
       Math.floor(Math.random() * 7),
       Math.floor(Math.random() * 4)
     );
+    if (editingTarget === "pusio") {
+      pusioRobot = newCfg;
+    } else {
+      currentUser.robot = newCfg;
+    }
     triggerCanvasPop();
     saveState();
     renderAll();
-    showToast("Personaje mezclado con nuevas piezas");
+    showToast("Avatar mezclado con nuevas piezas");
   };
 
   document.getElementById("btnSaveRobotStudio").onclick = () => {
-    if (!requireAuth()) return;
+    if (editingTarget !== "pusio" && !requireAuth()) return;
     saveState();
     renderAll();
-    showToast(`Personaje guardado en el perfil de ${currentUser.name}`);
+    if (editingTarget === "pusio") {
+      showToast("¡Avatar de Pus.io actualizado en la portada!");
+    } else {
+      showToast(`Personaje guardado en el perfil de ${currentUser.name}`);
+    }
+    closeModal("modalRobotStudio");
   };
 
-  document.getElementById("btnConfirmPassenger").onclick = () => {
-    if (!requireAuth()) return;
-    currentUser.travelMode = "passenger";
-    currentUser.puedo_dar_coche = 0;
-    saveState();
-    renderAll();
-    showToast(`${currentUser.name} confirmado como pasajero`);
-  };
+  const btnConfPassenger = document.getElementById("btnConfirmPassenger");
+  if (btnConfPassenger) {
+    btnConfPassenger.onclick = () => {
+      if (!requireAuth()) return;
+      currentUser.travelMode = "passenger";
+      currentUser.puedo_dar_coche = 0;
+      saveState();
+      renderAll();
+      showToast(`${currentUser.name} confirmado como pasajero`);
+    };
+  }
 
   document.getElementById("carForm").onsubmit = (e) => {
     e.preventDefault();
     if (!requireAuth()) return;
 
-    carsList.push({
+    // Evitar que el mismo usuario registre más de un vehículo
+    carsList = carsList.filter(c => c.driverEmail.toLowerCase() !== currentUser.email.toLowerCase());
+
+    const newCar = {
       id: Date.now(),
       driverEmail: currentUser.email,
       driver: currentUser.name,
       model: document.getElementById("carInputModel").value.trim(),
-      seats: document.getElementById("carInputSeats").value,
+      seats: Number(document.getElementById("carInputSeats").value) || 3,
       zone: document.getElementById("carInputZone").value.trim(),
-      time: document.getElementById("carInputTime").value.trim()
-    });
+      time: document.getElementById("carInputTime").value.trim(),
+      passengers: []
+    };
+
+    carsList.push(newCar);
 
     currentUser.puedo_dar_coche = 1;
     currentUser.travelMode = "driver";
+
+    // Reflejar también en el objeto dentro de attendeesList
+    const inList = attendeesList.find(u => u.email.toLowerCase() === currentUser.email.toLowerCase());
+    if (inList) {
+      inList.puedo_dar_coche = 1;
+      inList.travelMode = "driver";
+    }
+
     saveState();
     closeModal("modalCar");
     document.getElementById("carForm").reset();
     renderAll();
-    showToast(`Coche registrado para ${currentUser.name}`);
+    showToast(`Coche registrado. ¡Rango y brillo VIP activado para ${currentUser.name}!`);
   };
 
   document.querySelectorAll(".example-pill").forEach(btn => {
@@ -1216,27 +1947,29 @@ function setupEventListeners() {
     };
   });
 
-  document.getElementById("pusioForm").onsubmit = (e) => {
-    e.preventDefault();
-    const input = document.getElementById("pusioInput");
-    const val = input.value.trim();
-    if (val) {
-      handlePusioMessage(val);
-      input.value = "";
-    }
-  };
-
-  // Compositor rápido en pestaña de Planes y propuestas
-  const inlineForm = document.getElementById("inlineProposalForm");
-  if (inlineForm) {
-    inlineForm.onsubmit = (e) => {
+  const pForm = document.getElementById("pusioForm");
+  if (pForm) {
+    pForm.onsubmit = (e) => {
       e.preventDefault();
-      const input = document.getElementById("inlineProposalInput");
+      const input = document.getElementById("pusioInput");
+      const val = input ? input.value.trim() : "";
+      if (val) {
+        handlePusioMessage(val);
+        input.value = "";
+      }
+    };
+  }
+
+  // Compositor principal con pus.io en la sección de planes y dinámicas
+  const agendaForm = document.getElementById("agendaProposalForm");
+  if (agendaForm) {
+    agendaForm.onsubmit = (e) => {
+      e.preventDefault();
+      const input = document.getElementById("agendaProposalInput");
       const val = input.value.trim();
       if (val) {
         handlePusioMessage(val);
         input.value = "";
-        switchTab("tabPlanes");
       }
     };
   }
@@ -1247,15 +1980,45 @@ function setupEventListeners() {
       const prompt = chip.dataset.prompt;
       if (prompt) {
         handlePusioMessage(prompt);
-        switchTab("tabPlanes");
       }
     };
   });
 
   document.querySelectorAll("[data-close]").forEach(btn => {
-    btn.onclick = () => closeModal(btn.getAttribute("data-close"));
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      closeModal(btn.getAttribute("data-close"));
+    };
   });
 }
+
+// Delegación global de eventos para asegurar que cualquier botón con data-close o tachita funcione siempre
+document.addEventListener("click", (e) => {
+  const closeBtn = e.target.closest("[data-close]");
+  if (closeBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+    const modalId = closeBtn.getAttribute("data-close");
+    if (modalId) {
+      closeModal(modalId);
+    }
+    return;
+  }
+
+  // Cierre al hacer clic en el backdrop / overlay del modal
+  if (e.target.classList && e.target.classList.contains("modal-overlay")) {
+    closeModal(e.target.id);
+  }
+});
+
+// Cerrar modal activo al presionar la tecla Escape
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" || e.key === "Esc") {
+    document.querySelectorAll(".modal-overlay:not(.hidden)").forEach(m => {
+      closeModal(m.id);
+    });
+  }
+});
 
 function showToast(msg) {
   const toast = document.getElementById("toastNotice");
@@ -1274,4 +2037,226 @@ function openModal(id) {
 function closeModal(id) {
   const el = document.getElementById(id);
   if (el) el.classList.add("hidden");
+  if (id === "modalRobotStudio") {
+    editingTarget = "user";
+  }
 }
+
+// ==========================================================================
+// CONCURSO DE PERSONALIZACIÓN DE PUS.IO (VOTACIONES & RECOMPENSAS APRENDIDAS)
+// ==========================================================================
+function openPusioContestModal() {
+  renderContestRewards();
+  renderContestSubmissions();
+  openModal("modalPusioContest");
+}
+
+function renderContestRewards() {
+  const container = document.getElementById("contestRewardChips");
+  if (!container) return;
+  container.innerHTML = "";
+
+  const ideas = pusioContest.rewardIdeas || [];
+  ideas.forEach(idea => {
+    const chip = document.createElement("div");
+    chip.className = "contest-reward-chip";
+    chip.innerHTML = `
+      <span class="reward-chip-dot"></span>
+      <span class="reward-chip-text">${idea}</span>
+    `;
+    container.appendChild(chip);
+  });
+}
+
+function submitRewardIdea(e) {
+  e.preventDefault();
+  const input = document.getElementById("contestRewardInput");
+  if (!input) return;
+  const rawText = input.value.trim();
+  if (!rawText) return;
+
+  // Filtrar duplicados insensibles a mayúsculas
+  const alreadyExists = pusioContest.rewardIdeas.some(
+    item => item.toLowerCase() === rawText.toLowerCase()
+  );
+
+  if (alreadyExists) {
+    showToast("Esa idea ya está entre las propuestas del premio.");
+    input.value = "";
+    return;
+  }
+
+  // Guardar la nueva propuesta del usuario
+  pusioContest.rewardIdeas.unshift(rawText);
+
+  // Aprendizaje activo: si el texto tiene ciertas palabras clave, inferir una variante jocosa
+  const lower = rawText.toLowerCase();
+  let generatedIdea = null;
+
+  if (lower.includes("dormir") || lower.includes("cama") || lower.includes("cuarto")) {
+    generatedIdea = "Apartar la mejor cama con aire acondicionado en Chelem";
+  } else if (lower.includes("cerveza") || lower.includes("chela") || lower.includes("trago") || lower.includes("cubeta")) {
+    generatedIdea = "Servicio de hielera VIP llevado directo a la alberca";
+  } else if (lower.includes("música") || lower.includes("dj") || lower.includes("bocina") || lower.includes("playlist")) {
+    generatedIdea = "Control absoluto del Bluetooth sin derecho a veto musical";
+  } else if (lower.includes("smash") || lower.includes("juego") || lower.includes("switch")) {
+    generatedIdea = "Elegir escenario y reglas en el combate estelar de Smash";
+  }
+
+  if (generatedIdea && !pusioContest.rewardIdeas.some(i => i.toLowerCase() === generatedIdea.toLowerCase())) {
+    pusioContest.rewardIdeas.push(generatedIdea);
+  }
+
+  input.value = "";
+  saveState();
+  renderContestRewards();
+  showToast("Tu propuesta de recompensa se registró con éxito.");
+}
+
+function submitCurrentPusioToContest() {
+  if (!requireAuth()) return;
+
+  const currentCfg = pusioRobot || DEFAULT_PUSIO_ROBOT;
+  const userEmail = currentUser.email.toLowerCase();
+  const userName = currentUser.name;
+
+  // Verificar si ya postuló
+  let existing = pusioContest.submissions.find(
+    s => s.authorEmail.toLowerCase() === userEmail
+  );
+
+  if (existing) {
+    existing.robot = JSON.parse(JSON.stringify(currentCfg));
+    existing.authorName = userName;
+    existing.updatedAt = new Date().toISOString();
+    showToast("Tu propuesta de Pus.io ha sido actualizada en el concurso.");
+  } else {
+    const newSubmission = {
+      id: Date.now(),
+      authorEmail: userEmail,
+      authorName: userName,
+      robot: JSON.parse(JSON.stringify(currentCfg)),
+      votesCount: 0,
+      createdAt: new Date().toISOString()
+    };
+    pusioContest.submissions.push(newSubmission);
+    showToast("¡Pus.io postulado al concurso con éxito!");
+  }
+
+  saveState();
+  renderContestSubmissions();
+}
+
+function votePusioDesign(submissionId) {
+  if (!requireAuth()) return;
+
+  const userEmail = currentUser.email.toLowerCase();
+  const previousVoteSubId = pusioContest.votes[userEmail];
+
+  if (previousVoteSubId === submissionId) {
+    showToast("Ya votaste por esta propuesta.");
+    return;
+  }
+
+  // Quitar voto de la propuesta anterior si existía
+  if (previousVoteSubId) {
+    const prevSub = pusioContest.submissions.find(s => s.id === previousVoteSubId);
+    if (prevSub && prevSub.votesCount > 0) {
+      prevSub.votesCount--;
+    }
+  }
+
+  // Sumar voto a la nueva propuesta
+  const targetSub = pusioContest.submissions.find(s => s.id === submissionId);
+  if (targetSub) {
+    targetSub.votesCount = (targetSub.votesCount || 0) + 1;
+    pusioContest.votes[userEmail] = submissionId;
+  }
+
+  // La propuesta con más votos actualiza el Pus.io oficial activo de la posada
+  checkContestLeader();
+
+  saveState();
+  renderContestSubmissions();
+  renderPusioMascot();
+  showToast(`Tu voto para el diseño de ${targetSub.authorName} fue guardado.`);
+}
+
+function checkContestLeader() {
+  if (!pusioContest.submissions || pusioContest.submissions.length === 0) return;
+
+  const sorted = [...pusioContest.submissions].sort((a, b) => (b.votesCount || 0) - (a.votesCount || 0));
+  const leader = sorted[0];
+
+  if (leader && leader.votesCount > 0) {
+    pusioRobot = JSON.parse(JSON.stringify(leader.robot));
+  }
+}
+
+function renderContestSubmissions() {
+  const grid = document.getElementById("contestSubmissionsGrid");
+  const countBadge = document.getElementById("contestSubmissionsCount");
+  if (!grid) return;
+
+  const list = pusioContest.submissions || [];
+  if (countBadge) {
+    countBadge.textContent = `${list.length} propuesta${list.length === 1 ? '' : 's'}`;
+  }
+
+  grid.innerHTML = "";
+
+  if (list.length === 0) {
+    grid.innerHTML = `
+      <div class="contest-empty-box">
+        <p>Aún no hay propuestas registradas. Personaliza tu versión de Pus.io y sé el primero en postularla.</p>
+      </div>
+    `;
+    return;
+  }
+
+  // Ordenar por votos descendente
+  const sorted = [...list].sort((a, b) => (b.votesCount || 0) - (a.votesCount || 0));
+  const userVoteId = currentUser ? pusioContest.votes[(currentUser.email || "").toLowerCase()] : null;
+
+  sorted.forEach((sub, rank) => {
+    const isVotedByMe = userVoteId === sub.id;
+    const isLeader = rank === 0 && sub.votesCount > 0;
+    const isMySubmission = currentUser && currentUser.email.toLowerCase() === sub.authorEmail.toLowerCase();
+
+    const card = document.createElement("div");
+    card.className = `contest-card ${isLeader ? 'is-leader' : ''} ${isVotedByMe ? 'is-my-vote' : ''}`;
+
+    const svgIcon = renderRobotSVG(sub.robot, null, null, true);
+
+    card.innerHTML = `
+      ${isLeader ? '<div class="contest-leader-ribbon">Líder Oficial</div>' : ''}
+      <div class="contest-card-avatar">
+        ${svgIcon}
+      </div>
+      <div class="contest-card-body">
+        <span class="contest-card-author">Por ${sub.authorName}${isMySubmission ? ' (Tú)' : ''}</span>
+        <span class="contest-votes-count">${sub.votesCount || 0} voto${(sub.votesCount || 0) === 1 ? '' : 's'}</span>
+      </div>
+      <button type="button" class="btn btn-sm ${isVotedByMe ? 'btn-pusio' : 'btn-secondary'}" onclick="votePusioDesign(${sub.id})">
+        ${isVotedByMe ? 'Votado' : 'Votar'}
+      </button>
+    `;
+
+    grid.appendChild(card);
+  });
+}
+
+// Exponer explícitamente en el objeto window global para que onclick="" en el HTML siempre responda
+window.showToast = showToast;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.retireCar = retireCar;
+window.leaveCar = leaveCar;
+window.joinCarAsPassenger = joinCarAsPassenger;
+window.openCarDetailModal = openCarDetailModal;
+window.selectUserForCustomization = selectUserForCustomization;
+window.selectPusioForCustomization = selectPusioForCustomization;
+window.openPusioContestModal = openPusioContestModal;
+window.submitRewardIdea = submitRewardIdea;
+window.submitCurrentPusioToContest = submitCurrentPusioToContest;
+window.votePusioDesign = votePusioDesign;

@@ -4,7 +4,7 @@ from database import get_connection, init_db
 INITIAL_USERS = [
     {
         "email": "reyvelljk87@gmail.com",
-        "name": "Reyvell (Anfitrión)",
+        "name": "Reyvell",
         "alias": "Reyvell",
         "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=reyvell",
         "modalidad": "Solo io",
@@ -13,44 +13,35 @@ INITIAL_USERS = [
     },
     {
         "email": "titorvc08@gmail.com",
-        "name": "Roberto Vargas (Titor)",
-        "alias": "Titor",
+        "name": "Tito",
+        "alias": "Tito",
         "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=titor",
         "modalidad": "Solo io",
         "puedo_dar_casa": 1,
         "puedo_dar_coche": 0
     },
     {
-        "email": "danielitoestabonito16@gmail.com",
-        "name": "Danielito",
-        "alias": "Danielito",
-        "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=danielito",
-        "modalidad": "Solo io",
-        "puedo_dar_casa": 1,
-        "puedo_dar_coche": 1
-    },
-    {
-        "email": "mendoza.lpinzon@gmail.com",
-        "name": "Pinzón",
-        "alias": "Pinzón",
-        "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=pinzon",
+        "email": "fjvc091002@gmail.com",
+        "name": "Shory",
+        "alias": "Shory",
+        "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=shory",
         "modalidad": "Parejas",
         "puedo_dar_casa": 1,
         "puedo_dar_coche": 0
     },
     {
-        "email": "fjvc091002@gmail.com",
-        "name": "FJVC",
-        "alias": "FJVC",
-        "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=fjvc",
+        "email": "mendoza.lpinzon@gmail.com",
+        "name": "Luis",
+        "alias": "Luis",
+        "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=luis",
         "modalidad": "Parejas",
         "puedo_dar_casa": 1,
         "puedo_dar_coche": 0
     },
     {
         "email": "alejandroaltamiranopuc@gmail.com",
-        "name": "Alejandro Altamirano",
-        "alias": "Alex Altamirano",
+        "name": "Alex",
+        "alias": "Alex",
         "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=alex",
         "modalidad": "Solo io",
         "puedo_dar_casa": 1,
@@ -58,29 +49,74 @@ INITIAL_USERS = [
     },
     {
         "email": "joserikb@gmail.com",
-        "name": "Erik B.",
-        "alias": "Erik",
-        "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=erik",
+        "name": "Choro",
+        "alias": "Choro",
+        "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=choro",
         "modalidad": "Solo io",
         "puedo_dar_casa": 1,
         "puedo_dar_coche": 0
     },
     {
         "email": "ivan.raygosa@gmail.com",
-        "name": "Iván Raygosa",
-        "alias": "Iván",
-        "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=ivan",
+        "name": "Rubén",
+        "alias": "Rubén",
+        "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=ruben",
         "modalidad": "Parejas",
         "puedo_dar_casa": 0,
         "puedo_dar_coche": 0
     },
     {
         "email": "cplus.lat@gmail.com",
-        "name": "CPlus",
-        "alias": "CPlus",
-        "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=cplus",
+        "name": "Beto",
+        "alias": "Beto",
+        "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=beto",
         "modalidad": "Parejas",
         "puedo_dar_casa": 1,
+        "puedo_dar_coche": 0
+    },
+    {
+        "email": "danielitoestabonito16@gmail.com",
+        "name": "Daniel",
+        "alias": "Daniel",
+        "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=daniel",
+        "modalidad": "Solo io",
+        "puedo_dar_casa": 1,
+        "puedo_dar_coche": 1
+    },
+    {
+        "email": "cesar.amigo@posadachelem.com",
+        "name": "César",
+        "alias": "César",
+        "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=cesar",
+        "modalidad": "Solo io",
+        "puedo_dar_casa": 0,
+        "puedo_dar_coche": 0
+    },
+    {
+        "email": "aldo.amigo@posadachelem.com",
+        "name": "Aldo",
+        "alias": "Aldo",
+        "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=aldo",
+        "modalidad": "Solo io",
+        "puedo_dar_casa": 0,
+        "puedo_dar_coche": 0
+    },
+    {
+        "email": "noe.amigo@posadachelem.com",
+        "name": "Noé",
+        "alias": "Noé",
+        "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=noe",
+        "modalidad": "Solo io",
+        "puedo_dar_casa": 0,
+        "puedo_dar_coche": 0
+    },
+    {
+        "email": "andres.amigo@posadachelem.com",
+        "name": "Andrés",
+        "alias": "Andrés",
+        "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=andres",
+        "modalidad": "Solo io",
+        "puedo_dar_casa": 0,
         "puedo_dar_coche": 0
     }
 ]

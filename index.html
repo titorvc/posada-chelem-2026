@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Posada Chelem 2026</title>
 
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=20261117_1715">
 
   <meta property="og:title" content="Posada Chelem 2026">
   <meta property="og:description" content="Organización colaborativa para la posada en Chelem.">
@@ -29,17 +29,17 @@
 
   <!-- HERO EDITORIAL LIMPIO CON TOQUES SUTILES DE COLOR -->
   <section class="hero-clean container">
-    <div class="hero-meta-pill">
-      <span class="meta-dot"></span>
-      <span id="heroMetaText">Chelem Puerto, Yucatán &bull; Sábado 19 Dic 2026 &bull; Casa de Reyvell</span>
-    </div>
-
     <h1 class="hero-headline">
       Posada en <em>Chelem</em>
     </h1>
 
+    <div class="hero-meta-pill">
+      <span class="meta-dot"></span>
+      <span id="heroMetaText">Casa de Reyvell &bull; Sábado 19 de Diciembre, 2026</span>
+    </div>
+
     <p class="hero-dek">
-      El punto de encuentro para organizar comida, juegos, autos y dinámicas entre todos con el asistente <strong>pus.io</strong>.
+      Aquí planearemos todo: comida, transporte, dinámicas y juegos. Entre todos, con nuestro asistente: <strong>pus.io</strong>
     </p>
 
     <!-- CONTADOR EDITORIAL GRANDE -->
@@ -62,163 +62,223 @@
       </div>
     </div>
 
-    <!-- ACCESOS RÁPIDOS PARA INVITAR A CREAR CONTENIDO -->
-    <div class="hero-actions-deck">
-      <button type="button" class="hero-action-card card-teal" onclick="switchTab('tabPlanes')">
-        <span class="action-card-label">Colaboración</span>
-        <strong class="action-card-title">Planes y propuestas</strong>
-        <span class="action-card-sub" id="heroPlanesSub">0 planes activos &bull; Ver lista</span>
-      </button>
+    <!-- ====================================================================
+         PANEL DE RESUMEN (3 COLUMNAS: ASISTENCIA • TRANSPORTE • PUS.IO)
+         ==================================================================== -->
+    <div class="summary-panel">
+      <!-- Columna Izquierda: ¿Quiénes vamos? -->
+      <div class="summary-card summary-attendees">
+        <div class="summary-card-header">
+          <span class="summary-eyebrow">Asistencia</span>
+          <h2 class="summary-title">¿Quiénes vamos?</h2>
+          <p class="summary-caption">Gris: no confirmado. Con brillo: confirmado. Toca tu muñequito para personalizarlo.</p>
+        </div>
+        <div id="summaryAvatarsGrid" class="summary-avatars-grid"></div>
+      </div>
 
-      <button type="button" class="hero-action-card card-coral" onclick="switchTab('tabPusio')">
-        <span class="action-card-label">Asistente IA</span>
-        <strong class="action-card-title">Proponer con pus.io</strong>
-        <span class="action-card-sub">Escribe una idea y la IA la desglosa</span>
-      </button>
+      <!-- Columna Central: Transporte VIP -->
+      <div class="summary-card summary-transport">
+        <div class="summary-card-header">
+          <span class="summary-eyebrow">Logística Mérida &bull; Chelem</span>
+          <h2 class="summary-title">Transporte (5 Cupos de Autos)</h2>
+          <p class="summary-caption">Lleva tu coche para desbloquear los privilegios de Conductor VIP.</p>
+        </div>
 
-      <button type="button" class="hero-action-card card-amber" onclick="switchTab('tabRobot')">
-        <span class="action-card-label">Identidad</span>
-        <strong class="action-card-title">Mi Personaje</strong>
-        <span class="action-card-sub">Personaliza tu robot animado</span>
-      </button>
+        <!-- Indicador dinámico de capacidad logística Mérida -> Chelem -->
+        <div class="transport-capacity-bar-wrap">
+          <div class="transport-capacity-labels">
+            <span class="capacity-eyebrow">Asientos para la caravana</span>
+            <span id="transportCapacityStats" class="capacity-count">0 / 13 asientos</span>
+          </div>
+          <div class="transport-capacity-track">
+            <div id="transportCapacityFill" class="transport-capacity-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <div id="summaryCarsGrid" class="summary-cars-grid"></div>
+
+        <div id="vipPerksDrawer" class="vip-perks-box">
+          <div class="vip-perks-header">
+            <strong>Adquiere rasgos VIP</strong>
+          </div>
+          <div class="vip-chips-grid">
+            <div class="vip-chip-item">
+              <span class="vip-chip-dot"></span>
+              <span>100% gasolina cubierta</span>
+            </div>
+            <div class="vip-chip-item">
+              <span class="vip-chip-dot"></span>
+              <span>Voto de oro de la noche</span>
+            </div>
+            <div class="vip-chip-item">
+              <span class="vip-chip-dot"></span>
+              <span>Ventaja de turno en Smash</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna Derecha: Asistente de Posada (Pus.io) -->
+      <div class="summary-card summary-pusio-card">
+        <div class="summary-card-header pusio-card-header">
+          <div class="pusio-header-text">
+            <span class="summary-eyebrow">Asistente de Posada &bull; Pus.io</span>
+            <h2 class="summary-title pusio-title">&iquest;Qu&eacute; te gustar&iacute;a hacer, comer o tomar en Chelem?</h2>
+            <p class="summary-caption">Escribe qu&eacute; tienes en mente y te ayudo a organizarlo.</p>
+          </div>
+        </div>
+
+        <div class="pusio-card-body">
+          <!-- Formulario con botón flecha triangular hacia la derecha -->
+          <form id="agendaProposalForm" class="pusio-composer-form">
+            <div class="pusio-input-wrap">
+              <input type="text" id="agendaProposalInput" class="pusio-input-field" placeholder="Escribe tu propuesta..." autocomplete="off" required>
+              <button type="submit" class="btn-pusio-submit" title="Armar el plan (Enter)">
+                <svg class="enter-icon-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <polygon points="7,4 19,12 7,20"></polygon>
+                </svg>
+              </button>
+            </div>
+          </form>
+
+          <!-- Avatar de perfil interactivo y centrado de Pus.io -->
+          <div class="pusio-profile-center">
+            <div id="pusioMascotWrap" class="pusio-portrait-avatar" onclick="selectPusioForCustomization()" title="Toca a Pus.io para personalizar su diseño y colores">
+              <!-- Se renderiza dinámicamente con Bottts y tus selecciones -->
+            </div>
+            <div class="pusio-action-links">
+              <button type="button" class="pusio-customize-link" onclick="selectPusioForCustomization()">Personal&iacute;zame</button>
+              <span class="pusio-link-sep">&bull;</span>
+              <button type="button" class="pusio-contest-link" onclick="openPusioContestModal()">Concurso Pus.io</button>
+            </div>
+          </div>
+
+          <!-- Estante dinámico de sugerencias conversacionales -->
+          <div class="pusio-suggestions-deck">
+            <div class="suggestions-conversational-title">Elige una idea para ver la magia</div>
+            <div class="sparks-grid">
+              <button type="button" class="spark-chip" data-prompt="Hacer hamburguesas al carbón con papas">
+                <span class="spark-dot dot-amber"></span>
+                <span>Hamburguesas al carb&oacute;n</span>
+              </button>
+              <button type="button" class="spark-chip" data-prompt="Organizar torneo de Mario Kart en la noche">
+                <span class="spark-dot dot-slate"></span>
+                <span>Torneo de Mario Kart</span>
+              </button>
+              <button type="button" class="spark-chip" data-prompt="Preparar ceviche playero y botanas de marisco">
+                <span class="spark-dot dot-teal"></span>
+                <span>Ceviche playero</span>
+              </button>
+              <button type="button" class="spark-chip" data-prompt="Hieleras con hielo, refrescos y bebidas frías">
+                <span class="spark-dot dot-pine"></span>
+                <span>Hieleras comunitarias</span>
+              </button>
+              <button type="button" class="spark-chip" data-prompt="Intercambio de regalos estilo elefante blanco">
+                <span class="spark-dot dot-coral"></span>
+                <span>Intercambio de regalos</span>
+              </button>
+              <button type="button" class="spark-chip" data-prompt="Torneo de retas de Smash Bros en la sala">
+                <span class="spark-dot dot-purple"></span>
+                <span>Torneo de Smash</span>
+              </button>
+              <button type="button" class="spark-chip" data-prompt="Nachos con queso derretido y carne al pastor">
+                <span class="spark-dot dot-amber"></span>
+                <span>Nachos de pastor</span>
+              </button>
+              <button type="button" class="spark-chip" data-prompt="Sesión de karaoke y música con bocina frente al mar">
+                <span class="spark-dot dot-teal"></span>
+                <span>Karaoke en la terraza</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- NAVEGACIÓN POR PESTAÑAS -->
-  <div class="container">
-    <div class="tabs-nav-wrap">
-      <div class="tabs-bar" role="tablist">
-        <button type="button" class="tab-trigger active" data-tab="tabPlanes">
-          <span>Planes y propuestas</span>
-          <span id="badgePlanesCount" class="tab-count">0</span>
-        </button>
-        <button type="button" class="tab-trigger" data-tab="tabPusio">
-          <span>Chat pus.io</span>
-        </button>
-        <button type="button" class="tab-trigger" data-tab="tabRobot">
-          <span>Mi Robot</span>
-        </button>
-        <button type="button" class="tab-trigger" data-tab="tabAsistentes">
-          <span>¿Quiénes vamos?</span>
-        </button>
-        <button type="button" class="tab-trigger" data-tab="tabTransporte">
-          <span>Transporte</span>
-        </button>
-      </div>
+  <!-- ====================================================================
+       SECCIÓN CENTRAL: BANQUETE, DINÁMICAS Y CRONOGRAMA VIVO DE LA POSADA
+       ==================================================================== -->
+  <main class="container plans-agenda-section">
+
+
+    <!-- TABLERO A 2 COLUMNAS: COMIDA Y BEBIDA vs JUEGOS & ACTIVIDADES -->
+    <div class="agenda-columns-grid">
+      <!-- Columna 1: Comida & Bebida -->
+      <section class="agenda-column">
+        <div class="agenda-column-header">
+          <div>
+            <span class="column-eyebrow">Para compartir</span>
+            <h3 class="agenda-column-title">Comida & Bebida</h3>
+          </div>
+          <span id="badgeFoodCount" class="agenda-badge-count">0</span>
+        </div>
+        <div id="foodBoardContainer" class="agenda-cards-list"></div>
+      </section>
+
+      <!-- Columna 2: Juegos & Dinámicas -->
+      <section class="agenda-column">
+        <div class="agenda-column-header">
+          <div>
+            <span class="column-eyebrow">Para divertirnos</span>
+            <h3 class="agenda-column-title">Juegos & Dinámicas</h3>
+          </div>
+          <span id="badgeActivityCount" class="agenda-badge-count">0</span>
+        </div>
+        <div id="activityBoardContainer" class="agenda-cards-list"></div>
+      </section>
     </div>
 
-    <!-- ====================================================================
-         PESTAÑA 1: PLANES Y PROPUESTAS
-         ==================================================================== -->
-    <section id="tabPlanes" class="tab-panel active">
-      <div class="view-header">
+    <!-- BLOQUE FINAL: CRONOGRAMA DINÁMICO DE LA POSADA (3 MOMENTOS) -->
+    <section class="timeline-section">
+      <div class="timeline-header">
         <div>
-          <h2 class="view-title">Planes y <em>propuestas</em></h2>
-          <p class="view-subtitle">Cada comida o actividad se desglosa en insumos para dividirnos entre varios.</p>
-        </div>
-
-        <button type="button" class="btn btn-pusio" onclick="switchTab('tabPusio')">
-          <svg class="robot-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="4" y="8" width="16" height="12" rx="3"></rect>
-            <circle cx="9" cy="13" r="1.2" fill="currentColor"></circle>
-            <circle cx="15" cy="13" r="1.2" fill="currentColor"></circle>
-            <path d="M9.5 17h5"></path>
-            <path d="M12 4v4"></path>
-            <circle cx="12" cy="3" r="1" fill="currentColor"></circle>
-            <path d="M2 13v2"></path>
-            <path d="M22 13v2"></path>
-          </svg>
-          <span>Abrir chat pus.io</span>
-        </button>
-      </div>
-
-      <!-- COMPOSITOR RÁPIDO INTERACTIVO CON CHISPAS DE IDEAS -->
-      <div class="proposal-composer-card">
-        <div class="composer-header">
-          <div>
-            <h3 class="composer-title">¿Qué te gustaría armar en la posada?</h3>
-            <p class="composer-sub">Escribe cualquier comida o dinámica; la IA desglosará los insumos necesarios para dividirnos.</p>
-          </div>
-        </div>
-
-        <form id="inlineProposalForm" class="composer-input-row">
-          <input type="text" id="inlineProposalInput" class="composer-input" placeholder="Ej. Ceviche playero, Carne asada en la terraza, Torneo de Mario Kart..." autocomplete="off" required>
-          <button type="submit" class="btn btn-pusio">Desglosar con IA</button>
-        </form>
-
-        <div class="sparks-shelf">
-          <span class="sparks-label">Ideas para inspirarte:</span>
-          <button type="button" class="spark-chip" data-prompt="Quiero comer nachos de pastor">
-            <span class="spark-dot dot-coral"></span>
-            <span>Nachos de pastor</span>
-          </button>
-          <button type="button" class="spark-chip" data-prompt="Hacer hamburguesas al carbón">
-            <span class="spark-dot dot-amber"></span>
-            <span>Hamburguesas al carbón</span>
-          </button>
-          <button type="button" class="spark-chip" data-prompt="Preparar ceviche fresco frente al mar">
-            <span class="spark-dot dot-teal"></span>
-            <span>Ceviche frente al mar</span>
-          </button>
-          <button type="button" class="spark-chip" data-prompt="Organizar torneo de Super Smash Bros">
-            <span class="spark-dot dot-slate"></span>
-            <span>Torneo de Smash</span>
-          </button>
-          <button type="button" class="spark-chip" data-prompt="Llevar hieleras con hielo y bebidas">
-            <span class="spark-dot dot-pine"></span>
-            <span>Hieleras y bebidas</span>
-          </button>
+          <span class="agenda-eyebrow">Agenda</span>
+          <h2 class="timeline-title">Cronograma del Día</h2>
         </div>
       </div>
 
-      <div id="collabBoardContainer"></div>
-    </section>
-
-    <!-- ====================================================================
-         PESTAÑA 2: CHAT CON PUS.IO
-         ==================================================================== -->
-    <section id="tabPusio" class="tab-panel">
-      <div class="view-header">
-        <div>
-          <h2 class="view-title">Asistente <em>pus.io</em></h2>
-          <p class="view-subtitle">Dile qué quieres comer, tomar o jugar; pus.io armará la lista de insumos en Planes y propuestas.</p>
-        </div>
-      </div>
-
-      <div class="pusio-box">
-        <div class="pusio-examples">
-          <span style="font-family:var(--font-mono); font-size:0.7rem; text-transform:uppercase; color:var(--ink-muted);">Ideas de ejemplo:</span>
-          <button type="button" class="example-pill" data-prompt="Quiero comer nachos de pastor">Nachos de pastor</button>
-          <button type="button" class="example-pill" data-prompt="Organizar torneo de Super Smash Bros">Torneo de Smash</button>
-          <button type="button" class="example-pill" data-prompt="Hacer hamburguesas al carbón">Hamburguesas al carbón</button>
-          <button type="button" class="example-pill" data-prompt="Llevar hieleras con bebidas y hielo">Hieleras y bebidas</button>
+      <div class="timeline-grid">
+        <!-- Momento 1: Tarde de Sol & Bienvenida -->
+        <div class="timeline-stage-card">
+          <div class="stage-time-tag">14:00 &bull; 17:30</div>
+          <h3 class="stage-name">Tarde & Bienvenida</h3>
+          <div id="timelineStage1" class="stage-plans-container"></div>
         </div>
 
-        <div id="pusioChatArea" class="chat-stream">
-          <div class="chat-msg bot">
-            Hola. Escribe cualquier plan o comida que quieras proponer (por ejemplo: <em>"Quiero comer nachos de pastor"</em>). Desglosaré todo lo que se necesita en <strong>Planes y propuestas</strong> para que cada quien elija qué llevar.
-          </div>
+        <!-- Momento 2: Atardecer & Asador -->
+        <div class="timeline-stage-card">
+          <div class="stage-time-tag">17:30 &bull; 20:30</div>
+          <h3 class="stage-name">Atardecer & Asador</h3>
+          <div id="timelineStage2" class="stage-plans-container"></div>
         </div>
 
-        <form id="pusioForm" class="chat-input-bar">
-          <input type="text" id="pusioInput" class="chat-text-field" placeholder="Ej. Quiero comer nachos de pastor..." autocomplete="off">
-          <button type="submit" class="btn btn-pusio">Crear plan</button>
-        </form>
+        <!-- Momento 3: Noche Estelar & Competencia -->
+        <div class="timeline-stage-card">
+          <div class="stage-time-tag">20:30 en adelante</div>
+          <h3 class="stage-name">Noche & Convivencia</h3>
+          <div id="timelineStage3" class="stage-plans-container"></div>
+        </div>
       </div>
     </section>
+  </main>
 
-    <!-- ====================================================================
-         PESTAÑA 3: ESTUDIO DE PERSONAJE & AVATAR BOTTTS
-         ==================================================================== -->
-    <section id="tabRobot" class="tab-panel">
-      <div class="view-header">
+  <!-- ======================================================================
+       MODAL 0: ESTUDIO DE PERSONALIZACIÓN DE PERSONAJE (SE ABRE AL CLICKEAR EL MUÑEQUITO)
+       ====================================================================== -->
+  <div id="modalRobotStudio" class="modal-overlay hidden">
+    <div class="modal-box modal-box-studio">
+      <div class="modal-header">
         <div>
-          <h2 class="view-title">Estudio de <em>personaje</em></h2>
-          <p class="view-subtitle">Personaliza cada parte de tu personaje y ajusta sus tonos con la paleta circular.</p>
+          <h3 class="modal-title">Estudio de <em>personaje</em></h3>
+          <p class="modal-subtitle" style="font-size:0.85rem; color:var(--ink-secondary); margin-top:4px;">
+            Personaliza cada rasgo y ajusta los tonos con la paleta interactiva.
+          </p>
         </div>
-        <div style="display:flex; gap:8px;">
-          <button type="button" id="btnRandomRobot" class="btn btn-secondary btn-sm">Mezclar al azar</button>
-          <button type="button" id="btnSaveRobotStudio" class="btn btn-pusio btn-sm">Guardar cambios</button>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button type="button" id="btnRandomRobot" class="btn btn-secondary btn-sm">Mezclar</button>
+          <button type="button" id="btnSaveRobotStudio" class="btn btn-pusio btn-sm">Guardar</button>
+          <button type="button" class="modal-close-btn" data-close="modalRobotStudio" onclick="closeModal('modalRobotStudio')" title="Cerrar">&times;</button>
         </div>
       </div>
 
@@ -298,75 +358,7 @@
 
         </div>
       </div>
-    </section>
-
-    <!-- ====================================================================
-         PESTAÑA 4: ¿QUIÉNES VAMOS?
-         ==================================================================== -->
-    <section id="tabAsistentes" class="tab-panel">
-      <div class="view-header">
-        <div>
-          <h2 class="view-title">¿Quiénes <em>vamos</em>?</h2>
-          <p class="view-subtitle">Lista de amigos confirmados. Cada perfil está protegido por el correo y PIN de su dueño.</p>
-        </div>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="switchTab('tabRobot')">Personalizar mi personaje</button>
-      </div>
-
-      <div id="whosGoingGrid" class="friends-grid"></div>
-    </section>
-
-    <!-- ====================================================================
-         PESTAÑA 5: TRANSPORTE Y PRIVILEGIOS DE CONDUCTOR
-         ==================================================================== -->
-    <section id="tabTransporte" class="tab-panel">
-      <div class="view-header">
-        <div>
-          <h2 class="view-title">Rutas y <em>transporte</em></h2>
-          <p class="view-subtitle">Coordina si puedes llevar tu coche desde Mérida o si vas como pasajero.</p>
-        </div>
-      </div>
-
-      <div class="transport-grid">
-        <div class="transport-card">
-          <h3>Puedo dar mi coche</h3>
-          <p>Registra los asientos libres de tu vehículo para la salida Mérida &mdash; Chelem y activa los beneficios VIP.</p>
-          <button type="button" id="btnOpenCarModal" class="btn btn-pusio btn-sm">Registrar mi coche</button>
-        </div>
-
-        <div class="transport-card">
-          <h3>Voy como pasajero</h3>
-          <p>Mi coche no está disponible por ahora; me sumo a alguno de los autos dividiendo la gasolina.</p>
-          <button type="button" id="btnConfirmPassenger" class="btn btn-sm">Confirmarme como pasajero</button>
-        </div>
-      </div>
-
-      <div id="carsContainer" style="margin-bottom: 24px;"></div>
-
-      <div>
-        <h3 style="font-family:var(--font-serif); font-size:1.75rem; font-weight:400; margin-bottom:12px;">
-          Privilegios para quien lleve su coche
-        </h3>
-        <div class="perks-compact-grid">
-          <div class="perk-mini">
-            <strong>01. Combustible cubierto</strong>
-            <span>Tus pasajeros dividen y cubren el 100% de la gasolina del viaje.</span>
-          </div>
-          <div class="perk-mini">
-            <strong>02. Voto de oro</strong>
-            <span>Prioridad para desempatar cualquier decisión grupal de la noche.</span>
-          </div>
-          <div class="perk-mini">
-            <strong>03. Ventaja en Smash</strong>
-            <span>Eliges tu primer rival o turno en el torneo de Smash Bros.</span>
-          </div>
-          <div class="perk-mini">
-            <strong>04. Distintivo VIP</strong>
-            <span>Insignia de Conductor VIP en tu perfil toda la posada.</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
+    </div>
   </div>
 
   <!-- ======================================================================
@@ -376,7 +368,7 @@
     <div class="modal-box">
       <div class="modal-header">
         <h3 class="modal-title">Acceso personal único</h3>
-        <button type="button" class="modal-close-btn" data-close="modalAuth">&times;</button>
+        <button type="button" class="modal-close-btn" data-close="modalAuth" onclick="closeModal('modalAuth')" title="Cerrar">&times;</button>
       </div>
 
       <div class="auth-security-note">
@@ -386,11 +378,23 @@
       <form id="secureAuthForm">
         <div class="form-item">
           <label for="authInputEmail">Tu correo electrónico (Gmail)</label>
-          <input type="email" id="authInputEmail" class="form-ctrl" placeholder="tucorreo@gmail.com" required>
+          <input type="email" id="authInputEmail" class="form-ctrl" placeholder="tucorreo@gmail.com" required autocomplete="email">
         </div>
+
+        <!-- Banner de coincidencia / reclamo inteligente de personaje -->
+        <div id="claimMatchBanner" class="claim-match-banner" style="display:none;">
+          <div class="claim-match-avatar" id="claimMatchAvatar"></div>
+          <div class="claim-match-text">
+            <span class="claim-match-tag">Coincidencia detectada</span>
+            <strong id="claimMatchName">¿Eres tú?</strong>
+            <p>Este personaje está en la lista. Puedes reclamarlo con tu correo real y ponerte un apodo.</p>
+          </div>
+          <button type="button" id="btnClaimMatch" class="btn btn-pusio btn-sm">Reclamar</button>
+        </div>
+
         <div class="form-item">
-          <label for="authInputName">Tu nombre o apodo</label>
-          <input type="text" id="authInputName" class="form-ctrl" placeholder="Ej. Roberto, Daniel, Reyvell..." required>
+          <label for="authInputName">Tu nombre o apodo personalizado</label>
+          <input type="text" id="authInputName" class="form-ctrl" placeholder="Ej. Tito, Daniel, Reyvell..." required>
         </div>
         <div class="form-item">
           <label for="authInputPin">Tu PIN o clave secreta (mínimo 4 caracteres)</label>
@@ -409,7 +413,7 @@
     <div class="modal-box">
       <div class="modal-header">
         <h3 class="modal-title">Registrar mi coche</h3>
-        <button type="button" class="modal-close-btn" data-close="modalCar">&times;</button>
+        <button type="button" class="modal-close-btn" data-close="modalCar" onclick="closeModal('modalCar')" title="Cerrar">&times;</button>
       </div>
       <form id="carForm">
         <div class="form-item">
@@ -417,12 +421,13 @@
           <input type="text" id="carInputModel" class="form-ctrl" placeholder="Ej. Mazda 3, Swift, SUV" required>
         </div>
         <div class="form-item">
-          <label for="carInputSeats">Lugares libres</label>
+          <label for="carInputSeats">Lugares disponibles para pasajeros</label>
           <select id="carInputSeats" class="form-ctrl" required>
-            <option value="2">2 lugares libres</option>
-            <option value="3" selected>3 lugares libres</option>
-            <option value="4">4 lugares libres</option>
-            <option value="5">5 lugares libres</option>
+            <option value="1">1 pasajero (+ 1 conductor)</option>
+            <option value="2">2 pasajeros (+ 1 conductor)</option>
+            <option value="3" selected>3 pasajeros (+ 1 conductor)</option>
+            <option value="4">4 pasajeros (+ 1 conductor)</option>
+            <option value="5">5 pasajeros (+ 1 conductor)</option>
           </select>
         </div>
         <div class="form-item">
@@ -430,17 +435,84 @@
           <input type="text" id="carInputZone" class="form-ctrl" placeholder="Ej. Altabrisa, Norte, Poniente" required>
         </div>
         <div class="form-item">
-          <label for="carInputTime">Hora aproximada</label>
+          <label for="carInputTime">Hora aproximada de salida</label>
           <input type="text" id="carInputTime" class="form-ctrl" placeholder="Ej. 3:00 PM" required>
         </div>
-        <button type="submit" class="btn btn-pusio" style="width:100%; margin-top:8px;">Guardar coche</button>
+        <button type="submit" class="btn btn-pusio" style="width:100%; margin-top:8px;">Guardar coche y activar VIP</button>
       </form>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       MODAL 3: DETALLES DE VEHÍCULO / GESTIÓN DE PASAJEROS
+       ====================================================================== -->
+  <div id="modalCarDetail" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" id="carDetailTitle">Vehículo</h3>
+          <p id="carDetailSubtitle" style="font-size:0.8rem; color:var(--ink-secondary); margin-top:4px;">Detalles de ruta y cupos</p>
+        </div>
+        <button type="button" class="modal-close-btn" data-close="modalCarDetail" onclick="closeModal('modalCarDetail')" title="Cerrar">&times;</button>
+      </div>
+
+      <div id="carDetailBody"></div>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       MODAL 4: CONCURSO DE PERSONALIZACIÓN DE PUS.IO (VOTACIONES & RECOMPENSAS APRENDIDAS)
+       ====================================================================== -->
+  <div id="modalPusioContest" class="modal-overlay hidden">
+    <div class="modal-box contest-modal-box">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">Concurso Pus.io</h3>
+          <p style="font-size:0.8rem; color:var(--ink-secondary); margin-top:2px;">
+            El diseño con más votos será el avatar oficial de la posada.
+          </p>
+        </div>
+        <button type="button" class="modal-close-btn" data-close="modalPusioContest" onclick="closeModal('modalPusioContest')" title="Cerrar">&times;</button>
+      </div>
+
+      <!-- Barra rápida para postular el diseño actual -->
+      <div class="contest-submit-bar">
+        <div class="contest-submit-info">
+          <strong>Tu diseño actual</strong>
+          <span>Postúlalo a la galería para que todos voten.</span>
+        </div>
+        <button type="button" class="btn btn-pusio" onclick="submitCurrentPusioToContest()">Postular mi Pus.io</button>
+      </div>
+
+      <!-- Sección de Recompensas Minimalista -->
+      <div class="contest-reward-card">
+        <div class="contest-reward-header">
+          <span class="contest-eyebrow">Premio</span>
+          <h4 class="contest-reward-title">&iquest;Qu&eacute; gana el creador?</h4>
+        </div>
+
+        <div id="contestRewardChips" class="contest-reward-chips"></div>
+
+        <form id="contestRewardForm" class="contest-reward-form" onsubmit="submitRewardIdea(event)">
+          <input type="text" id="contestRewardInput" class="form-ctrl contest-input-text" placeholder="Proponer otra recompensa..." maxlength="100" required>
+          <button type="submit" class="btn btn-pusio btn-sm">Sugerir</button>
+        </form>
+      </div>
+
+      <!-- Galería de propuestas postuladas -->
+      <div class="contest-gallery-section">
+        <div class="contest-gallery-head">
+          <span class="contest-eyebrow">Propuestas</span>
+          <span id="contestSubmissionsCount" class="contest-count-badge">0</span>
+        </div>
+        <div id="contestSubmissionsGrid" class="contest-submissions-grid"></div>
+      </div>
     </div>
   </div>
 
   <div id="toastNotice" class="toast-notice">Guardado</div>
 
   <script src="js/bottts_parts.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/app.js?v=20261117_1715"></script>
 </body>
 </html>
