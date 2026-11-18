@@ -1701,8 +1701,8 @@ function createPlanCardElement(collab, catClass) {
     
     <!-- Encabezado compacto / interactivo -->
     <div class="plan-card-head" onclick="togglePlanCollapse(${collab.id})" title="Clic para expandir o contraer">
-      <div style="flex:1; min-width:0;">
-        <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+      <div class="plan-head-left-info">
+        <div class="plan-card-tags-row">
           <span class="plan-cat-pill">${collab.category}</span>
           <span class="plan-stage-pill">&bull; ${stageName}</span>
         </div>

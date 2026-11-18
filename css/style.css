@@ -944,18 +944,21 @@ body {
 
 .plan-card-title {
   font-family: var(--font-serif);
-  font-size: clamp(1.18rem, 2.2vw, 1.38rem);
+  font-size: clamp(1.18rem, 2vw, 1.35rem);
   font-weight: 500;
   color: var(--ink);
-  line-height: 1.2;
+  line-height: 1.25;
   margin: 4px 0 3px;
-  word-break: break-word;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 
 .plan-card-author {
   font-size: 0.84rem;
   color: var(--ink-secondary);
   font-weight: 500;
+  white-space: normal;
 }
 
 /* Escala cromática de los automóviles aplicada a las tarjetas */
@@ -1023,22 +1026,38 @@ body {
 
 .plan-card-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
   cursor: pointer;
   user-select: none;
-  padding-right: 28px;
+  padding-right: 32px;
   width: 100%;
   box-sizing: border-box;
+}
+
+.plan-head-left-info {
+  flex: 1 1 200px;
+  min-width: 180px;
+  max-width: 100%;
+}
+
+.plan-card-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
 }
 
 .plan-head-right-status {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .plan-vibe-pill {
@@ -2612,9 +2631,11 @@ body {
 /* Tablero a 2 Columnas */
 .agenda-columns-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 24px;
   margin-bottom: 44px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 @media (max-width: 820px) {
@@ -2633,6 +2654,9 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 380px;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .agenda-column-header {
