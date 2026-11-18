@@ -647,6 +647,11 @@ function selectUserForCustomization(personId) {
   showToast(`Personalizando a ${person.name}. Toca las piezas para editar.`);
 }
 
+function openPusioActionMenu() {
+  if (!requireAuth()) return;
+  openModal("modalPusioActions");
+}
+
 function selectPusioForCustomization() {
   if (!requireAuth()) return;
   editingTarget = "pusio";
@@ -3052,6 +3057,7 @@ window.leaveCar = leaveCar;
 window.joinCarAsPassenger = joinCarAsPassenger;
 window.openCarDetailModal = openCarDetailModal;
 window.selectUserForCustomization = selectUserForCustomization;
+window.openPusioActionMenu = openPusioActionMenu;
 window.selectPusioForCustomization = selectPusioForCustomization;
 window.openPusioContestModal = openPusioContestModal;
 window.requestCloseStudio = requestCloseStudio;

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>El pusio 2026</title>
 
-  <link rel="stylesheet" href="css/style.css?v=20261118_1635">
+  <link rel="stylesheet" href="css/style.css?v=20261118_1645">
 
   <meta property="og:title" content="El pusio 2026">
   <meta property="og:description" content="Organización colaborativa para la posada en Chelem.">
@@ -158,16 +158,12 @@
         </div>
 
         <div class="pusio-card-body">
-          <!-- Avatar de perfil interactivo y centrado de Pus.io: ahora ubicado justo arriba del input -->
+          <!-- Avatar de perfil interactivo de Pus.io con halo resplandeciente -->
           <div class="pusio-profile-center">
-            <div id="pusioMascotWrap" class="pusio-portrait-avatar" onclick="selectPusioForCustomization()" title="Toca a Pus.io para personalizar su diseño y colores">
+            <div id="pusioMascotWrap" class="pusio-portrait-avatar pusio-glowing-halo" onclick="openPusioActionMenu()" title="Toca a Pus.io para abrir opciones">
               <!-- Se renderiza dinámicamente con Bottts y tus selecciones -->
             </div>
-            <div class="pusio-action-links">
-              <button type="button" class="pusio-customize-link" onclick="selectPusioForCustomization()">Personal&iacute;zame</button>
-              <span class="pusio-link-sep">&bull;</span>
-              <button type="button" class="pusio-contest-link" onclick="openPusioContestModal()">Concurso Pus.io</button>
-            </div>
+            <span class="pusio-avatar-hint">Toca a Pus.io</span>
           </div>
 
           <!-- Formulario con botón enter de acción táctil -->
@@ -501,6 +497,41 @@
   </div>
 
   <!-- ======================================================================
+       MODAL 3.5: MENÚ DE ACCIONES DE PUS.IO (PERSONALIZAR O CONCURSO)
+       ====================================================================== -->
+  <div id="modalPusioActions" class="modal-overlay hidden">
+    <div class="modal-box pusio-actions-modal-box">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">Pus.io &bull; Opciones</h3>
+          <p style="font-size:0.8rem; color:var(--ink-secondary); margin-top:2px;">
+            Tu anfitri&oacute;n y asistente para la posada en Chelem.
+          </p>
+        </div>
+        <button type="button" class="modal-close-btn" data-close="modalPusioActions" onclick="closeModal('modalPusioActions')" title="Cerrar">&times;</button>
+      </div>
+
+      <div class="pusio-actions-menu-grid">
+        <button type="button" class="pusio-menu-card-btn" onclick="closeModal('modalPusioActions'); selectPusioForCustomization();">
+          <div class="pusio-menu-card-icon">🎨</div>
+          <div class="pusio-menu-card-text">
+            <strong>Personalizar a Pus.io</strong>
+            <span>Cambia sus ojos, cara, antena y colores con el estudio de robots.</span>
+          </div>
+        </button>
+
+        <button type="button" class="pusio-menu-card-btn highlight" onclick="closeModal('modalPusioActions'); openPusioContestModal();">
+          <div class="pusio-menu-card-icon">🏆</div>
+          <div class="pusio-menu-card-text">
+            <strong>Concurso Pus.io &bull; Galería</strong>
+            <span>Postula tu diseño o vota por el avatar oficial de la posada.</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================
        MODAL 4: CONCURSO DE PERSONALIZACIÓN DE PUS.IO (VOTACIONES & RECOMPENSAS APRENDIDAS)
        ====================================================================== -->
   <div id="modalPusioContest" class="modal-overlay hidden">
@@ -587,6 +618,6 @@
   <div id="toastNotice" class="toast-notice">Guardado</div>
 
   <script src="js/bottts_parts.js"></script>
-  <script src="js/app.js?v=20261118_1635"></script>
+  <script src="js/app.js?v=20261118_1645"></script>
 </body>
 </html>
