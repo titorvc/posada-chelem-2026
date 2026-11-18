@@ -361,6 +361,7 @@ function selectUserForCustomization(personId) {
 }
 
 function selectPusioForCustomization() {
+  if (!requireAuth()) return;
   editingTarget = "pusio";
   if (!pusioRobot) {
     pusioRobot = JSON.parse(JSON.stringify(DEFAULT_PUSIO_ROBOT));
@@ -2105,6 +2106,7 @@ function renderContestRewards() {
 
 function submitRewardIdea(e) {
   e.preventDefault();
+  if (!requireAuth()) return;
   const input = document.getElementById("contestRewardInput");
   if (!input) return;
   const rawText = input.value.trim();
