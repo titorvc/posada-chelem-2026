@@ -706,6 +706,22 @@ body {
     max-width: 100%;
   }
 
+  .summary-panel,
+  .summary-card,
+  .summary-pusio-card,
+  .plans-agenda-section,
+  .agenda-columns-grid {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .agenda-columns-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
   .hero-clean {
     padding-left: 14px;
     padding-right: 14px;
@@ -713,10 +729,18 @@ body {
 
   .agenda-column {
     padding: 16px 14px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
 
   .timeline-section {
     padding: 16px 14px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
 }
 
@@ -891,14 +915,47 @@ body {
   background: var(--bg-page);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 14px 16px;
+  padding: 16px 18px;
   position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   transition: all 0.22s var(--ease);
 }
 
 .plan-item-card:hover {
   border-color: var(--border-hover);
   box-shadow: var(--shadow-sm);
+}
+
+.plan-cat-pill {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-subtle);
+  color: var(--ink);
+  border: 1px solid var(--border);
+}
+
+.plan-card-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.18rem, 2.2vw, 1.38rem);
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.2;
+  margin: 4px 0 3px;
+  word-break: break-word;
+}
+
+.plan-card-author {
+  font-size: 0.84rem;
+  color: var(--ink-secondary);
+  font-weight: 500;
 }
 
 /* Escala cromática de los automóviles aplicada a las tarjetas */
@@ -968,10 +1025,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
   cursor: pointer;
   user-select: none;
   padding-right: 28px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .plan-head-right-status {
@@ -983,9 +1043,9 @@ body {
 
 .plan-vibe-pill {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.80rem;
   font-weight: 700;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: var(--radius-pill);
   white-space: nowrap;
 }
@@ -2675,11 +2735,11 @@ body {
 
 .plan-stage-pill {
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  padding: 2px 7px;
+  padding: 3px 9px;
   border-radius: var(--radius-pill);
   background: var(--bg-subtle);
   color: var(--ink-secondary);
@@ -3655,11 +3715,14 @@ body {
   background: var(--bg-page);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 10px 12px;
+  padding: 11px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
   transition: all 0.18s ease;
 }
 
@@ -3673,12 +3736,13 @@ body {
   align-items: center;
   gap: 8px;
   flex: 1;
-  min-width: 0;
+  min-width: 140px;
 }
 
 .task-name {
-  font-size: 0.86rem;
+  font-size: 0.96rem;
   font-weight: 600;
+  line-height: 1.35;
   word-break: break-word;
 }
 
@@ -3792,19 +3856,19 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.74rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--teal-accent);
   background: var(--bg-card);
-  padding: 3px 10px 3px 4px;
+  padding: 4px 12px 4px 5px;
   border-radius: var(--radius-pill);
   border: 1px solid rgba(0, 143, 122, 0.25);
   cursor: pointer;
 }
 
 .task-assignee-icon {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   overflow: hidden;
   display: inline-flex;
@@ -3812,9 +3876,9 @@ body {
 
 .claim-btn {
   font-family: var(--font-sans);
-  font-size: 0.74rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  padding: 5px 12px;
+  padding: 6px 14px;
   border-radius: var(--radius-pill);
   border: 1px solid var(--border-hover);
   background: var(--bg-card);
@@ -3833,14 +3897,17 @@ body {
   display: flex;
   gap: 8px;
   margin-bottom: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .add-subitem-input {
   flex: 1;
-  padding: 9px 14px;
+  min-width: 0;
+  padding: 10px 14px;
   border: 1px solid var(--border);
   border-radius: var(--radius-pill);
-  font-size: 0.82rem;
+  font-size: 0.90rem;
   background: var(--bg-page);
   outline: none;
 }
@@ -3859,12 +3926,12 @@ body {
   align-items: center;
   gap: 7px;
   font-family: var(--font-sans);
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--ink);
   background: var(--bg-card);
   border: 1px solid var(--border-hover);
-  padding: 6px 14px;
+  padding: 7px 14px;
   border-radius: var(--radius-pill);
   cursor: pointer;
   transition: all 0.18s ease;
@@ -3888,9 +3955,9 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.76rem;
+  font-size: 0.84rem;
   font-weight: 600;
-  padding: 5px 12px;
+  padding: 6px 14px;
   border-radius: var(--radius-pill);
   background: var(--bg-card);
   border: 1px solid var(--teal-accent);
