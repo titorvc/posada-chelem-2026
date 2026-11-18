@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Posada Chelem 2026</title>
 
-  <link rel="stylesheet" href="css/style.css?v=20261117_2230">
+  <link rel="stylesheet" href="css/style.css?v=20261117_2245">
 
   <meta property="og:title" content="Posada Chelem 2026">
   <meta property="og:description" content="Organización colaborativa para la posada en Chelem.">
@@ -301,8 +301,8 @@
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
           <button type="button" id="btnRandomRobot" class="btn btn-secondary btn-sm">Mezclar</button>
-          <button type="button" id="btnSaveRobotStudio" class="btn btn-pusio btn-sm">Guardar</button>
-          <button type="button" class="modal-close-btn" data-close="modalRobotStudio" onclick="closeModal('modalRobotStudio')" title="Cerrar">&times;</button>
+          <button type="button" id="btnSaveRobotStudio" class="btn btn-pusio btn-sm" onclick="saveRobotStudioAction()">Guardar</button>
+          <button type="button" class="modal-close-btn" onclick="requestCloseStudio()" title="Cerrar">&times;</button>
         </div>
       </div>
 
@@ -380,6 +380,15 @@
             </div>
           </div>
 
+        </div>
+      </div>
+
+      <!-- Barra de acciones inferior: Guardar tras terminar de personalizar -->
+      <div class="studio-bottom-actions-bar">
+        <span class="studio-bottom-hint">¿Terminaste tu diseño? Recuerda guardar para conservarlo en tu perfil.</span>
+        <div class="studio-bottom-buttons">
+          <button type="button" id="btnDiscardRobotStudioBottom" class="btn btn-secondary btn-sm" onclick="requestCloseStudio()">Descartar</button>
+          <button type="button" id="btnSaveRobotStudioBottom" class="btn btn-pusio btn-sm" onclick="saveRobotStudioAction()">Guardar cambios</button>
         </div>
       </div>
     </div>
@@ -534,9 +543,26 @@
     </div>
   </div>
 
+  <!-- MODAL DE CONFIRMACIÓN: CAMBIOS SIN GUARDAR EN EL ESTUDIO -->
+  <div id="modalConfirmUnsavedStudio" class="modal-overlay hidden">
+    <div class="modal-box modal-box-confirm">
+      <div class="modal-header" style="justify-content:center; margin-bottom:8px;">
+        <h3 class="modal-title" style="font-size:1.45rem;">¿Guardar cambios?</h3>
+      </div>
+      <p style="font-size:0.86rem; color:var(--ink-secondary); line-height:1.4; margin:0 0 16px;">
+        Hiciste ajustes en tu personaje pero no los has guardado. Si sales ahora, tus cambios no se conservarán.
+      </p>
+      <div class="confirm-dialog-actions">
+        <button type="button" class="btn btn-pusio" onclick="confirmSaveAndCloseStudio()">Guardar y salir</button>
+        <button type="button" class="btn btn-secondary" onclick="confirmDiscardAndCloseStudio()">Descartar cambios</button>
+        <button type="button" class="btn" style="background:transparent; border:none; color:var(--ink-muted); font-size:0.8rem;" onclick="closeModal('modalConfirmUnsavedStudio')">Seguir editando</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toastNotice" class="toast-notice">Guardado</div>
 
   <script src="js/bottts_parts.js"></script>
-  <script src="js/app.js?v=20261117_2230"></script>
+  <script src="js/app.js?v=20261117_2245"></script>
 </body>
 </html>

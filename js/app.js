@@ -92,6 +92,8 @@ let carsList = [];
 let collaborations = [];
 let pusioRobot = null;
 let editingTarget = "user"; // "user" o "pusio"
+let studioOriginalState = null; // Snapshot al abrir el estudio para descartar si no guarda
+let studioIsDirty = false; // Indica si hubo cambios sin guardar
 let pusioContest = {
   submissions: [],
   rewardIdeas: [...DEFAULT_REWARD_IDEAS],
@@ -355,7 +357,15 @@ function selectUserForCustomization(personId) {
 
   editingTarget = "user";
   currentUser = person;
-  saveState();
+  // Guardar snapshot original antes de cualquier modificación
+  studioOriginalState = {
+    target: "user",
+    userId: person.id,
+    name: person.name,
+    robot: JSON.parse(JSON.stringify(person.robot))
+  };
+  studioIsDirty = false;
+
   renderRobotStudio();
   openModal("modalRobotStudio");
   showToast(`Personalizando a ${person.name}. Toca las piezas para editar.`);
@@ -367,6 +377,13 @@ function selectPusioForCustomization() {
   if (!pusioRobot) {
     pusioRobot = JSON.parse(JSON.stringify(DEFAULT_PUSIO_ROBOT));
   }
+  // Guardar snapshot original de Pus.io
+  studioOriginalState = {
+    target: "pusio",
+    robot: JSON.parse(JSON.stringify(pusioRobot))
+  };
+  studioIsDirty = false;
+
   renderRobotStudio();
   openModal("modalRobotStudio");
   showToast("Personalizando el avatar de Pus.io. Toca las piezas para cambiar su estilo.");
@@ -644,11 +661,8 @@ function initQuickSwatches() {
       if (activePart === "texture") {
         r.face.sec = { h: sw.h, s: sw.s, l: sw.l };
       }
-      saveState();
+      studioIsDirty = true;
       renderRobotStudio();
-      renderSessionHeader();
-      renderWhosGoing();
-      renderPusioMascot();
     };
     row.appendChild(btn);
   });
@@ -715,8 +729,8 @@ function renderRobotStudio() {
       if (editingTarget !== "pusio" && !requireAuth()) return;
       r[activePart].shape = shapeKey;
       triggerCanvasPop();
-      saveState();
-      renderAll();
+      studioIsDirty = true;
+      renderRobotStudio();
     };
     shapesGrid.appendChild(tile);
   });
@@ -780,11 +794,8 @@ function setupModernHueWheel() {
     if (activePart === "texture") {
       r.face.sec.h = r.texture.pri.h;
     }
-    saveState();
+    studioIsDirty = true;
     renderRobotStudio();
-    renderSessionHeader();
-    renderWhosGoing();
-    renderPusioMascot();
   }
 
   wheel.addEventListener("mousedown", (e) => { dragging = true; updateHueFromPointer(e); });
@@ -810,11 +821,8 @@ function setupModernHueWheel() {
     const r = getEditingRobot();
     r[activePart][activeColorChannel].s = Number(e.target.value);
     if (activePart === "texture") r.face.sec.s = r.texture.pri.s;
-    saveState();
+    studioIsDirty = true;
     renderRobotStudio();
-    renderSessionHeader();
-    renderWhosGoing();
-    renderPusioMascot();
   });
 
   document.getElementById("sliderLight").addEventListener("input", (e) => {
@@ -822,11 +830,8 @@ function setupModernHueWheel() {
     const r = getEditingRobot();
     r[activePart][activeColorChannel].l = Number(e.target.value);
     if (activePart === "texture") r.face.sec.l = r.texture.pri.l;
-    saveState();
+    studioIsDirty = true;
     renderRobotStudio();
-    renderSessionHeader();
-    renderWhosGoing();
-    renderPusioMascot();
   });
 }
 
@@ -1936,9 +1941,7 @@ function setupEventListeners() {
     const v = e.target.value.trim();
     if (v) {
       currentUser.name = v;
-      saveState();
-      renderSessionHeader();
-      renderWhosGoing();
+      studioIsDirty = true;
     }
   });
 
@@ -1961,22 +1964,12 @@ function setupEventListeners() {
       currentUser.robot = newCfg;
     }
     triggerCanvasPop();
-    saveState();
-    renderAll();
+    studioIsDirty = true;
+    renderRobotStudio();
     showToast("Avatar mezclado con nuevas piezas");
   };
 
-  document.getElementById("btnSaveRobotStudio").onclick = () => {
-    if (editingTarget !== "pusio" && !requireAuth()) return;
-    saveState();
-    renderAll();
-    if (editingTarget === "pusio") {
-      showToast("¡Avatar de Pus.io actualizado en la portada!");
-    } else {
-      showToast(`Personaje guardado en el perfil de ${currentUser.name}`);
-    }
-    closeModal("modalRobotStudio");
-  };
+  document.getElementById("btnSaveRobotStudio").onclick = saveRobotStudioAction;
 
   const btnConfPassenger = document.getElementById("btnConfirmPassenger");
   if (btnConfPassenger) {
@@ -2086,7 +2079,9 @@ document.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
     const modalId = closeBtn.getAttribute("data-close");
-    if (modalId) {
+    if (modalId === "modalRobotStudio") {
+      requestCloseStudio();
+    } else if (modalId) {
       closeModal(modalId);
     }
     return;
@@ -2094,14 +2089,29 @@ document.addEventListener("click", (e) => {
 
   // Cierre al hacer clic en el backdrop / overlay del modal
   if (e.target.classList && e.target.classList.contains("modal-overlay")) {
-    closeModal(e.target.id);
+    if (e.target.id === "modalRobotStudio") {
+      requestCloseStudio();
+    } else {
+      closeModal(e.target.id);
+    }
   }
 });
 
 // Cerrar modal activo al presionar la tecla Escape
 window.addEventListener("keydown", (e) => {
   if (e.key === "Escape" || e.key === "Esc") {
-    document.querySelectorAll(".modal-overlay:not(.hidden)").forEach(m => {
+    const activeModals = Array.from(document.querySelectorAll(".modal-overlay:not(.hidden)"));
+    const confirmModal = activeModals.find(m => m.id === "modalConfirmUnsavedStudio");
+    if (confirmModal) {
+      closeModal("modalConfirmUnsavedStudio");
+      return;
+    }
+    const studioModal = activeModals.find(m => m.id === "modalRobotStudio");
+    if (studioModal) {
+      requestCloseStudio();
+      return;
+    }
+    activeModals.forEach(m => {
       closeModal(m.id);
     });
   }
@@ -2169,7 +2179,53 @@ function closeModal(id) {
   if (el) el.classList.add("hidden");
   if (id === "modalRobotStudio") {
     editingTarget = "user";
+    studioIsDirty = false;
+    studioOriginalState = null;
   }
+}
+
+function requestCloseStudio() {
+  if (studioIsDirty) {
+    openModal("modalConfirmUnsavedStudio");
+    return;
+  }
+  closeModal("modalRobotStudio");
+}
+
+function saveRobotStudioAction() {
+  if (editingTarget !== "pusio" && !requireAuth()) return;
+  saveState();
+  studioIsDirty = false;
+  studioOriginalState = null;
+  renderAll();
+  if (editingTarget === "pusio") {
+    showToast("Avatar de Pus.io guardado con éxito.");
+  } else {
+    showToast(`Diseño guardado en el perfil de ${currentUser.name}`);
+  }
+  closeModal("modalRobotStudio");
+  closeModal("modalConfirmUnsavedStudio");
+}
+
+function confirmSaveAndCloseStudio() {
+  saveRobotStudioAction();
+}
+
+function confirmDiscardAndCloseStudio() {
+  if (studioOriginalState) {
+    if (studioOriginalState.target === "pusio") {
+      pusioRobot = studioOriginalState.robot;
+    } else if (currentUser && studioOriginalState.target === "user") {
+      currentUser.robot = studioOriginalState.robot;
+      currentUser.name = studioOriginalState.name;
+    }
+  }
+  studioIsDirty = false;
+  studioOriginalState = null;
+  renderAll();
+  closeModal("modalConfirmUnsavedStudio");
+  closeModal("modalRobotStudio");
+  showToast("Cambios descartados");
 }
 
 // ==========================================================================
@@ -2390,6 +2446,10 @@ window.openCarDetailModal = openCarDetailModal;
 window.selectUserForCustomization = selectUserForCustomization;
 window.selectPusioForCustomization = selectPusioForCustomization;
 window.openPusioContestModal = openPusioContestModal;
+window.requestCloseStudio = requestCloseStudio;
+window.saveRobotStudioAction = saveRobotStudioAction;
+window.confirmSaveAndCloseStudio = confirmSaveAndCloseStudio;
+window.confirmDiscardAndCloseStudio = confirmDiscardAndCloseStudio;
 window.submitRewardIdea = submitRewardIdea;
 window.submitCurrentPusioToContest = submitCurrentPusioToContest;
 window.votePusioDesign = votePusioDesign;
