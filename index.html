@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Posada Chelem 2026</title>
 
-  <link rel="stylesheet" href="css/style.css?v=20261117_2145">
+  <link rel="stylesheet" href="css/style.css?v=20261117_2215">
 
   <meta property="og:title" content="Posada Chelem 2026">
   <meta property="og:description" content="Organización colaborativa para la posada en Chelem.">
@@ -149,17 +149,21 @@
         </div>
 
         <div class="pusio-card-body">
-          <!-- Formulario con botón flecha triangular hacia la derecha -->
+          <!-- Formulario con botón enter de acción táctil -->
           <form id="agendaProposalForm" class="pusio-composer-form">
             <div class="pusio-input-wrap">
               <input type="text" id="agendaProposalInput" class="pusio-input-field" placeholder="Escribe tu propuesta..." autocomplete="off" required>
               <button type="submit" class="btn-pusio-submit" title="Armar el plan (Enter)">
+                <span class="btn-pusio-submit-text">Enter</span>
                 <svg class="enter-icon-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <polygon points="7,4 19,12 7,20"></polygon>
                 </svg>
               </button>
             </div>
           </form>
+
+          <!-- Ranura interactiva para nuevo plan recién creado en móvil -->
+          <div id="pusioInlineRecentPlan" class="pusio-inline-plan-slot"></div>
 
           <!-- Avatar de perfil interactivo y centrado de Pus.io -->
           <div class="pusio-profile-center">
@@ -533,6 +537,6 @@
   <div id="toastNotice" class="toast-notice">Guardado</div>
 
   <script src="js/bottts_parts.js"></script>
-  <script src="js/app.js?v=20261117_2145"></script>
+  <script src="js/app.js?v=20261117_2215"></script>
 </body>
 </html>

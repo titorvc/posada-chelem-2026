@@ -314,6 +314,7 @@ function renderAll() {
   renderSessionHeader();
   renderSummaryPanel();
   renderPusioMascot();
+  renderInlineRecentPlan();
   renderAgendaBoards();
   renderDynamicTimeline();
   renderRobotStudio();
@@ -377,6 +378,49 @@ function renderPusioMascot() {
   const cfg = pusioRobot || DEFAULT_PUSIO_ROBOT;
   // Render sin fondo plano para que se fusione con la insignia suave
   mascotWrap.innerHTML = renderRobotSVG(cfg, null, null, true);
+}
+
+let lastCreatedPlanId = null;
+
+function renderInlineRecentPlan() {
+  const slot = document.getElementById("pusioInlineRecentPlan");
+  if (!slot) return;
+
+  if (!lastCreatedPlanId) {
+    slot.innerHTML = "";
+    return;
+  }
+
+  const plan = collaborations.find(c => c.id === lastCreatedPlanId);
+  if (!plan) {
+    slot.innerHTML = "";
+    return;
+  }
+
+  const itemsPreview = plan.items.slice(0, 4).map(i => `<span class="inline-plan-item-pill">${i.name}</span>`).join("");
+  const moreCount = plan.items.length > 4 ? `<span class="inline-plan-item-pill">+${plan.items.length - 4} más</span>` : "";
+
+  slot.innerHTML = `
+    <div class="inline-plan-card plan-enter-anim">
+      <div class="inline-plan-head">
+        <div>
+          <span class="inline-plan-badge">${plan.category}</span>
+          <h4 class="inline-plan-title">${plan.title}</h4>
+        </div>
+        <button type="button" class="inline-plan-close-btn" onclick="dismissInlineRecentPlan(${plan.id})" title="Eliminar este plan recién creado">&times;</button>
+      </div>
+      <div class="inline-plan-items">
+        ${itemsPreview}
+        ${moreCount}
+      </div>
+    </div>
+  `;
+}
+
+function dismissInlineRecentPlan(planId) {
+  deleteCollab(planId);
+  lastCreatedPlanId = null;
+  renderInlineRecentPlan();
 }
 
 function renderSummaryPanel() {
@@ -1164,16 +1208,22 @@ function handlePusioMessage(rawText) {
   };
 
   collaborations.unshift(newCollab);
+  lastCreatedPlanId = newCollab.id;
   saveState();
   renderAll();
 
-  // Scroll suave hacia la columna correspondiente
-  const targetCol = plan.category.toLowerCase().includes("comida")
-    ? document.getElementById("foodBoardContainer")
-    : document.getElementById("activityBoardContainer");
+  // Scroll suave hacia la columna correspondiente en escritorio, o hacia el plan recién añadido en móvil
+  const inlineSlot = document.getElementById("pusioInlineRecentPlan");
+  if (window.innerWidth <= 860 && inlineSlot) {
+    inlineSlot.scrollIntoView({ behavior: "smooth", block: "center" });
+  } else {
+    const targetCol = plan.category.toLowerCase().includes("comida")
+      ? document.getElementById("foodBoardContainer")
+      : document.getElementById("activityBoardContainer");
 
-  if (targetCol) {
-    targetCol.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    if (targetCol) {
+      targetCol.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
   }
 
   showToast(`Plan creado con pus.io: ${plan.title}`);
@@ -1738,11 +1788,11 @@ function setupEventListeners() {
   });
 
   document.getElementById("btnOpenAuthModal").onclick = () => {
-    document.getElementById("authErrorMsg").style.display = "none";
     if (currentUser) {
-      document.getElementById("authInputEmail").value = currentUser.email;
-      document.getElementById("authInputName").value = currentUser.name;
+      selectUserForCustomization(currentUser.id);
+      return;
     }
+    document.getElementById("authErrorMsg").style.display = "none";
     checkAuthDeduplication();
     openModal("modalAuth");
   };
@@ -2034,6 +2084,9 @@ function setupMobileTabs() {
   function switchMobileTab(tabKey) {
     activeMobileTab = tabKey;
 
+    // Actualizar clase en el body para control de visibilidad CSS
+    document.body.classList.toggle("mobile-tab-is-pusio", tabKey === "tab-pusio");
+
     // Actualizar botones de pestaña
     tabs.forEach(btn => {
       btn.classList.toggle("active", btn.dataset.mobileTab === tabKey);
@@ -2044,6 +2097,12 @@ function setupMobileTabs() {
       const match = pane.getAttribute("data-mobile-pane") === tabKey;
       pane.classList.toggle("mobile-active", match);
     });
+
+    // Si se selecciona la pestaña Planes, asegurar scroll hacia la sección de planes
+    if (tabKey === "tab-agenda") {
+      const agendaEl = document.getElementById("mainAgendaSection");
+      if (agendaEl) agendaEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   }
 
   tabs.forEach(btn => {
@@ -2287,6 +2346,8 @@ function renderContestSubmissions() {
 window.showToast = showToast;
 window.openModal = openModal;
 window.closeModal = closeModal;
+window.deleteCollab = deleteCollab;
+window.dismissInlineRecentPlan = dismissInlineRecentPlan;
 window.retireCar = retireCar;
 window.leaveCar = leaveCar;
 window.joinCarAsPassenger = joinCarAsPassenger;

@@ -361,7 +361,9 @@ body {
     animation: mobilePaneFade 0.22s ease-out;
   }
 
-  [data-mobile-pane]#mainAgendaSection.mobile-active {
+  /* Si la pestaña activa es Planes, o si estamos en Pus.io y se hace scroll hacia abajo */
+  [data-mobile-pane]#mainAgendaSection.mobile-active,
+  body.mobile-tab-is-pusio [data-mobile-pane]#mainAgendaSection {
     display: block !important;
     animation: mobilePaneFade 0.22s ease-out;
   }
@@ -402,17 +404,38 @@ body {
   .pusio-input-wrap {
     flex-direction: row !important;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
   }
 
   .pusio-input-field {
-    padding: 8px 14px;
-    font-size: 0.82rem;
+    padding: 9px 14px;
+    font-size: 0.84rem;
   }
 
   .btn-pusio-submit {
-    width: 32px;
-    height: 32px;
+    width: auto !important;
+    height: 38px !important;
+    padding: 0 14px !important;
+    gap: 6px !important;
+    background: var(--ink) !important;
+    color: #FFFFFF !important;
+    border: 1px solid var(--ink) !important;
+    border-radius: var(--radius-pill) !important;
+    box-shadow: 0 2px 8px rgba(17, 18, 20, 0.22) !important;
+  }
+
+  .btn-pusio-submit .btn-pusio-submit-text {
+    display: inline-block !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em !important;
+    color: #FFFFFF !important;
+  }
+
+  .btn-pusio-submit .enter-icon-svg {
+    width: 13px !important;
+    height: 13px !important;
+    color: #FFFFFF !important;
   }
 
   .suggestions-conversational-title {
@@ -427,6 +450,111 @@ body {
   .spark-chip {
     padding: 5px 10px;
     font-size: 0.72rem;
+  }
+
+  /* Ranura de plan recién generado inmediatamente bajo el input en móvil */
+  .pusio-inline-plan-slot {
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 6px;
+    box-sizing: border-box;
+  }
+
+  .inline-plan-card {
+    background: #FFFFFF;
+    border: 1.5px solid var(--border-hover);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    box-shadow: 0 4px 14px rgba(17, 18, 20, 0.08);
+    position: relative;
+  }
+
+  .plan-enter-anim {
+    animation: planSlideDown 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes planSlideDown {
+    0% {
+      opacity: 0;
+      transform: translateY(-12px) scale(0.97);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .inline-plan-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .inline-plan-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--teal-accent);
+    background: var(--teal-tint);
+    padding: 2px 7px;
+    border-radius: var(--radius-pill);
+    margin-bottom: 4px;
+  }
+
+  .inline-plan-title {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  .inline-plan-close-btn {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    min-height: 26px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg-subtle);
+    color: var(--ink-secondary);
+    font-size: 1rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    flex-shrink: 0;
+  }
+
+  .inline-plan-close-btn:hover {
+    background: var(--ink);
+    color: #FFFFFF;
+    border-color: var(--ink);
+  }
+
+  .inline-plan-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 6px;
+  }
+
+  .inline-plan-item-pill {
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    font-size: 0.72rem;
+    padding: 3px 8px;
+    color: var(--ink-secondary);
   }
 }
 
@@ -1219,8 +1347,9 @@ body {
 
 @media (max-width: 480px) {
   .pusio-input-wrap {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
   }
 }
 
@@ -1252,37 +1381,54 @@ body {
   line-height: 1.35;
 }
 
-/* Botón de envío: flecha triangular hacia la derecha */
+/* Botón de envío: acción táctil tipo pill button */
 .btn-pusio-submit {
-  background: transparent !important;
-  color: var(--ink) !important;
-  border: none !important;
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  display: flex;
+  background: var(--ink) !important;
+  color: #FFFFFF !important;
+  border: 1px solid var(--ink) !important;
+  width: auto;
+  min-width: 44px;
+  height: 38px;
+  padding: 0 14px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   cursor: pointer;
   transition: all 0.18s ease;
   flex-shrink: 0;
   border-radius: var(--radius-pill);
+  box-shadow: 0 2px 6px rgba(17, 18, 20, 0.16);
+}
+
+.btn-pusio-submit-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #FFFFFF;
 }
 
 .enter-icon-svg {
-  width: 16px;
-  height: 16px;
-  color: #111214;
+  width: 14px;
+  height: 14px;
+  color: #FFFFFF;
   transition: transform 0.18s ease, color 0.18s ease;
 }
 
 .btn-pusio-submit:hover {
-  background: rgba(17, 18, 20, 0.07) !important;
-  transform: translateX(2px);
+  background: var(--teal-accent) !important;
+  border-color: var(--teal-accent) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 168, 150, 0.28);
+}
+
+.btn-pusio-submit:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 3px rgba(17, 18, 20, 0.2);
 }
 
 .btn-pusio-submit:hover .enter-icon-svg {
-  color: var(--teal-accent);
+  color: #FFFFFF;
 }
 
 /* Centro de perfil interactivo de Pus.io */
@@ -3117,6 +3263,15 @@ body {
     width: 92vw !important;
     max-width: 440px !important;
     max-height: 85vh !important;
+  }
+
+  /* En móvil, desanclar la cabecera del estudio y modales para que no estorbe ni tape el contenido al deslizar */
+  .modal-box-studio .modal-header,
+  .modal-box .modal-header {
+    position: static !important;
+    top: auto !important;
+    z-index: auto !important;
+    padding-bottom: 8px;
   }
 }
 
