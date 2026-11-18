@@ -1513,6 +1513,86 @@ function getCollabVibeTier(claimed, total) {
   return { tier: "vibe-tier-mid", label: "En marcha" };
 }
 
+let editingSubItem = null;
+
+function canManagePlan(collab) {
+  if (!currentUser || !collab) return false;
+  const isAuthor = (
+    (collab.authorEmail && collab.authorEmail.toLowerCase() === currentUser.email.toLowerCase()) ||
+    (collab.author && collab.author.toLowerCase() === currentUser.name.toLowerCase())
+  );
+  const isAdmin = (
+    (currentUser.email && currentUser.email.toLowerCase() === "titorvc08@gmail.com") ||
+    (currentUser.name && currentUser.name.toLowerCase() === "tito")
+  );
+  return Boolean(isAuthor || isAdmin);
+}
+
+function startEditSubItem(collabId, itemId) {
+  editingSubItem = { collabId, itemId };
+  renderAll();
+  setTimeout(() => {
+    const input = document.getElementById(`editSubItemInput_${collabId}_${itemId}`);
+    if (input) {
+      input.focus();
+      input.select();
+    }
+  }, 40);
+}
+
+function cancelEditSubItem() {
+  editingSubItem = null;
+  renderAll();
+}
+
+function saveEditSubItem(collabId, itemId) {
+  const input = document.getElementById(`editSubItemInput_${collabId}_${itemId}`);
+  if (!input) return;
+  const newName = input.value.trim();
+  if (!newName) {
+    showToast("El nombre no puede estar vacío.");
+    return;
+  }
+
+  const collab = collaborations.find(c => c.id === collabId);
+  if (!collab) return;
+  if (!canManagePlan(collab)) {
+    showToast("Solo el creador o Tito (Admin) pueden modificar este elemento.");
+    return;
+  }
+
+  const item = collab.items.find(i => String(i.id) === String(itemId));
+  if (!item) return;
+
+  item.name = newName.charAt(0).toUpperCase() + newName.slice(1);
+  editingSubItem = null;
+  saveState();
+  renderAll();
+  showToast("Elemento actualizado");
+}
+
+function deleteSubItem(collabId, itemId) {
+  const collab = collaborations.find(c => c.id === collabId);
+  if (!collab) return;
+  if (!canManagePlan(collab)) {
+    showToast("Solo el creador o Tito (Admin) pueden eliminar este elemento.");
+    return;
+  }
+
+  const itemIndex = collab.items.findIndex(i => String(i.id) === String(itemId));
+  if (itemIndex === -1) return;
+
+  const itemName = collab.items[itemIndex].name;
+  collab.items.splice(itemIndex, 1);
+  if (editingSubItem && editingSubItem.collabId === collabId && editingSubItem.itemId === itemId) {
+    editingSubItem = null;
+  }
+
+  saveState();
+  renderAll();
+  showToast(`Elemento eliminado: ${itemName}`);
+}
+
 function createPlanCardElement(collab, catClass) {
   const claimedCount = collab.items.filter(i => i.claimedBy).length;
   const totalCount = collab.items.length;
@@ -3087,7 +3167,14 @@ window.showToast = showToast;
 window.openModal = openModal;
 window.closeModal = closeModal;
 window.deleteCollab = deleteCollab;
-window.dismissInlineRecentPlan = dismissInlineRecentPlan;
+window.removePendingProposalItem = removePendingProposalItem;
+window.discardPendingProposal = discardPendingProposal;
+window.confirmPendingProposal = confirmPendingProposal;
+window.togglePlanCollapse = togglePlanCollapse;
+window.startEditSubItem = startEditSubItem;
+window.cancelEditSubItem = cancelEditSubItem;
+window.saveEditSubItem = saveEditSubItem;
+window.deleteSubItem = deleteSubItem;
 window.retireCar = retireCar;
 window.leaveCar = leaveCar;
 window.joinCarAsPassenger = joinCarAsPassenger;
