@@ -4937,6 +4937,65 @@ body {
   border-color: #DC2626;
 }
 
+/* Detalles de cantidad, costo equitativo y compartidos en Mi Resumen */
+.summary-item-top-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.summary-cost-pill {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--ink);
+  background: rgba(0, 0, 0, 0.06);
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  flex-shrink: 0;
+}
+
+.summary-qty-line {
+  font-size: 0.73rem;
+  color: var(--ink-secondary);
+  margin-top: 2px;
+}
+
+.summary-shared-pill {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #4338CA;
+  background: rgba(79, 70, 229, 0.10);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+}
+
+.summary-solo-pill {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+.summary-cost-tile.cost-balanced {
+  border-color: rgba(16, 185, 129, 0.40) !important;
+  background: rgba(16, 185, 129, 0.06) !important;
+}
+
+.summary-cost-tile.cost-high {
+  border-color: rgba(244, 63, 94, 0.40) !important;
+  background: rgba(244, 63, 94, 0.06) !important;
+}
+
+.summary-cost-balance-note {
+  font-size: 0.74rem;
+  color: var(--ink-secondary);
+  margin-top: 2px;
+  display: block;
+}
+
 .claim-btn {
   font-family: var(--font-sans);
   font-size: 0.82rem;

@@ -97,6 +97,32 @@ const DEFAULT_ADDITIONALS = [
   { id: "add_carbon",    name: "Carbón y encendedor",         qtyHint: "~6 kg (2 bolsas) + encendedor",          targetQty: 1, claimers: [] }
 ];
 
+// Estimación de costo total en MXN para 13 personas por tipo de insumo
+function estimateTotalCostMXNFor13(itemName) {
+  const n = (itemName || "").toLowerCase();
+  if (/carne|arrachera|rib|sirloin|bistec|pastor|cochinita|costilla/.test(n)) return 950;
+  if (/pizza/.test(n)) return 780;
+  if (/hamburguesa|carne molida/.test(n)) return 650;
+  if (/ceviche|camar[oó]n|pescado|pulpo/.test(n)) return 720;
+  if (/cerveza|chela|alcohol|ron|tequila|mezcal|vodka/.test(n)) return 600;
+  if (/pollo|pechuga/.test(n)) return 480;
+  if (/salchicha|chistorra|chorizo|tocino/.test(n)) return 280;
+  if (/botana|papa|totopo|dorito|sabrita|cacahuate/.test(n)) return 260;
+  if (/refresco|coca|soda|jugo/.test(n)) return 240;
+  if (/queso/.test(n)) return 220;
+  if (/hielo/.test(n)) return 180;
+  if (/carb[oó]n/.test(n)) return 170;
+  if (/verdura|lechuga|tomate|jitomate|cebolla|aguacate|cilantro|guacamole/.test(n)) return 180;
+  if (/pan|bollo|medias noches|tortilla/.test(n)) return 160;
+  if (/postre|pastel|brownie|galleta|helado/.test(n)) return 240;
+  if (/plato|desechable/.test(n)) return 140;
+  if (/agua|garraf[oó]n/.test(n)) return 130;
+  if (/cubierto|servilleta/.test(n)) return 120;
+  if (/salsa|lim[oó]n|catsup|mayonesa|mostaza|aderezo|sal/.test(n)) return 110;
+  if (/basura/.test(n)) return 70;
+  return 150;
+}
+
 // Estimación automática de cantidades sugeridas para 13 personas en consumibles
 function estimateConsumableFor13(itemName) {
   const n = (itemName || "").toLowerCase();
@@ -776,11 +802,32 @@ function renderMySummary() {
     );
 
     let myCollabItems = [];
+    let totalPosadaEstCost = 0;
+    let myTotalEstCost = 0;
+
     collaborations.forEach(c => {
       (c.items || []).forEach(it => {
         const claimers = getItemClaimers(it);
-        if (claimers.some(cl => (cl.email || "").toLowerCase() === currentUser.email.toLowerCase())) {
-          myCollabItems.push({ itemName: it.name, planTitle: c.title, category: c.category });
+        const itemCost = estimateTotalCostMXNFor13(it.name);
+        totalPosadaEstCost += itemCost;
+        const isMine = claimers.some(cl => (cl.email || "").toLowerCase() === currentUser.email.toLowerCase());
+        if (isMine) {
+          const shareCount = Math.max(1, claimers.length);
+          const myShareCost = Math.round(itemCost / shareCount);
+          myTotalEstCost += myShareCost;
+          const others = claimers
+            .filter(cl => (cl.email || "").toLowerCase() !== currentUser.email.toLowerCase())
+            .map(cl => cl.name);
+          const qtyHint = estimateConsumableFor13(it.name);
+          myCollabItems.push({
+            itemName: it.name,
+            planTitle: c.title,
+            category: c.category,
+            qtyHint,
+            others,
+            shareCount,
+            myShareCost
+          });
         }
       });
     });
@@ -788,10 +835,42 @@ function renderMySummary() {
     let myAdditionalItems = [];
     (additionalsList || []).forEach(addItem => {
       const claimers = getItemClaimers(addItem);
-      if (claimers.some(cl => (cl.email || "").toLowerCase() === currentUser.email.toLowerCase())) {
-        myAdditionalItems.push({ name: addItem.name, qtyHint: addItem.qtyHint || "" });
+      const itemCost = estimateTotalCostMXNFor13(addItem.name);
+      totalPosadaEstCost += itemCost;
+      const isMine = claimers.some(cl => (cl.email || "").toLowerCase() === currentUser.email.toLowerCase());
+      if (isMine) {
+        const shareCount = Math.max(1, claimers.length);
+        const targetQty = Math.max(1, Number(addItem.targetQty) || 1);
+        const divisor = Math.max(shareCount, targetQty);
+        const myShareCost = Math.round(itemCost / divisor);
+        myTotalEstCost += myShareCost;
+        const others = claimers
+          .filter(cl => (cl.email || "").toLowerCase() !== currentUser.email.toLowerCase())
+          .map(cl => cl.name);
+        myAdditionalItems.push({
+          name: addItem.name,
+          qtyHint: addItem.qtyHint || estimateConsumableFor13(addItem.name) || "",
+          others,
+          shareCount,
+          myShareCost
+        });
       }
     });
+
+    const activeAttendeesCount = Math.max(1, (attendeesList || []).filter(u => u.attendance !== "declined").length);
+    const fairAvgCost = Math.round(totalPosadaEstCost / activeAttendeesCount);
+    let costBalanceLabel = "Equilibrado";
+    let costBalanceClass = "cost-balanced";
+    if (myTotalEstCost === 0) {
+      costBalanceLabel = "Sin gasto asignado aún";
+      costBalanceClass = "cost-low";
+    } else if (myTotalEstCost < fairAvgCost * 0.75) {
+      costBalanceLabel = "Debajo del promedio (puedes sumarte a otro)";
+      costBalanceClass = "cost-low";
+    } else if (myTotalEstCost > fairAvgCost * 1.25) {
+      costBalanceLabel = "Arriba del promedio (comparte un insumo)";
+      costBalanceClass = "cost-high";
+    }
 
     const claimedItemsCount = myCollabItems.length + myAdditionalItems.length;
     const totalAttendeesConfirmed = attendeesList.filter(u => u.attendance === "confirmed").length;
@@ -806,31 +885,48 @@ function renderMySummary() {
               const isFoodCat = (x.category || "").toLowerCase().includes("comida") || (x.category || "").toLowerCase().includes("bebida");
               const catClass = isFoodCat ? "is-cat-food" : "is-cat-activity";
               const catBadge = isFoodCat ? "Comida" : "Actividad";
+              const sharedHtml = x.others.length > 0
+                ? `<span class="summary-shared-pill">Compartido con ${x.others.join(", ")} (entre ${x.shareCount})</span>`
+                : `<span class="summary-solo-pill">Individual</span>`;
               return `
               <li class="summary-checklist-li ${catClass}">
                 <span class="summary-check-dot"></span>
                 <div class="summary-check-text">
-                  <strong>${x.itemName}</strong>
+                  <div class="summary-item-top-line">
+                    <strong>${x.itemName}</strong>
+                    <span class="summary-cost-pill">~$${x.myShareCost} MXN</span>
+                  </div>
                   <span><em class="summary-cat-tag">${catBadge}</em> &bull; ${x.planTitle}</span>
+                  ${x.qtyHint ? `<span class="summary-qty-line">Cantidad sugerida: ${x.qtyHint}${x.shareCount > 1 ? ` (dividido entre ${x.shareCount})` : ''}</span>` : ''}
+                  <div style="margin-top:3px;">${sharedHtml}</div>
                 </div>
               </li>
             `;
             }).join("")}
-            ${myAdditionalItems.map(x => `
+            ${myAdditionalItems.map(x => {
+              const sharedHtml = x.others.length > 0
+                ? `<span class="summary-shared-pill">Compartido con ${x.others.join(", ")} (entre ${x.shareCount})</span>`
+                : `<span class="summary-solo-pill">Individual</span>`;
+              return `
               <li class="summary-checklist-li is-cat-additional">
                 <span class="summary-check-dot"></span>
                 <div class="summary-check-text">
-                  <strong>${x.name}</strong>
+                  <div class="summary-item-top-line">
+                    <strong>${x.name}</strong>
+                    <span class="summary-cost-pill">~$${x.myShareCost} MXN</span>
+                  </div>
                   <span><em class="summary-cat-tag">Adicional</em>${x.qtyHint ? ` &bull; ${x.qtyHint}` : ""}</span>
+                  <div style="margin-top:3px;">${sharedHtml}</div>
                 </div>
               </li>
-            `).join("")}
+            `;
+            }).join("")}
           </ul>
         </div>
       `
       : `
         <div class="summary-checklist-empty">
-          Todav&iacute;a no apartas ning&uacute;n insumo. Baja al <strong>Tablero de Equidad</strong> o a <strong>Adicionales</strong> y pulsa <em>&ldquo;Yo lo llevo&rdquo;</em>.
+          Todav&iacute;a no apartas ning&uacute;n insumo. Baja al tablero y pulsa <em>&ldquo;Yo lo llevo&rdquo;</em>.
         </div>
       `;
 
@@ -864,6 +960,13 @@ function renderMySummary() {
         <div class="my-summary-stat-tile">
           <span class="stat-tile-label">Tu Transporte</span>
           <strong class="stat-tile-value">${transportSummary}</strong>
+        </div>
+
+        <!-- Gasto equitativo estimado -->
+        <div class="my-summary-stat-tile summary-cost-tile ${costBalanceClass}">
+          <span class="stat-tile-label">Gasto equitativo estimado</span>
+          <strong class="stat-tile-value">Tu parte: ~$${myTotalEstCost} MXN &bull; Promedio grupo: ~$${fairAvgCost} MXN</strong>
+          <span class="summary-cost-balance-note">${costBalanceLabel}</span>
         </div>
 
         <!-- Checklist explícito de qué lleva / hace -->
