@@ -4840,6 +4840,102 @@ body {
   border-color: #DC2626;
 }
 
+/* ==========================================================================
+   ANILLO TIPO "HISTORIA" EN AVATAR DEL HEADER PARA ABRIR "MI RESUMEN"
+   ========================================================================== */
+.session-avatar.has-story-ring {
+  padding: 2.5px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--story-c1, #0EA5E9), var(--story-c2, #6366F1));
+  box-sizing: border-box;
+  transition: box-shadow 0.25s ease, filter 0.25s ease;
+}
+
+.session-avatar.has-story-ring svg {
+  border-radius: 50%;
+  background: var(--bg-card);
+  display: block;
+}
+
+@keyframes storyRingPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0), 0 0 0 2px var(--story-c1, #0EA5E9);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(14, 165, 233, 0.22), 0 0 12px var(--story-c1, #0EA5E9);
+  }
+}
+
+.session-avatar.has-story-ring.is-unseen-story {
+  animation: storyRingPulse 2.2s ease-in-out infinite;
+}
+
+.session-avatar.has-story-ring.is-seen-story {
+  animation: none;
+  box-shadow: none;
+  opacity: 0.92;
+}
+
+/* Botones de votar y eliminar en Premios del Concurso Pus.io */
+.contest-reward-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.reward-chip-text {
+  flex: 1;
+}
+
+.reward-chip-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.reward-vote-btn {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-hover);
+  background: var(--bg-card);
+  color: var(--ink-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.reward-vote-btn:hover,
+.reward-vote-btn.active {
+  background: var(--teal-accent);
+  color: #FFFFFF;
+  border-color: var(--teal-accent);
+}
+
+.reward-del-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(239, 68, 68, 0.28);
+  background: transparent;
+  color: #DC2626;
+  font-size: 0.9rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reward-del-btn:hover {
+  background: #DC2626;
+  color: #FFFFFF;
+  border-color: #DC2626;
+}
+
 .claim-btn {
   font-family: var(--font-sans);
   font-size: 0.82rem;

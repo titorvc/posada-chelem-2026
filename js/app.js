@@ -120,15 +120,13 @@ function estimateConsumableFor13(itemName) {
   return "";
 }
 
-// Recompensas iniciales sugeridas para el concurso de personalización de Pus.io
+// Recompensas iniciales sugeridas para el concurso de personalización de Pus.io (relevantes para la posada)
 const DEFAULT_REWARD_IDEAS = [
-  "Elegir la primera canción que sonará al llegar a la casa de Chelem",
-  "El primer plato servido en la comida del atardecer",
-  "Inmunidad y pase directo a la final en el torneo de Smash",
-  "Derecho a elegir la película de la madrugada en la sala",
-  "Título honorario de Capitán de Playa Chelem 2026",
-  "El mejor asiento frente al ventilador en la terraza",
-  "No lavar platos ni vasos en todo el fin de semana"
+  { id: "rew_cancion",   text: "Elegir la primera canción que sonará al llegar a Chelem", authorEmail: "", authorName: "Posada", votes: [] },
+  { id: "rew_plato",     text: "El primer plato servido en la comida principal",            authorEmail: "", authorName: "Posada", votes: [] },
+  { id: "rew_capitan",   text: "Título honorario de Capitán de Playa Chelem 2026",        authorEmail: "", authorName: "Posada", votes: [] },
+  { id: "rew_limpieza",  text: "Exento de recoger basura o limpiar al final",             authorEmail: "", authorName: "Posada", votes: [] },
+  { id: "rew_asiento",   text: "El mejor lugar con sombra y ventilador en la terraza",    authorEmail: "", authorName: "Posada", votes: [] }
 ];
 
 let currentUser = null;
@@ -900,11 +898,30 @@ function renderSessionHeader() {
     avatarWrap.innerHTML = renderRobotSVG(currentUser.robot);
     nameEl.textContent = currentUser.name;
     if (statusEl) {
-      statusEl.textContent = "Sesión verificada";
+      statusEl.textContent = "Ver mi resumen";
       statusEl.style.display = "block";
     }
+
+    // Anillo estilo "historia" con los colores del fondo del personaje
+    const bgPri = (currentUser.robot && currentUser.robot.bg && currentUser.robot.bg.pri) || { h: 198, s: 75, l: 55 };
+    const bgSec = (currentUser.robot && currentUser.robot.bg && currentUser.robot.bg.sec) || { h: 230, s: 70, l: 50 };
+    const hasSeenSummary = localStorage.getItem("posada_summary_seen_v1") === "1";
+
+    const c1 = hasSeenSummary
+      ? `hsl(${bgPri.h}, ${Math.max(18, Math.round((bgPri.s || 65) * 0.42))}%, ${Math.min(62, Math.max(42, bgPri.l || 55))}%)`
+      : `hsl(${bgPri.h}, ${Math.min(95, Math.max(72, bgPri.s || 80))}%, 50%)`;
+    const c2 = hasSeenSummary
+      ? `hsl(${bgSec.h}, ${Math.max(18, Math.round((bgSec.s || 65) * 0.42))}%, ${Math.min(62, Math.max(42, bgSec.l || 50))}%)`
+      : `hsl(${bgSec.h}, ${Math.min(95, Math.max(72, bgSec.s || 80))}%, 46%)`;
+
+    avatarWrap.style.setProperty("--story-c1", c1);
+    avatarWrap.style.setProperty("--story-c2", c2);
+    avatarWrap.classList.add("has-story-ring");
+    avatarWrap.classList.toggle("is-unseen-story", !hasSeenSummary);
+    avatarWrap.classList.toggle("is-seen-story", hasSeenSummary);
   } else {
     avatarWrap.innerHTML = renderRobotSVG(createBotConfig(198, 0, 0, 0, 0, 0));
+    avatarWrap.classList.remove("has-story-ring", "is-unseen-story", "is-seen-story");
     nameEl.textContent = "Iniciar sesión";
     if (statusEl) {
       statusEl.textContent = "";
@@ -3453,6 +3470,8 @@ function setupEventListeners() {
   document.getElementById("btnOpenAuthModal").onclick = () => {
     if (currentUser) {
       renderMySummary();
+      localStorage.setItem("posada_summary_seen_v1", "1");
+      renderSessionHeader();
       openModal("modalUserSummary");
       return;
     }
@@ -3910,34 +3929,127 @@ function openPusioContestModal() {
   openModal("modalPusioContest");
 }
 
+function normalizeRewardIdeas() {
+  if (!pusioContest || !Array.isArray(pusioContest.rewardIdeas)) {
+    pusioContest.rewardIdeas = JSON.parse(JSON.stringify(DEFAULT_REWARD_IDEAS));
+    return;
+  }
+  const irrelevantRegex = /smash|mario\s*kart|pel[ií]cula|switch|combate estelar/i;
+  const cleaned = [];
+  const seenTexts = new Set();
+
+  pusioContest.rewardIdeas.forEach((raw, idx) => {
+    const obj = typeof raw === "string"
+      ? { id: `rew_legacy_${idx}_${raw.length}`, text: raw.trim(), authorEmail: "", authorName: "Posada", votes: [] }
+      : {
+          id: raw.id || `rew_${idx}_${Date.now()}`,
+          text: (raw.text || "").trim(),
+          authorEmail: raw.authorEmail || "",
+          authorName: raw.authorName || "Posada",
+          votes: Array.isArray(raw.votes) ? raw.votes : []
+        };
+    if (!obj.text || irrelevantRegex.test(obj.text)) return;
+    const key = obj.text.toLowerCase();
+    if (seenTexts.has(key)) return;
+    seenTexts.add(key);
+    cleaned.push(obj);
+  });
+
+  if (cleaned.length < 3) {
+    DEFAULT_REWARD_IDEAS.forEach(def => {
+      if (!seenTexts.has(def.text.toLowerCase())) {
+        seenTexts.add(def.text.toLowerCase());
+        cleaned.push({ ...def, votes: [] });
+      }
+    });
+  }
+
+  pusioContest.rewardIdeas = cleaned;
+}
+
 function renderContestRewards() {
   const container = document.getElementById("contestRewardChips");
   if (!container) return;
+  normalizeRewardIdeas();
   container.innerHTML = "";
 
-  const ideas = pusioContest.rewardIdeas || [];
-  ideas.forEach(idea => {
+  const myEmail = currentUser ? (currentUser.email || "").toLowerCase() : "";
+  const admin = isAdminUser();
+  const sorted = [...pusioContest.rewardIdeas].sort((a, b) => (b.votes || []).length - (a.votes || []).length);
+
+  sorted.forEach(idea => {
+    const votes = Array.isArray(idea.votes) ? idea.votes : [];
+    const hasVoted = Boolean(myEmail && votes.some(v => v.toLowerCase() === myEmail));
+    const isOwner = Boolean(myEmail && idea.authorEmail && idea.authorEmail.toLowerCase() === myEmail);
+    const canDelete = Boolean(admin || isOwner);
+
     const chip = document.createElement("div");
-    chip.className = "contest-reward-chip";
+    chip.className = `contest-reward-chip ${hasVoted ? 'is-voted' : ''}`;
     chip.innerHTML = `
       <span class="reward-chip-dot"></span>
-      <span class="reward-chip-text">${idea}</span>
+      <span class="reward-chip-text">${idea.text}</span>
+      <div class="reward-chip-actions">
+        <button type="button" class="reward-vote-btn ${hasVoted ? 'active' : ''}" onclick="voteRewardIdea('${idea.id}')" title="Votar por este premio">
+          &#128077; ${votes.length}
+        </button>
+        ${canDelete ? `<button type="button" class="reward-del-btn" onclick="deleteRewardIdea('${idea.id}')" title="Eliminar premio">&times;</button>` : ''}
+      </div>
     `;
     container.appendChild(chip);
   });
 }
 
+function voteRewardIdea(rewardId) {
+  if (!requireAuth()) return;
+  normalizeRewardIdeas();
+  const target = pusioContest.rewardIdeas.find(r => String(r.id) === String(rewardId));
+  if (!target) return;
+
+  const myEmail = (currentUser.email || "").toLowerCase();
+  const idx = target.votes.findIndex(v => v.toLowerCase() === myEmail);
+  if (idx !== -1) {
+    target.votes.splice(idx, 1);
+    showToast("Voto retirado del premio");
+  } else {
+    target.votes.push(myEmail);
+    showToast("Voto registrado para este premio");
+  }
+
+  saveState(true);
+  renderContestRewards();
+}
+
+function deleteRewardIdea(rewardId) {
+  if (!requireAuth()) return;
+  normalizeRewardIdeas();
+  const idx = pusioContest.rewardIdeas.findIndex(r => String(r.id) === String(rewardId));
+  if (idx === -1) return;
+
+  const target = pusioContest.rewardIdeas[idx];
+  const myEmail = (currentUser.email || "").toLowerCase();
+  const isOwner = target.authorEmail && target.authorEmail.toLowerCase() === myEmail;
+  if (!isAdminUser() && !isOwner) {
+    showToast("Solo quien sugirió este premio o Tito (Admin) puede eliminarlo.");
+    return;
+  }
+
+  pusioContest.rewardIdeas.splice(idx, 1);
+  saveState(true);
+  renderContestRewards();
+  showToast("Premio eliminado");
+}
+
 function submitRewardIdea(e) {
   e.preventDefault();
   if (!requireAuth()) return;
+  normalizeRewardIdeas();
   const input = document.getElementById("contestRewardInput");
   if (!input) return;
   const rawText = input.value.trim();
   if (!rawText) return;
 
-  // Filtrar duplicados insensibles a mayúsculas
   const alreadyExists = pusioContest.rewardIdeas.some(
-    item => item.toLowerCase() === rawText.toLowerCase()
+    item => item.text.toLowerCase() === rawText.toLowerCase()
   );
 
   if (alreadyExists) {
@@ -3946,31 +4058,18 @@ function submitRewardIdea(e) {
     return;
   }
 
-  // Guardar la nueva propuesta del usuario
-  pusioContest.rewardIdeas.unshift(rawText);
-
-  // Aprendizaje activo: si el texto tiene ciertas palabras clave, inferir una variante jocosa
-  const lower = rawText.toLowerCase();
-  let generatedIdea = null;
-
-  if (lower.includes("dormir") || lower.includes("cama") || lower.includes("cuarto")) {
-    generatedIdea = "Apartar la mejor cama con aire acondicionado en Chelem";
-  } else if (lower.includes("cerveza") || lower.includes("chela") || lower.includes("trago") || lower.includes("cubeta")) {
-    generatedIdea = "Servicio de hielera VIP llevado directo a la alberca";
-  } else if (lower.includes("música") || lower.includes("dj") || lower.includes("bocina") || lower.includes("playlist")) {
-    generatedIdea = "Control absoluto del Bluetooth sin derecho a veto musical";
-  } else if (lower.includes("smash") || lower.includes("juego") || lower.includes("switch")) {
-    generatedIdea = "Elegir escenario y reglas en el combate estelar de Smash";
-  }
-
-  if (generatedIdea && !pusioContest.rewardIdeas.some(i => i.toLowerCase() === generatedIdea.toLowerCase())) {
-    pusioContest.rewardIdeas.push(generatedIdea);
-  }
+  pusioContest.rewardIdeas.unshift({
+    id: "rew_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
+    text: rawText.charAt(0).toUpperCase() + rawText.slice(1),
+    authorEmail: currentUser.email || "",
+    authorName: currentUser.name || "Invitado",
+    votes: [(currentUser.email || "").toLowerCase()]
+  });
 
   input.value = "";
-  saveState();
+  saveState(true);
   renderContestRewards();
-  showToast("Tu propuesta de recompensa se registró con éxito.");
+  showToast("Premio sugerido y votado");
 }
 
 function submitCurrentPusioToContest() {
@@ -4144,6 +4243,8 @@ window.openModal = openModal;
 window.closeModal = closeModal;
 window.deleteCollab = deleteCollab;
 window.voteDeleteCollab = voteDeleteCollab;
+window.voteRewardIdea = voteRewardIdea;
+window.deleteRewardIdea = deleteRewardIdea;
 window.removePendingProposalItem = removePendingProposalItem;
 window.discardPendingProposal = discardPendingProposal;
 window.confirmPendingProposal = confirmPendingProposal;
