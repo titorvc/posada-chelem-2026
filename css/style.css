@@ -1600,34 +1600,31 @@ body {
   transition: width 0.3s ease;
 }
 
-/* Columna 2: Siluetas de vehículos (grid flexible hasta 5 autos) */
+/* Columna 2: Siluetas de vehículos (grid 2x2 de 4 autos que ocupa todo el alto) */
 .summary-cars-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin-bottom: 14px;
+  grid-template-rows: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 0;
   flex: 1;
-}
-
-.summary-cars-grid > :nth-child(5):last-child {
-  grid-column: 1 / -1;
-  max-width: 100%;
 }
 
 .car-slot {
   background: var(--bg-page);
   border: 1.5px dashed var(--border-hover);
   border-radius: var(--radius-md);
-  padding: 12px 10px;
+  padding: 16px 12px;
   text-align: center;
   cursor: pointer;
   transition: all 0.22s var(--ease);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  min-height: 130px;
+  justify-content: center;
+  gap: 8px;
+  min-height: 155px;
+  height: 100%;
   box-sizing: border-box;
   position: relative;
 }

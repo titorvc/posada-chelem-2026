@@ -999,7 +999,7 @@ function renderSummaryPanel() {
   const carsGrid = document.getElementById("summaryCarsGrid");
   if (carsGrid) {
     carsGrid.innerHTML = "";
-    const maxCars = 5;
+    const maxCars = 4;
     for (let i = 0; i < maxCars; i++) {
       const car = carsList[i] || null;
       const isMine = car && currentUser && car.driverEmail.toLowerCase() === currentUser.email.toLowerCase();
