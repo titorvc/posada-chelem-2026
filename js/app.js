@@ -333,6 +333,35 @@ const SUPABASE_URL = "https://zrxingfpnczypophqbai.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_kRulPNGJbnmw-Gj8FG_ljg_RWMFbzL2";
 
 let syncDebounceTimer = null;
+let lastLocalMutationAt = 0;
+let pendingCloudPush = false;
+
+function getSavedSessionEmail() {
+  try {
+    const ls = localStorage.getItem("posada_active_email_v10");
+    if (ls && ls.trim()) return ls.trim();
+  } catch (e) {}
+  try {
+    const match = document.cookie.match(/(?:^|;\s*)posada_session_email=([^;]+)/);
+    if (match && match[1]) return decodeURIComponent(match[1]).trim();
+  } catch (e) {}
+  return null;
+}
+
+function setSavedSessionEmail(email) {
+  const clean = (email || "").trim();
+  try {
+    if (clean) localStorage.setItem("posada_active_email_v10", clean);
+    else localStorage.removeItem("posada_active_email_v10");
+  } catch (e) {}
+  try {
+    if (clean) {
+      document.cookie = `posada_session_email=${encodeURIComponent(clean)}; path=/; max-age=31536000; SameSite=Lax`;
+    } else {
+      document.cookie = "posada_session_email=; path=/; max-age=0; SameSite=Lax";
+    }
+  } catch (e) {}
+}
 
 // Perfiles redundantes eliminados (conservando Otis, Alpaquiña y Shalom)
 const REMOVED_ATTENDEE_IDS = new Set([8, 11, 13]);
@@ -358,14 +387,20 @@ function filterRemovedAttendees(list) {
 }
 
 async function syncFetchFromCloud() {
+  const fetchStartedAt = Date.now();
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/posada_sync?key=eq.global_state&select=data`, {
       headers: {
         "apikey": SUPABASE_ANON_KEY,
         "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-      }
+      },
+      cache: "no-store"
     });
     if (!res.ok) return;
+    // Si el usuario hizo un cambio local mientras esta descarga estaba en vuelo, NO sobrescribir
+    if (lastLocalMutationAt > fetchStartedAt || pendingCloudPush) {
+      return;
+    }
     const rows = await res.json();
     if (rows && rows.length > 0 && rows[0].data) {
       const cloud = rows[0].data;
@@ -409,15 +444,15 @@ async function syncFetchFromCloud() {
         localStorage.setItem("posada_pusio_contest_v10", JSON.stringify(pusioContest));
       }
 
-      // Re-vincular sesión activa del usuario local
-      const savedEmail = localStorage.getItem("posada_active_email_v10");
+      // Re-vincular sesión activa del usuario local (localStorage o cookie)
+      const savedEmail = getSavedSessionEmail();
       if (savedEmail) {
         currentUser = attendeesList.find(u => u.email.toLowerCase() === savedEmail.toLowerCase()) || currentUser;
       }
 
       renderAll();
       if (needsCloudCleanup) {
-        syncPushToCloud();
+        syncPushToCloud(true);
       }
     }
   } catch (err) {
@@ -425,38 +460,62 @@ async function syncFetchFromCloud() {
   }
 }
 
-async function syncPushToCloud() {
+async function flushCloudPushNow() {
   clearTimeout(syncDebounceTimer);
-  syncDebounceTimer = setTimeout(async () => {
-    try {
-      const payload = {
-        key: "global_state",
-        data: {
-          attendees: attendeesList,
-          cars: carsList,
-          collabs: collaborations,
-          additionals: additionalsList,
-          pusioRobot: pusioRobot,
-          pusioContest: pusioContest,
-          lastUpdated: Date.now()
-        }
-      };
+  pendingCloudPush = false;
+  try {
+    const payload = {
+      key: "global_state",
+      data: {
+        attendees: attendeesList,
+        cars: carsList,
+        collabs: collaborations,
+        additionals: additionalsList,
+        pusioRobot: pusioRobot,
+        pusioContest: pusioContest,
+        lastUpdated: Date.now()
+      }
+    };
 
-      await fetch(`${SUPABASE_URL}/rest/v1/posada_sync`, {
-        method: "POST",
-        headers: {
-          "apikey": SUPABASE_ANON_KEY,
-          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-          "Content-Type": "application/json",
-          "Prefer": "resolution=merge-duplicates"
-        },
-        body: JSON.stringify(payload)
-      });
-    } catch (err) {
-      console.warn("Supabase push warning:", err);
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/posada_sync`, {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+        "Content-Type": "application/json",
+        "Prefer": "resolution=merge-duplicates"
+      },
+      body: JSON.stringify(payload),
+      keepalive: true
+    });
+    if (!res.ok) {
+      console.warn("Supabase push HTTP error:", res.status);
     }
-  }, 400);
+  } catch (err) {
+    console.warn("Supabase push warning:", err);
+  }
 }
+
+async function syncPushToCloud(immediate = false) {
+  pendingCloudPush = true;
+  clearTimeout(syncDebounceTimer);
+  if (immediate) {
+    await flushCloudPushNow();
+    return;
+  }
+  syncDebounceTimer = setTimeout(() => {
+    flushCloudPushNow();
+  }, 120);
+}
+
+window.addEventListener("pagehide", () => {
+  if (pendingCloudPush) flushCloudPushNow();
+});
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden" && pendingCloudPush) {
+    flushCloudPushNow();
+  }
+});
 
 function loadState() {
   const savedAttendees = localStorage.getItem("posada_attendees_v10");
@@ -499,7 +558,7 @@ function loadState() {
     additionalsList = JSON.parse(JSON.stringify(DEFAULT_ADDITIONALS));
   }
 
-  const savedSessionEmail = localStorage.getItem("posada_active_email_v10");
+  const savedSessionEmail = getSavedSessionEmail();
   if (savedSessionEmail) {
     currentUser = attendeesList.find(u => u.email.toLowerCase() === savedSessionEmail.toLowerCase()) || null;
   }
@@ -523,21 +582,22 @@ function loadState() {
   syncFetchFromCloud();
 }
 
-function saveState() {
+function saveState(immediateCloud = false) {
+  lastLocalMutationAt = Date.now();
   localStorage.setItem("posada_attendees_v10", JSON.stringify(attendeesList));
   localStorage.setItem("posada_cars_v10", JSON.stringify(carsList));
   localStorage.setItem("posada_collabs_v10", JSON.stringify(collaborations));
   localStorage.setItem("posada_additionals_v10", JSON.stringify(additionalsList));
   if (currentUser) {
-    localStorage.setItem("posada_active_email_v10", currentUser.email);
+    setSavedSessionEmail(currentUser.email);
   }
   if (pusioRobot) {
     localStorage.setItem("posada_pusio_robot_v10", JSON.stringify(pusioRobot));
   }
   localStorage.setItem("posada_pusio_contest_v10", JSON.stringify(pusioContest));
 
-  // Sincronizar en segundo plano hacia Supabase
-  syncPushToCloud();
+  // Sincronizar hacia Supabase (inmediato en login o debounce corto con keepalive)
+  syncPushToCloud(immediateCloud);
 }
 
 function switchTab(tabId) {
@@ -3126,7 +3186,7 @@ function setupEventListeners() {
     errEl.style.display = "none";
     document.getElementById("authInputPin").value = "";
     document.getElementById("claimMatchBanner").style.display = "none";
-    saveState();
+    saveState(true);
     renderAll();
     closeModal("modalAuth");
     showToast(`Sesión verificada: ${currentUser.name}`);
