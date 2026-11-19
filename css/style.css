@@ -1667,27 +1667,28 @@ body {
   background: var(--teal-tint);
 }
 
-/* Semáforo de energía y vibra de llenado (mientras más pasajeros, mayor energía y resplandor) */
+/* Progresión de intensidad por llenado: Verdecito -> Azul intenso -> Morado intenso -> Dorado brillante */
 .car-slot.vibe-tier-low {
-  border-color: rgba(14, 165, 233, 0.45);
-  background: rgba(14, 165, 233, 0.05);
+  border-color: rgba(16, 185, 129, 0.50);
+  background: rgba(16, 185, 129, 0.06);
 }
 
 .car-slot.vibe-tier-mid {
-  border-color: rgba(16, 185, 129, 0.55);
-  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(37, 99, 235, 0.62);
+  background: rgba(37, 99, 235, 0.09);
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.12);
 }
 
 .car-slot.vibe-tier-high {
-  border-color: rgba(245, 158, 11, 0.7);
-  background: rgba(245, 158, 11, 0.1);
-  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.15);
+  border-color: rgba(124, 58, 237, 0.72);
+  background: rgba(124, 58, 237, 0.11);
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.18);
 }
 
 .car-slot.vibe-tier-max {
-  border-color: #8B5CF6;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(236, 72, 153, 0.08));
-  box-shadow: 0 4px 18px rgba(139, 92, 246, 0.22);
+  border-color: #D97706;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.16), rgba(217, 119, 6, 0.09));
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.28);
 }
 
 /* Letras de la casilla: conductor y modelo en negro editorial */
@@ -1705,50 +1706,50 @@ body {
   opacity: 0.65;
 }
 
-/* Semáforo de energía: el estado 'X lugares libres' y los puntitos coinciden con el color de la casilla */
+/* Progresión de intensidad: etiqueta de estado y puntitos coinciden con el color de la casilla */
 .car-slot.vibe-tier-low .car-status-pill {
-  color: #0284C7 !important;
+  color: #059669 !important;
 }
 .car-slot.vibe-tier-low .seat-dot.dot-free {
-  border-color: #0284C7 !important;
+  border-color: #10B981 !important;
 }
 .car-slot.vibe-tier-low .seat-dot.dot-taken {
-  background: #0284C7 !important;
-  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.25) !important;
+  background: #10B981 !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25) !important;
 }
 
 .car-slot.vibe-tier-mid .car-status-pill {
-  color: #059669 !important;
+  color: #1D4ED8 !important;
 }
 .car-slot.vibe-tier-mid .seat-dot.dot-free {
-  border-color: #059669 !important;
+  border-color: #2563EB !important;
 }
 .car-slot.vibe-tier-mid .seat-dot.dot-taken {
-  background: #059669 !important;
-  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.25) !important;
+  background: #2563EB !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25) !important;
 }
 
 .car-slot.vibe-tier-high .car-status-pill {
-  color: #D97706 !important;
+  color: #6D28D9 !important;
 }
 .car-slot.vibe-tier-high .seat-dot.dot-free {
-  border-color: #D97706 !important;
+  border-color: #7C3AED !important;
 }
 .car-slot.vibe-tier-high .seat-dot.dot-taken {
-  background: #D97706 !important;
-  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.25) !important;
+  background: #7C3AED !important;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.28) !important;
 }
 
 .car-slot.vibe-tier-max .car-status-pill {
-  color: #7C3AED !important;
+  color: #B45309 !important;
   font-weight: 800;
 }
 .car-slot.vibe-tier-max .seat-dot.dot-free {
-  border-color: #7C3AED !important;
+  border-color: #D97706 !important;
 }
 .car-slot.vibe-tier-max .seat-dot.dot-taken {
-  background: #7C3AED !important;
-  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.3) !important;
+  background: #F59E0B !important;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.35) !important;
 }
 
 .car-vibe-bar {
@@ -1767,19 +1768,19 @@ body {
 }
 
 .car-slot.vibe-tier-low .car-vibe-fill {
-  background: #0284C7;
+  background: linear-gradient(90deg, #10B981, #059669);
 }
 
 .car-slot.vibe-tier-mid .car-vibe-fill {
-  background: #059669;
+  background: linear-gradient(90deg, #3B82F6, #1D4ED8);
 }
 
 .car-slot.vibe-tier-high .car-vibe-fill {
-  background: #D97706;
+  background: linear-gradient(90deg, #8B5CF6, #6D28D9);
 }
 
 .car-slot.vibe-tier-max .car-vibe-fill {
-  background: linear-gradient(90deg, #7C3AED, #DB2777);
+  background: linear-gradient(90deg, #F59E0B, #D97706, #B45309);
 }
 
 .car-retire-quick-btn {
