@@ -804,21 +804,26 @@ function renderMySummary() {
         <div class="summary-checklist-block">
           <div class="summary-checklist-title">Lo que llevas (${claimedItemsCount})</div>
           <ul class="summary-checklist-ul">
-            ${myCollabItems.map(x => `
-              <li class="summary-checklist-li">
+            ${myCollabItems.map(x => {
+              const isFoodCat = (x.category || "").toLowerCase().includes("comida") || (x.category || "").toLowerCase().includes("bebida");
+              const catClass = isFoodCat ? "is-cat-food" : "is-cat-activity";
+              const catBadge = isFoodCat ? "Comida" : "Actividad";
+              return `
+              <li class="summary-checklist-li ${catClass}">
                 <span class="summary-check-dot"></span>
                 <div class="summary-check-text">
                   <strong>${x.itemName}</strong>
-                  <span>${x.planTitle}</span>
+                  <span><em class="summary-cat-tag">${catBadge}</em> &bull; ${x.planTitle}</span>
                 </div>
               </li>
-            `).join("")}
+            `;
+            }).join("")}
             ${myAdditionalItems.map(x => `
-              <li class="summary-checklist-li is-additional">
+              <li class="summary-checklist-li is-cat-additional">
                 <span class="summary-check-dot"></span>
                 <div class="summary-check-text">
                   <strong>${x.name}</strong>
-                  <span>Adicional${x.qtyHint ? ` &bull; ${x.qtyHint}` : ""}</span>
+                  <span><em class="summary-cat-tag">Adicional</em>${x.qtyHint ? ` &bull; ${x.qtyHint}` : ""}</span>
                 </div>
               </li>
             `).join("")}
@@ -2108,9 +2113,17 @@ function addCustomAdditional(e) {
 function getCollabVibeTier(claimed, total) {
   if (total === 0 || claimed === 0) return { tier: "vibe-tier-low", label: "Sin comenzar" };
   const ratio = claimed / total;
-  if (ratio >= 1) return { tier: "vibe-tier-max", label: "Completado" };
-  if (ratio >= 0.5) return { tier: "vibe-tier-high", label: "Casi listo" };
-  return { tier: "vibe-tier-mid", label: "En marcha" };
+  if (ratio >= 1) return { tier: "vibe-tier-gold", label: "Top" };
+  if (ratio >= 0.65) return { tier: "vibe-tier-purple", label: "Excelente" };
+  if (ratio >= 0.35) return { tier: "vibe-tier-blue", label: "Buena" };
+  return { tier: "vibe-tier-green", label: "Iniciada" };
+}
+
+function isAdminUser() {
+  if (!currentUser) return false;
+  const email = (currentUser.email || "").trim().toLowerCase();
+  const name = (currentUser.name || "").trim().toLowerCase();
+  return email === "titorvc08@gmail.com" || name === "tito";
 }
 
 let editingSubItem = null;
@@ -2470,8 +2483,17 @@ function createPlanCardElement(collab, catClass) {
     dotsHtml += `<span style="font-size:0.68rem; font-weight:700; margin-left:2px; opacity:0.8;">+${totalCount - 8}</span>`;
   }
 
+  const deleteVotes = Array.isArray(collab.deleteVotes) ? collab.deleteVotes : [];
+  const activeCount = Math.max(1, (attendeesList || []).filter(u => u.attendance !== "declined").length);
+  const majorityNeeded = Math.floor(activeCount / 2) + 1;
+  const hasVotedDelete = Boolean(
+    currentUser &&
+    deleteVotes.some(e => e.toLowerCase() === (currentUser.email || "").toLowerCase())
+  );
+  const showVoteDeleteBar = !canManage;
+
   card.innerHTML = `
-    ${isMine ? `<button type="button" class="plan-delete-corner-btn" onclick="event.stopPropagation(); deleteCollab(${collab.id})" title="Eliminar este plan que propusiste">&times;</button>` : ''}
+    ${isMine ? `<button type="button" class="plan-delete-corner-btn" onclick="event.stopPropagation(); deleteCollab('${collab.id}')" title="Eliminar este plan">&times;</button>` : ''}
     
     <!-- Encabezado compacto / interactivo -->
     <div class="plan-card-head" onclick="togglePlanCollapse(${collab.id})" title="Clic para expandir o contraer">
@@ -2506,10 +2528,19 @@ function createPlanCardElement(collab, catClass) {
       </form>
 
       <div class="ai-grow-bar">
-        <button type="button" class="ai-grow-trigger" onclick="toggleGrowPlan(${collab.id})">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-          <span>${isGrowing ? 'Ocultar sugerencias pus.io' : 'Desarrollar esta idea con <strong>pus.io</strong>'}</span>
-        </button>
+        <div class="plan-footer-actions-row">
+          <button type="button" class="ai-grow-trigger" onclick="toggleGrowPlan(${collab.id})">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+            <span>${isGrowing ? 'Ocultar sugerencias pus.io' : 'Desarrollar esta idea con <strong>pus.io</strong>'}</span>
+          </button>
+          ${
+            showVoteDeleteBar
+              ? `<button type="button" class="vote-delete-plan-btn ${hasVotedDelete ? 'voted' : ''}" onclick="voteDeleteCollab('${collab.id}')" title="Si se alcanza mayoría (${majorityNeeded} votos), esta actividad se elimina automáticamente">
+                   ${deleteVotes.length > 0 ? `Eliminar (${deleteVotes.length}/${majorityNeeded})` : 'Solicitar eliminar'}
+                 </button>`
+              : ''
+          }
+        </div>
         ${
           isGrowing
             ? `<div class="ai-grow-suggestions">
@@ -2750,23 +2781,21 @@ let lastDeletedPlanCache = null;
 
 function deleteCollab(collabId) {
   if (!requireAuth()) return;
-  const targetPlan = collaborations.find(c => c.id === collabId);
-  if (targetPlan) {
-    if (!canManagePlan(targetPlan)) {
-      showToast("Solo quien propuso esta idea o Tito (Admin) puede eliminarla.");
-      return;
-    }
+  const targetIdx = collaborations.findIndex(c => String(c.id) === String(collabId));
+  if (targetIdx === -1) return;
+  const targetPlan = collaborations[targetIdx];
+
+  if (!isAdminUser() && !canManagePlan(targetPlan)) {
+    showToast("Solo quien propuso esta idea o Tito (Admin) puede eliminarla directamente.");
+    return;
   }
 
-  const targetIdx = collaborations.findIndex(c => c.id === collabId);
-  if (targetIdx === -1) return;
   const removedPlan = collaborations[targetIdx];
-
   collaborations.splice(targetIdx, 1);
-  if (lastCreatedPlanId === collabId) {
+  if (String(lastCreatedPlanId) === String(collabId)) {
     lastCreatedPlanId = null;
   }
-  saveState();
+  saveState(true);
   renderAll();
 
   lastDeletedPlanCache = {
@@ -2774,16 +2803,53 @@ function deleteCollab(collabId) {
     index: targetIdx
   };
 
-  showToast("Plan eliminado", "Deshacer", () => {
+  showToast("Actividad eliminada", "Deshacer", () => {
     if (!lastDeletedPlanCache) return;
     const { plan, index } = lastDeletedPlanCache;
     const insertAt = Math.min(index, collaborations.length);
     collaborations.splice(insertAt, 0, plan);
     lastDeletedPlanCache = null;
-    saveState();
+    saveState(true);
     renderAll();
-    showToast("Plan restaurado");
+    showToast("Actividad restaurada");
   }, 7000);
+}
+
+function voteDeleteCollab(collabId) {
+  if (!requireAuth()) return;
+  const targetIdx = collaborations.findIndex(c => String(c.id) === String(collabId));
+  if (targetIdx === -1) return;
+  const collab = collaborations[targetIdx];
+
+  if (!Array.isArray(collab.deleteVotes)) {
+    collab.deleteVotes = [];
+  }
+
+  const myEmail = (currentUser.email || "").toLowerCase();
+  const existingIdx = collab.deleteVotes.findIndex(e => e.toLowerCase() === myEmail);
+
+  if (existingIdx !== -1) {
+    collab.deleteVotes.splice(existingIdx, 1);
+    saveState(true);
+    renderAll();
+    showToast("Retiraste tu voto para eliminar esta actividad.");
+    return;
+  }
+
+  collab.deleteVotes.push(myEmail);
+  const activeCount = Math.max(1, (attendeesList || []).filter(u => u.attendance !== "declined").length);
+  const majorityNeeded = Math.floor(activeCount / 2) + 1;
+
+  if (collab.deleteVotes.length >= majorityNeeded) {
+    collaborations.splice(targetIdx, 1);
+    saveState(true);
+    renderAll();
+    showToast(`"${collab.title}" eliminada por mayoría de votos (${majorityNeeded}/${activeCount}).`);
+  } else {
+    saveState(true);
+    renderAll();
+    showToast(`Solicitud registrada (${collab.deleteVotes.length}/${majorityNeeded} votos para eliminar).`);
+  }
 }
 
 function handlePusioMessage(rawText) {
@@ -4077,6 +4143,7 @@ window.showToast = showToast;
 window.openModal = openModal;
 window.closeModal = closeModal;
 window.deleteCollab = deleteCollab;
+window.voteDeleteCollab = voteDeleteCollab;
 window.removePendingProposalItem = removePendingProposalItem;
 window.discardPendingProposal = discardPendingProposal;
 window.confirmPendingProposal = confirmPendingProposal;

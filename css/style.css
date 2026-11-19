@@ -4730,6 +4730,116 @@ body {
   }
 }
 
+/* ==========================================================================
+   COLORES POR CATEGORÍA EN "MI RESUMEN" (COMIDA / ACTIVIDADES / ADICIONALES)
+   ========================================================================== */
+.summary-checklist-li {
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid transparent;
+}
+
+.summary-cat-tag {
+  font-style: normal;
+  font-weight: 700;
+}
+
+.summary-checklist-li.is-cat-food {
+  background: rgba(234, 88, 12, 0.07);
+  border-left-color: #EA580C;
+}
+.summary-checklist-li.is-cat-food .summary-check-dot { background: #EA580C; }
+.summary-checklist-li.is-cat-food .summary-cat-tag { color: #C2410C; }
+
+.summary-checklist-li.is-cat-activity {
+  background: rgba(124, 58, 237, 0.07);
+  border-left-color: #7C3AED;
+}
+.summary-checklist-li.is-cat-activity .summary-check-dot { background: #7C3AED; }
+.summary-checklist-li.is-cat-activity .summary-cat-tag { color: #6D28D9; }
+
+.summary-checklist-li.is-cat-additional {
+  background: rgba(37, 99, 235, 0.07);
+  border-left-color: #2563EB;
+}
+.summary-checklist-li.is-cat-additional .summary-check-dot { background: #2563EB; }
+.summary-checklist-li.is-cat-additional .summary-cat-tag { color: #1D4ED8; }
+
+/* ==========================================================================
+   ESCALA DE COLORES DE INTENSIDAD EN TARJETAS DE ACTIVIDADES
+   Iniciada (Verde) -> Buena (Azul) -> Excelente (Morado) -> Top (Dorado)
+   ========================================================================== */
+.plan-item-card.vibe-tier-green {
+  border-color: rgba(16, 185, 129, 0.55) !important;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.12);
+}
+.plan-vibe-pill.vibe-tier-green {
+  background: rgba(16, 185, 129, 0.14);
+  color: #059669;
+}
+.plan-item-card.vibe-tier-green .plan-seat-dot.dot-taken { background: #10B981; }
+
+.plan-item-card.vibe-tier-blue {
+  border-color: rgba(37, 99, 235, 0.62) !important;
+  box-shadow: 0 3px 12px rgba(37, 99, 235, 0.16);
+}
+.plan-vibe-pill.vibe-tier-blue {
+  background: rgba(37, 99, 235, 0.14);
+  color: #1D4ED8;
+}
+.plan-item-card.vibe-tier-blue .plan-seat-dot.dot-taken { background: #2563EB; }
+
+.plan-item-card.vibe-tier-purple {
+  border-color: rgba(124, 58, 237, 0.72) !important;
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.20);
+}
+.plan-vibe-pill.vibe-tier-purple {
+  background: rgba(124, 58, 237, 0.15);
+  color: #6D28D9;
+}
+.plan-item-card.vibe-tier-purple .plan-seat-dot.dot-taken { background: #7C3AED; }
+
+.plan-item-card.vibe-tier-gold {
+  border-color: #D97706 !important;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), var(--bg-card) 55%);
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.26);
+}
+.plan-vibe-pill.vibe-tier-gold {
+  background: rgba(245, 158, 11, 0.18);
+  color: #B45309;
+  font-weight: 800;
+}
+.plan-item-card.vibe-tier-gold .plan-seat-dot.dot-taken { background: #F59E0B; }
+
+/* Botón de solicitud de eliminación por mayoría de votos (no-admin) */
+.plan-footer-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.vote-delete-plan-btn {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(239, 68, 68, 0.30);
+  background: transparent;
+  color: #DC2626;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.vote-delete-plan-btn:hover,
+.vote-delete-plan-btn.voted {
+  background: #DC2626;
+  color: #FFFFFF;
+  border-color: #DC2626;
+}
+
 .claim-btn {
   font-family: var(--font-sans);
   font-size: 0.82rem;
