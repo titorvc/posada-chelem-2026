@@ -8,7 +8,7 @@
   <link rel="apple-touch-icon" href="favicon.svg?v=1">
   <meta name="theme-color" content="#00A896">
 
-  <link rel="stylesheet" href="css/style.css?v=20261119_0640">
+  <link rel="stylesheet" href="css/style.css?v=20261119_0655">
 
   <meta property="og:title" content="El pusio 2026">
   <meta property="og:description" content="Organización colaborativa para la posada en Chelem.">
@@ -202,16 +202,16 @@
     <section id="equityBoardSection" class="equity-board-section">
       <div class="equity-board-header">
         <div>
-          <span class="column-eyebrow">Gamificaci&oacute;n &bull; Reparto justo entre 13</span>
-          <h2 class="equity-board-title">Tablero de Equidad de la Posada</h2>
-          <p class="equity-board-subtitle">Que nadie cargue de m&aacute;s: todos aportamos parejo para completar el 100% de la posada.</p>
+          <span class="column-eyebrow">Meta ligera &bull; 2 aportes por persona</span>
+          <h2 class="equity-board-title">Avance de la Posada</h2>
+          <p class="equity-board-subtitle">Con que cada quien elija 2 cosas, cubrimos lo esencial sin que nadie cargue de m&aacute;s.</p>
         </div>
         <div class="equity-global-meter">
           <div class="equity-global-stats-row">
             <span id="equityGlobalPct" class="equity-global-pct">0%</span>
-            <span id="equityGlobalMeta" class="equity-global-meta">0 / 0 insumos cubiertos</span>
+            <span id="equityGlobalMeta" class="equity-global-meta">0 planes en marcha &bull; 0 b&aacute;sicos listos</span>
           </div>
-          <div class="transport-capacity-track" style="width:200px;">
+          <div class="transport-capacity-track" style="width:210px;">
             <div id="equityGlobalFill" class="transport-capacity-fill" style="width:0%;"></div>
           </div>
         </div>
@@ -300,35 +300,49 @@
       </form>
     </section>
 
-    <!-- BLOQUE FINAL: CRONOGRAMA DINÁMICO DE 2 DÍAS (SÁBADO TARDE A DOMINGO MEDIODÍA) -->
+    <!-- BLOQUE FINAL: CRONOGRAMA DINÁMICO DE 2 DÍAS CON ARRASTRE ESTILO SPOTIFY -->
     <section class="timeline-section">
       <div class="timeline-header">
         <div>
           <span class="agenda-eyebrow">Agenda de 2 D&iacute;as &bull; S&aacute;bado a Domingo</span>
           <h2 class="timeline-title">Cronograma de la Posada</h2>
+          <p class="timeline-drag-hint">Arrastra el &iacute;cono <strong>&#8942;&#8942;</strong> de cualquier tarjeta (o usa su selector de horario) para moverla de momento u orden.</p>
         </div>
       </div>
 
-      <div class="timeline-grid">
-        <!-- Momento 1: Día 1 - Sábado Tarde -->
-        <div class="timeline-stage-card">
-          <div class="stage-time-tag">S&aacute;bado &bull; Tarde (14:00 &ndash; 19:00)</div>
-          <h3 class="stage-name">D&iacute;a 1: Llegada &amp; Playa</h3>
-          <div id="timelineStage1" class="stage-plans-container"></div>
+      <!-- DÍA 1: SÁBADO -->
+      <div class="timeline-day-group">
+        <div class="timeline-day-banner">
+          <span class="timeline-day-pill">D&iacute;a 1</span>
+          <span class="timeline-day-label">S&aacute;bado &mdash; Llegada, Playa y Noche</span>
         </div>
+        <div class="timeline-grid timeline-grid-2col">
+          <!-- Momento 1: Sábado Tarde -->
+          <div class="timeline-stage-card" data-stage="stage1" ondragover="handleTimelineDragOver(event)" ondragleave="handleTimelineDragLeave(event)" ondrop="handleTimelineDrop(event, 'stage1')">
+            <div class="stage-time-tag">S&aacute;bado &bull; 14:00 &ndash; 19:00</div>
+            <h3 class="stage-name">Tarde: Llegada &amp; Playa</h3>
+            <div id="timelineStage1" class="stage-plans-container"></div>
+          </div>
 
-        <!-- Momento 2: Día 1 - Sábado Noche -->
-        <div class="timeline-stage-card">
-          <div class="stage-time-tag">S&aacute;bado &bull; Noche (19:00 en adelante)</div>
-          <h3 class="stage-name">D&iacute;a 1: Cena, Fogata &amp; Juegos</h3>
-          <div id="timelineStage2" class="stage-plans-container"></div>
+          <!-- Momento 2: Sábado Noche -->
+          <div class="timeline-stage-card" data-stage="stage2" ondragover="handleTimelineDragOver(event)" ondragleave="handleTimelineDragLeave(event)" ondrop="handleTimelineDrop(event, 'stage2')">
+            <div class="stage-time-tag">S&aacute;bado &bull; 19:00 en adelante</div>
+            <h3 class="stage-name">Noche: Cena, Fogata &amp; Juegos</h3>
+            <div id="timelineStage2" class="stage-plans-container"></div>
+          </div>
         </div>
+      </div>
 
-        <!-- Momento 3: Día 2 - Domingo Mañana / Mediodía -->
-        <div class="timeline-stage-card">
-          <div class="stage-time-tag">Domingo &bull; Ma&ntilde;ana / Mediod&iacute;a (09:00 &ndash; 14:00)</div>
-          <h3 class="stage-name">D&iacute;a 2: Desayuno &amp; Salida (comida opcional)</h3>
-          <div id="timelineStage3" class="stage-plans-container"></div>
+      <!-- DÍA 2: DOMINGO -->
+      <div class="timeline-day-group" style="margin-top:16px;">
+        <div class="timeline-day-banner">
+          <span class="timeline-day-pill day-2">D&iacute;a 2</span>
+          <span class="timeline-day-label">Domingo &mdash; Ma&ntilde;ana, Despedida y Comida opcional</span>
+        </div>
+        <div class="timeline-stage-card" data-stage="stage3" ondragover="handleTimelineDragOver(event)" ondragleave="handleTimelineDragLeave(event)" ondrop="handleTimelineDrop(event, 'stage3')">
+          <div class="stage-time-tag">Domingo &bull; 09:00 &ndash; 14:00</div>
+          <h3 class="stage-name">Ma&ntilde;ana / Mediod&iacute;a: Desayuno &amp; Salida</h3>
+          <div id="timelineStage3" class="stage-plans-container stage-plans-grid-2col"></div>
         </div>
       </div>
     </section>
@@ -751,6 +765,6 @@
   <div id="toastNotice" class="toast-notice">Guardado</div>
 
   <script src="js/bottts_parts.js?v=20261119_0358"></script>
-  <script src="js/app.js?v=20261119_0640"></script>
+  <script src="js/app.js?v=20261119_0655"></script>
 </body>
 </html>

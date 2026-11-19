@@ -1799,40 +1799,50 @@ function renderEquityBoard() {
   const fillEl = document.getElementById("equityGlobalFill");
   if (!grid) return;
 
-  let totalNeeded = 0;
-  let totalCovered = 0;
   const countsByEmail = {};
+  const totalPlans = (collaborations || []).length;
+  let activePlans = 0;
 
   (collaborations || []).forEach(c => {
-    (c.items || []).forEach(it => {
-      totalNeeded += 1;
+    const items = c.items || [];
+    let hasAny = false;
+    items.forEach(it => {
       const claimers = getItemClaimers(it);
-      if (claimers.length > 0) totalCovered += 1;
+      if (claimers.length > 0) hasAny = true;
       claimers.forEach(cl => {
         const key = (cl.email || cl.name || "").toLowerCase();
         if (key) countsByEmail[key] = (countsByEmail[key] || 0) + 1;
       });
     });
+    if (hasAny) activePlans += 1;
   });
 
+  const totalBasics = (additionalsList || []).length;
+  let readyBasics = 0;
   (additionalsList || []).forEach(addItem => {
     const qty = Math.max(1, Number(addItem.targetQty) || 1);
     const claimers = getItemClaimers(addItem);
-    totalNeeded += qty;
-    totalCovered += Math.min(claimers.length, qty);
+    if (claimers.length >= qty) readyBasics += 1;
     claimers.forEach(cl => {
       const key = (cl.email || cl.name || "").toLowerCase();
       if (key) countsByEmail[key] = (countsByEmail[key] || 0) + 1;
     });
   });
 
-  const pct = totalNeeded > 0 ? Math.min(100, Math.round((totalCovered / totalNeeded) * 100)) : 0;
-  if (pctEl) pctEl.textContent = `${pct}%`;
-  if (metaEl) metaEl.textContent = `${totalCovered} / ${totalNeeded} insumos cubiertos`;
-  if (fillEl) fillEl.style.width = `${pct}%`;
-
   const activeAttendees = (attendeesList || []).filter(u => u.attendance !== "declined");
-  const fairGoal = Math.max(1, Math.ceil(totalNeeded / Math.max(1, activeAttendees.length)));
+  const fairGoal = 2; // Meta ligera y lograble: 2 aportes por persona
+  const totalMilestones = Math.max(1, activeAttendees.length * fairGoal);
+  const totalParticipantContributions = activeAttendees.reduce((acc, u) => {
+    const eKey = (u.email || "").toLowerCase();
+    const nKey = (u.name || "").toLowerCase();
+    const c = countsByEmail[eKey] || countsByEmail[nKey] || 0;
+    return acc + Math.min(c, fairGoal);
+  }, 0);
+
+  const pct = Math.min(100, Math.round((totalParticipantContributions / totalMilestones) * 100));
+  if (pctEl) pctEl.textContent = `${pct}%`;
+  if (metaEl) metaEl.textContent = `${activePlans}/${totalPlans} planes en marcha • ${readyBasics}/${totalBasics} básicos listos`;
+  if (fillEl) fillEl.style.width = `${pct}%`;
 
   const membersWithScore = activeAttendees.map(u => {
     const eKey = (u.email || "").toLowerCase();
@@ -1850,7 +1860,7 @@ function renderEquityBoard() {
       badgeText = "MVP Generoso";
       tierClass = "eq-tier-over";
     } else if (count >= fairGoal) {
-      badgeText = "Aporte justo";
+      badgeText = "Meta cumplida";
       tierClass = "eq-tier-fair";
     } else if (count > 0) {
       badgeText = "En marcha";
@@ -1931,8 +1941,9 @@ function renderAdditionalsSection() {
   const allMet = totalNeeded > 0 && totalCovered >= totalNeeded;
   const pct = totalNeeded > 0 ? Math.min(100, Math.round((totalCovered / totalNeeded) * 100)) : 0;
 
+  const readyCount = list.filter(it => getItemClaimers(it).length >= Math.max(1, Number(it.targetQty) || 1)).length;
   if (statsEl) {
-    statsEl.textContent = `${totalCovered} / ${totalNeeded} cubiertos (${pct}%)`;
+    statsEl.textContent = `${readyCount} de ${list.length} básicos listos`;
   }
   if (fillEl) {
     fillEl.style.width = `${pct}%`;
@@ -2487,6 +2498,62 @@ function createPlanCardElement(collab, catClass) {
   return card;
 }
 
+let draggedTimelineCollabId = null;
+
+function handleTimelineDragStart(e, collabId) {
+  draggedTimelineCollabId = collabId;
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", String(collabId));
+  }
+  if (e.currentTarget) {
+    e.currentTarget.classList.add("is-dragging");
+  }
+}
+
+function handleTimelineDragEnd(e) {
+  if (e.currentTarget) {
+    e.currentTarget.classList.remove("is-dragging");
+  }
+  document.querySelectorAll(".timeline-stage-card.is-drop-target").forEach(el => el.classList.remove("is-drop-target"));
+  draggedTimelineCollabId = null;
+}
+
+function handleTimelineDragOver(e) {
+  e.preventDefault();
+  if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
+  if (e.currentTarget) e.currentTarget.classList.add("is-drop-target");
+}
+
+function handleTimelineDragLeave(e) {
+  if (e.currentTarget && !e.currentTarget.contains(e.relatedTarget)) {
+    e.currentTarget.classList.remove("is-drop-target");
+  }
+}
+
+function handleTimelineDrop(e, targetStage) {
+  e.preventDefault();
+  if (e.currentTarget) e.currentTarget.classList.remove("is-drop-target");
+  const rawId = draggedTimelineCollabId || (e.dataTransfer ? Number(e.dataTransfer.getData("text/plain")) : null);
+  if (!rawId) return;
+  changeCollabStageQuick(rawId, targetStage);
+}
+
+function changeCollabStageQuick(collabId, newStage) {
+  const collab = collaborations.find(c => String(c.id) === String(collabId));
+  if (!collab) return;
+  collab.stage = newStage;
+  collab.stageOrder = Date.now();
+  saveState(true);
+  renderAll();
+  const labels = {
+    stage1: "Sábado Tarde",
+    stage2: "Sábado Noche",
+    stage3: "Domingo Mañana / Mediodía"
+  };
+  showToast(`"${collab.title}" movido a ${labels[newStage] || newStage}`);
+}
+
 function renderDynamicTimeline() {
   const s1 = document.getElementById("timelineStage1");
   const s2 = document.getElementById("timelineStage2");
@@ -2498,12 +2565,13 @@ function renderDynamicTimeline() {
   s2.innerHTML = "";
   s3.innerHTML = "";
 
-  // Agrupar colaboraciones según su etapa o inferencia
-  collaborations.forEach(collab => {
-    let targetStage = collab.stage || "stage2";
+  const buckets = { stage1: [], stage2: [], stage3: [] };
+
+  collaborations.forEach((collab, idx) => {
+    let targetStage = collab.stage || null;
     const lower = (collab.title + " " + collab.category).toLowerCase();
 
-    if (!collab.stage) {
+    if (!targetStage) {
       if (lower.includes("desayuno") || lower.includes("chilaquil") || lower.includes("café") || lower.includes("domingo") || lower.includes("despedida") || lower.includes("salida")) {
         targetStage = "stage3";
       } else if (lower.includes("ceviche") || lower.includes("bienvenida") || lower.includes("llegada") || lower.includes("playa") || lower.includes("voleibol") || lower.includes("tarde")) {
@@ -2512,38 +2580,62 @@ function renderDynamicTimeline() {
         targetStage = "stage2";
       }
     }
-
-    const claimedCount = collab.items.filter(i => i.claimedBy).length;
-    const totalCount = collab.items.length;
-    const isPromoted = claimedCount > 0;
-
-    const row = document.createElement("div");
-    row.className = `timeline-plan-row ${isPromoted ? 'is-promoted' : ''}`;
-
-    row.innerHTML = `
-      <div class="timeline-plan-info">
-        <span class="timeline-plan-title">${collab.title}</span>
-        <span class="timeline-plan-meta">&bull; ${collab.author}</span>
-      </div>
-      <div style="display:flex; align-items:center; gap:8px;">
-        <span class="timeline-plan-pill ${isPromoted ? 'promoted-badge' : ''}">${claimedCount}/${totalCount} cubiertos</span>
-      </div>
-    `;
-
-    if (targetStage === "stage1") s1.appendChild(row);
-    else if (targetStage === "stage3") s3.appendChild(row);
-    else s2.appendChild(row);
+    if (!buckets[targetStage]) targetStage = "stage2";
+    buckets[targetStage].push({ collab, order: collab.stageOrder || idx });
   });
 
-  // Mostrar mensaje de aliento si alguna etapa no tiene aún planes
-  [
-    { container: s1, text: "Sin actividades aún" },
-    { container: s2, text: "Sin dinámicas aún" },
-    { container: s3, text: "Sin actividades aún" }
-  ].forEach(stage => {
-    if (stage.container.children.length === 0) {
-      stage.container.innerHTML = `<div class="empty-stage-hint">${stage.text}</div>`;
+  const containers = { stage1: s1, stage2: s2, stage3: s3 };
+  const emptyHints = {
+    stage1: "Arrastra aquí actividades para el Sábado por la tarde",
+    stage2: "Arrastra aquí planes para el Sábado por la noche",
+    stage3: "Arrastra aquí desayuno o planes del Domingo"
+  };
+
+  Object.keys(buckets).forEach(stageKey => {
+    const list = buckets[stageKey].sort((a, b) => a.order - b.order);
+    const container = containers[stageKey];
+    if (list.length === 0) {
+      container.innerHTML = `<div class="empty-stage-hint">${emptyHints[stageKey]}</div>`;
+      return;
     }
+
+    list.forEach(({ collab }) => {
+      const items = collab.items || [];
+      const claimedCount = items.filter(i => getItemClaimers(i).length > 0).length;
+      const totalCount = items.length;
+      const isComplete = totalCount > 0 && claimedCount === totalCount;
+      const isPromoted = claimedCount > 0;
+      const statusLabel = isComplete ? "Listo" : (isPromoted ? "En marcha" : "Por empezar");
+
+      const row = document.createElement("div");
+      row.className = `timeline-plan-row timeline-draggable-card ${isComplete ? 'is-complete' : (isPromoted ? 'is-promoted' : '')}`;
+      row.draggable = true;
+      row.ondragstart = (ev) => handleTimelineDragStart(ev, collab.id);
+      row.ondragend = (ev) => handleTimelineDragEnd(ev);
+
+      row.innerHTML = `
+        <div class="timeline-drag-handle" title="Mantén presionado y arrastra para mover de horario">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <circle cx="5" cy="3.5" r="1.4"/><circle cx="11" cy="3.5" r="1.4"/>
+            <circle cx="5" cy="8" r="1.4"/><circle cx="11" cy="8" r="1.4"/>
+            <circle cx="5" cy="12.5" r="1.4"/><circle cx="11" cy="12.5" r="1.4"/>
+          </svg>
+        </div>
+        <div class="timeline-plan-info">
+          <span class="timeline-plan-title">${collab.title}</span>
+          <span class="timeline-plan-meta">${collab.category} &bull; ${collab.author}</span>
+        </div>
+        <div class="timeline-plan-controls">
+          <span class="timeline-plan-pill ${isComplete ? 'complete-badge' : (isPromoted ? 'promoted-badge' : '')}">${statusLabel}</span>
+          <select class="timeline-stage-quick-select" aria-label="Cambiar horario" title="Mover a otro horario" onchange="changeCollabStageQuick(${collab.id}, this.value)">
+            <option value="stage1" ${stageKey === 'stage1' ? 'selected' : ''}>Sáb. Tarde</option>
+            <option value="stage2" ${stageKey === 'stage2' ? 'selected' : ''}>Sáb. Noche</option>
+            <option value="stage3" ${stageKey === 'stage3' ? 'selected' : ''}>Dom. Mañana</option>
+          </select>
+        </div>
+      `;
+      container.appendChild(row);
+    });
   });
 }
 
@@ -3968,6 +4060,12 @@ window.openPusioActionMenu = openPusioActionMenu;
 window.selectPusioForCustomization = selectPusioForCustomization;
 window.openPusioContestModal = openPusioContestModal;
 window.deleteContestSubmission = deleteContestSubmission;
+window.handleTimelineDragStart = handleTimelineDragStart;
+window.handleTimelineDragEnd = handleTimelineDragEnd;
+window.handleTimelineDragOver = handleTimelineDragOver;
+window.handleTimelineDragLeave = handleTimelineDragLeave;
+window.handleTimelineDrop = handleTimelineDrop;
+window.changeCollabStageQuick = changeCollabStageQuick;
 window.requestCloseStudio = requestCloseStudio;
 window.saveRobotStudioAction = saveRobotStudioAction;
 window.confirmSaveAndCloseStudio = confirmSaveAndCloseStudio;
