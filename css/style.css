@@ -4226,6 +4226,290 @@ body {
   }
 }
 
+/* ==========================================================================
+   TABLERO DE GAMIFICACIÓN Y EQUIDAD
+   ========================================================================== */
+.equity-board-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.equity-board-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.equity-board-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 2px 0 4px;
+}
+
+.equity-board-subtitle {
+  font-size: 0.82rem;
+  color: var(--ink-secondary);
+  margin: 0;
+}
+
+.equity-global-meter {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.equity-global-stats-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.equity-global-pct {
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--teal-accent);
+}
+
+.equity-global-meta {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--ink-secondary);
+}
+
+.equity-members-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 10px;
+}
+
+.equity-member-card {
+  background: var(--bg-page);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.equity-member-card.is-me {
+  border-color: var(--teal-accent);
+  box-shadow: 0 0 0 2px rgba(0, 143, 122, 0.12);
+}
+
+.equity-member-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.equity-member-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: inline-flex;
+}
+
+.equity-member-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.equity-member-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.equity-member-badge {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--ink-muted);
+}
+
+.equity-member-count {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+
+.equity-member-bar {
+  width: 100%;
+  height: 5px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.equity-member-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  transition: width 0.3s ease;
+}
+
+.eq-tier-zero .equity-member-bar-fill { background: #CBD5E1; }
+.eq-tier-mid .equity-member-bar-fill { background: #3B82F6; }
+.eq-tier-mid .equity-member-badge { color: #1D4ED8; }
+.eq-tier-fair .equity-member-bar-fill { background: #10B981; }
+.eq-tier-fair .equity-member-badge { color: #059669; }
+.eq-tier-over .equity-member-bar-fill { background: linear-gradient(90deg, #F59E0B, #D97706); }
+.eq-tier-over .equity-member-badge { color: #B45309; }
+
+/* ==========================================================================
+   RESUMEN PERSONAL V2 (CLARO, VISUAL Y 100% MÓVIL)
+   ========================================================================== */
+.summary-v2-layout {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.summary-v2-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+}
+
+.summary-checklist-block {
+  background: var(--bg-page);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.summary-checklist-title {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--ink-secondary);
+  margin-bottom: 8px;
+}
+
+.summary-checklist-ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summary-checklist-li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.84rem;
+}
+
+.summary-check-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--teal-accent);
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.summary-checklist-li.is-additional .summary-check-dot {
+  background: #3B82F6;
+}
+
+.summary-check-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.summary-check-text strong {
+  color: var(--ink);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.summary-check-text span {
+  font-size: 0.74rem;
+  color: var(--ink-secondary);
+}
+
+.summary-checklist-empty {
+  background: var(--bg-page);
+  border: 1px dashed var(--border-hover);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  font-size: 0.82rem;
+  color: var(--ink-secondary);
+  line-height: 1.4;
+}
+
+/* Botón eliminar diseño en Concurso Pus.io */
+.contest-card {
+  position: relative;
+}
+
+.contest-delete-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  background: rgba(255, 255, 255, 0.92);
+  color: #DC2626;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  transition: all 0.15s ease;
+}
+
+.contest-delete-btn:hover {
+  background: #DC2626;
+  color: #FFFFFF;
+  border-color: #DC2626;
+}
+
+@media (max-width: 600px) {
+  .equity-global-meter {
+    align-items: flex-start;
+  }
+  .equity-members-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .summary-v2-top {
+    gap: 10px;
+  }
+}
+
 .claim-btn {
   font-family: var(--font-sans);
   font-size: 0.82rem;

@@ -386,6 +386,60 @@ function filterRemovedAttendees(list) {
   });
 }
 
+// Reglas para detectar insumos que pertenecen a Adicionales & Básicos y sacarlos de Comida/Actividades
+const ADDITIONAL_ITEM_RULES = [
+  { regex: /botana|papa|totopo|dorito|sabrita|cacahuate/i, targetId: "add_botanas" },
+  { regex: /refresco|coca|soda|bebida/i, targetId: "add_refrescos" },
+  { regex: /\bhielo/i, targetId: "add_hielo" },
+  { regex: /agua\s*(natural|embotellada|garraf[oó]n)?|garraf[oó]n/i, targetId: "add_agua" },
+  { regex: /plato|desechable/i, targetId: "add_platos" },
+  { regex: /vaso\s*desechable|vasos/i, targetId: null }, // Sin vasos desechables (se lleva Yeti)
+  { regex: /cubierto|servilleta|tenedor|cuchillo/i, targetId: "add_cubiertos" },
+  { regex: /bolsa.*basura|basura/i, targetId: "add_basura" },
+  { regex: /carb[oó]n|encendedor|ocote/i, targetId: "add_carbon" }
+];
+
+function stripAdditionalsFromCollabs() {
+  if (!Array.isArray(collaborations) || collaborations.length === 0) return false;
+  let changed = false;
+
+  collaborations.forEach(collab => {
+    if (!Array.isArray(collab.items)) return;
+    const kept = [];
+    collab.items.forEach(item => {
+      const name = (item && item.name) ? item.name.trim() : "";
+      const matchedRule = ADDITIONAL_ITEM_RULES.find(r => r.regex.test(name));
+      if (matchedRule) {
+        changed = true;
+        if (matchedRule.targetId) {
+          const targetAdd = (additionalsList || []).find(a => a.id === matchedRule.targetId);
+          const itemClaimers = getItemClaimers(item);
+          if (targetAdd && itemClaimers.length > 0) {
+            const existing = getItemClaimers(targetAdd);
+            itemClaimers.forEach(cl => {
+              const dup = existing.some(e =>
+                (e.email && cl.email && e.email.toLowerCase() === cl.email.toLowerCase()) ||
+                (e.name && cl.name && e.name.toLowerCase() === cl.name.toLowerCase())
+              );
+              if (!dup) existing.push(cl);
+            });
+            syncItemClaimFields(targetAdd, existing);
+          }
+        }
+      } else {
+        kept.push(item);
+      }
+    });
+    collab.items = kept;
+  });
+
+  if (changed) {
+    localStorage.setItem("posada_collabs_v10", JSON.stringify(collaborations));
+    localStorage.setItem("posada_additionals_v10", JSON.stringify(additionalsList));
+  }
+  return changed;
+}
+
 async function syncFetchFromCloud() {
   const fetchStartedAt = Date.now();
   try {
@@ -448,6 +502,10 @@ async function syncFetchFromCloud() {
       const savedEmail = getSavedSessionEmail();
       if (savedEmail) {
         currentUser = attendeesList.find(u => u.email.toLowerCase() === savedEmail.toLowerCase()) || currentUser;
+      }
+
+      if (stripAdditionalsFromCollabs()) {
+        needsCloudCleanup = true;
       }
 
       renderAll();
@@ -578,6 +636,8 @@ function loadState() {
     }
   }
 
+  stripAdditionalsFromCollabs();
+
   // Cargar estado actualizado desde la nube Supabase de inmediato
   syncFetchFromCloud();
 }
@@ -617,6 +677,7 @@ function renderAll() {
   renderPusioMascot();
   renderDynamicSparks();
   renderInlineRecentPlan();
+  renderEquityBoard();
   renderAgendaBoards();
   renderAdditionalsSection();
   renderDynamicTimeline();
@@ -689,66 +750,97 @@ function renderMySummary() {
       (c.author && c.author.toLowerCase() === currentUser.name.toLowerCase())
     );
 
-    let claimedItemsCount = 0;
+    let myCollabItems = [];
     collaborations.forEach(c => {
       (c.items || []).forEach(it => {
         const claimers = getItemClaimers(it);
         if (claimers.some(cl => (cl.email || "").toLowerCase() === currentUser.email.toLowerCase())) {
-          claimedItemsCount++;
+          myCollabItems.push({ itemName: it.name, planTitle: c.title, category: c.category });
         }
       });
     });
+
+    let myAdditionalItems = [];
     (additionalsList || []).forEach(addItem => {
       const claimers = getItemClaimers(addItem);
       if (claimers.some(cl => (cl.email || "").toLowerCase() === currentUser.email.toLowerCase())) {
-        claimedItemsCount++;
+        myAdditionalItems.push({ name: addItem.name, qtyHint: addItem.qtyHint || "" });
       }
     });
 
+    const claimedItemsCount = myCollabItems.length + myAdditionalItems.length;
     const totalAttendeesConfirmed = attendeesList.filter(u => u.attendance === "confirmed").length;
     const totalCarsActive = carsList.length;
 
+    const myItemsListHtml = claimedItemsCount > 0
+      ? `
+        <div class="summary-checklist-block">
+          <div class="summary-checklist-title">Lo que llevas (${claimedItemsCount})</div>
+          <ul class="summary-checklist-ul">
+            ${myCollabItems.map(x => `
+              <li class="summary-checklist-li">
+                <span class="summary-check-dot"></span>
+                <div class="summary-check-text">
+                  <strong>${x.itemName}</strong>
+                  <span>${x.planTitle}</span>
+                </div>
+              </li>
+            `).join("")}
+            ${myAdditionalItems.map(x => `
+              <li class="summary-checklist-li is-additional">
+                <span class="summary-check-dot"></span>
+                <div class="summary-check-text">
+                  <strong>${x.name}</strong>
+                  <span>Adicional${x.qtyHint ? ` &bull; ${x.qtyHint}` : ""}</span>
+                </div>
+              </li>
+            `).join("")}
+          </ul>
+        </div>
+      `
+      : `
+        <div class="summary-checklist-empty">
+          Todav&iacute;a no apartas ning&uacute;n insumo. Baja al <strong>Tablero de Equidad</strong> o a <strong>Adicionales</strong> y pulsa <em>&ldquo;Yo lo llevo&rdquo;</em>.
+        </div>
+      `;
+
     return `
-      <div class="my-summary-user-box modal-user-box-layout">
-        <!-- Columna izquierda: Avatar y personalización directa -->
-        <div class="my-summary-user-profile">
+      <div class="my-summary-user-box modal-user-box-layout summary-v2-layout">
+        <!-- Cabecera compacta: Avatar, nombre y asistencia -->
+        <div class="summary-v2-top">
           <div class="user-summary-avatar-wrap" onclick="closeModal('modalUserSummary'); selectUserForCustomization(${currentUser.id})" title="Clic para editar tu muñequito">
             ${renderRobotSVG(currentUser.robot, null, null, true)}
             <span class="user-summary-edit-badge" title="Editar diseño">Editar</span>
           </div>
-          <div class="user-summary-meta">
-            <h3 class="user-summary-name">${currentUser.name}</h3>
-            <span class="attendance-badge ${statusBadgeClass}">${statusBadgeLabel}</span>
-            ${isVIP ? '<span class="avatar-vip-badge" style="position:static; display:inline-block; margin-top:4px;">VIP</span>' : ''}
+          <div class="user-summary-meta" style="flex:1; min-width:0;">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <h3 class="user-summary-name" style="margin:0;">${currentUser.name}</h3>
+              <span class="attendance-badge ${statusBadgeClass}">${statusBadgeLabel}</span>
+              ${isVIP ? '<span class="avatar-vip-badge" style="position:static; display:inline-block;">VIP</span>' : ''}
+            </div>
+            <div style="font-size:0.78rem; color:var(--ink-secondary); margin-top:4px;">
+              ${totalAttendeesConfirmed} confirmados &bull; ${totalCarsActive} autos &bull; ${userPlans.length} plan${userPlans.length === 1 ? '' : 'es'} propuestos
+            </div>
           </div>
         </div>
 
-        <!-- Columna central: Mis eventos y roles -->
-        <div class="my-summary-details-grid">
-          <div class="my-summary-stat-tile yeti-reminder-tile" style="grid-column: 1 / -1;">
-            <span class="stat-tile-label">Recordatorio importante</span>
-            <strong class="stat-tile-value">🧊 LLEVAR YETI (no habrá vasos desechables)</strong>
-          </div>
-          <div class="my-summary-stat-tile">
-            <span class="stat-tile-label">Tu Transporte</span>
-            <strong class="stat-tile-value">${transportSummary}</strong>
-          </div>
-          <div class="my-summary-stat-tile">
-            <span class="stat-tile-label">Tus Planes Propuestos</span>
-            <strong class="stat-tile-value">${userPlans.length} planes creados</strong>
-          </div>
-          <div class="my-summary-stat-tile">
-            <span class="stat-tile-label">Cosas / Tareas que llevas</span>
-            <strong class="stat-tile-value">${claimedItemsCount} elementos asignados</strong>
-          </div>
-          <div class="my-summary-stat-tile">
-            <span class="stat-tile-label">Evento General</span>
-            <strong class="stat-tile-value">${totalAttendeesConfirmed} confirmados • ${totalCarsActive} autos</strong>
-          </div>
+        <!-- Recordatorio Yeti destacado -->
+        <div class="my-summary-stat-tile yeti-reminder-tile">
+          <span class="stat-tile-label">Recordatorio obligatorio</span>
+          <strong class="stat-tile-value">🧊 LLEVAR YETI (no habr&aacute; vasos desechables)</strong>
         </div>
 
-        <!-- Columna derecha: Acciones rápidas de confirmación -->
-        <div class="my-summary-action-col">
+        <!-- Transporte -->
+        <div class="my-summary-stat-tile">
+          <span class="stat-tile-label">Tu Transporte</span>
+          <strong class="stat-tile-value">${transportSummary}</strong>
+        </div>
+
+        <!-- Checklist explícito de qué lleva / hace -->
+        ${myItemsListHtml}
+
+        <!-- Acciones rápidas de confirmación -->
+        <div class="my-summary-action-col" style="width:100%;">
           <span class="my-summary-action-title">Cambiar tu asistencia:</span>
           <div class="attendance-toggle-pills" style="width:100%;">
             <button type="button" class="attend-btn btn-attend-confirmed ${currentAtt === 'confirmed' ? 'active' : ''}" onclick="setAttendanceStatus('confirmed')">Confirmar</button>
@@ -1637,6 +1729,7 @@ let activeGrowPlanId = null;
 function toggleGrowPlan(collabId) {
   if (!requireAuth()) return;
   activeGrowPlanId = activeGrowPlanId === collabId ? null : collabId;
+  renderEquityBoard();
   renderAgendaBoards();
   renderAdditionalsSection();
 }
@@ -1664,6 +1757,7 @@ function togglePlanCollapse(planId) {
   } else {
     expandedPlanIds.add(planId);
   }
+  renderEquityBoard();
   renderAgendaBoards();
   renderAdditionalsSection();
 }
@@ -1696,6 +1790,90 @@ function calculateCollabTraction(collab) {
   const claimed = collab.items.filter(i => getItemClaimers(i).length > 0).length;
   // Prioridad matemática: mayor porcentaje de cobertura y mayor cantidad de asignados
   return (claimed / total) * 100 + (claimed * 10);
+}
+
+function renderEquityBoard() {
+  const grid = document.getElementById("equityMembersGrid");
+  const pctEl = document.getElementById("equityGlobalPct");
+  const metaEl = document.getElementById("equityGlobalMeta");
+  const fillEl = document.getElementById("equityGlobalFill");
+  if (!grid) return;
+
+  let totalNeeded = 0;
+  let totalCovered = 0;
+  const countsByEmail = {};
+
+  (collaborations || []).forEach(c => {
+    (c.items || []).forEach(it => {
+      totalNeeded += 1;
+      const claimers = getItemClaimers(it);
+      if (claimers.length > 0) totalCovered += 1;
+      claimers.forEach(cl => {
+        const key = (cl.email || cl.name || "").toLowerCase();
+        if (key) countsByEmail[key] = (countsByEmail[key] || 0) + 1;
+      });
+    });
+  });
+
+  (additionalsList || []).forEach(addItem => {
+    const qty = Math.max(1, Number(addItem.targetQty) || 1);
+    const claimers = getItemClaimers(addItem);
+    totalNeeded += qty;
+    totalCovered += Math.min(claimers.length, qty);
+    claimers.forEach(cl => {
+      const key = (cl.email || cl.name || "").toLowerCase();
+      if (key) countsByEmail[key] = (countsByEmail[key] || 0) + 1;
+    });
+  });
+
+  const pct = totalNeeded > 0 ? Math.min(100, Math.round((totalCovered / totalNeeded) * 100)) : 0;
+  if (pctEl) pctEl.textContent = `${pct}%`;
+  if (metaEl) metaEl.textContent = `${totalCovered} / ${totalNeeded} insumos cubiertos`;
+  if (fillEl) fillEl.style.width = `${pct}%`;
+
+  const activeAttendees = (attendeesList || []).filter(u => u.attendance !== "declined");
+  const fairGoal = Math.max(1, Math.ceil(totalNeeded / Math.max(1, activeAttendees.length)));
+
+  const membersWithScore = activeAttendees.map(u => {
+    const eKey = (u.email || "").toLowerCase();
+    const nKey = (u.name || "").toLowerCase();
+    const count = countsByEmail[eKey] || countsByEmail[nKey] || 0;
+    return { user: u, count };
+  }).sort((a, b) => b.count - a.count || a.user.name.localeCompare(b.user.name));
+
+  grid.innerHTML = membersWithScore.map(({ user, count }) => {
+    const isMe = currentUser && currentUser.email.toLowerCase() === (user.email || "").toLowerCase();
+    const ratio = Math.min(100, Math.round((count / fairGoal) * 100));
+    let badgeText = "Falta sumarse";
+    let tierClass = "eq-tier-zero";
+    if (count > fairGoal) {
+      badgeText = "MVP Generoso";
+      tierClass = "eq-tier-over";
+    } else if (count >= fairGoal) {
+      badgeText = "Aporte justo";
+      tierClass = "eq-tier-fair";
+    } else if (count > 0) {
+      badgeText = "En marcha";
+      tierClass = "eq-tier-mid";
+    }
+    const miniSvg = renderRobotSVG(user.robot, null, null, true);
+
+    return `
+      <div class="equity-member-card ${tierClass} ${isMe ? 'is-me' : ''}">
+        <div class="equity-member-top">
+          <span class="equity-member-avatar">${miniSvg}</span>
+          <div class="equity-member-info">
+            <span class="equity-member-name">${user.name}${isMe ? ' (Tú)' : ''}</span>
+            <span class="equity-member-badge">${badgeText}</span>
+          </div>
+          <span class="equity-member-count">${count}/${fairGoal}</span>
+        </div>
+        <div class="equity-member-bar">
+          <div class="equity-member-bar-fill" style="width:${ratio}%;"></div>
+        </div>
+      </div>
+    `;
+  }).join("");
 }
 
 function renderAgendaBoards() {
@@ -2229,9 +2407,9 @@ function createPlanCardElement(collab, catClass) {
   const available = pool.filter(p => !collab.items.some(i => i.name.toLowerCase() === p.toLowerCase())).slice(0, 3);
 
   const stageLabels = {
-    stage1: "Tarde de Sol",
-    stage2: "Atardecer & Fuego",
-    stage3: "Noche Estelar"
+    stage1: "Sábado Tarde (Llegada)",
+    stage2: "Sábado Noche (Cena & Juegos)",
+    stage3: "Domingo Mañana / Mediodía"
   };
   const stageName = stageLabels[collab.stage] || "Posada";
 
@@ -2326,9 +2504,9 @@ function renderDynamicTimeline() {
     const lower = (collab.title + " " + collab.category).toLowerCase();
 
     if (!collab.stage) {
-      if (lower.includes("smash") || lower.includes("regalo") || lower.includes("película") || lower.includes("cine")) {
+      if (lower.includes("desayuno") || lower.includes("chilaquil") || lower.includes("café") || lower.includes("domingo") || lower.includes("despedida") || lower.includes("salida")) {
         targetStage = "stage3";
-      } else if (lower.includes("ceviche") || lower.includes("bienvenida") || lower.includes("llegada") || lower.includes("playa") || lower.includes("voleibol")) {
+      } else if (lower.includes("ceviche") || lower.includes("bienvenida") || lower.includes("llegada") || lower.includes("playa") || lower.includes("voleibol") || lower.includes("tarde")) {
         targetStage = "stage1";
       } else {
         targetStage = "stage2";
@@ -3682,6 +3860,35 @@ function checkContestLeader() {
   }
 }
 
+function deleteContestSubmission(subId) {
+  if (!requireAuth()) return;
+  const list = pusioContest.submissions || [];
+  const idx = list.findIndex(s => String(s.id) === String(subId));
+  if (idx === -1) return;
+
+  const target = list[idx];
+  const isOwner = (target.authorEmail || "").toLowerCase() === (currentUser.email || "").toLowerCase();
+  const isAdmin = (currentUser.email || "").toLowerCase() === "titorvc08@gmail.com" || (currentUser.name || "").toLowerCase() === "tito";
+  if (!isOwner && !isAdmin) {
+    showToast("Solo el autor o Tito (Admin) pueden eliminar este diseño.");
+    return;
+  }
+
+  list.splice(idx, 1);
+  if (pusioContest.votes) {
+    Object.keys(pusioContest.votes).forEach(voterEmail => {
+      if (String(pusioContest.votes[voterEmail]) === String(subId)) {
+        delete pusioContest.votes[voterEmail];
+      }
+    });
+  }
+
+  checkContestLeader();
+  saveState(true);
+  renderContestSubmissions();
+  showToast("Diseño eliminado del concurso");
+}
+
 function renderContestSubmissions() {
   const grid = document.getElementById("contestSubmissionsGrid");
   const countBadge = document.getElementById("contestSubmissionsCount");
@@ -3711,6 +3918,8 @@ function renderContestSubmissions() {
     const isVotedByMe = userVoteId === sub.id;
     const isLeader = rank === 0 && sub.votesCount > 0;
     const isMySubmission = currentUser && currentUser.email.toLowerCase() === sub.authorEmail.toLowerCase();
+    const isAdmin = currentUser && ((currentUser.email || "").toLowerCase() === "titorvc08@gmail.com" || (currentUser.name || "").toLowerCase() === "tito");
+    const canDeleteSub = Boolean(isMySubmission || isAdmin);
 
     const card = document.createElement("div");
     card.className = `contest-card ${isLeader ? 'is-leader' : ''} ${isVotedByMe ? 'is-my-vote' : ''}`;
@@ -3719,6 +3928,7 @@ function renderContestSubmissions() {
 
     card.innerHTML = `
       ${isLeader ? '<div class="contest-leader-ribbon">Líder Oficial</div>' : ''}
+      ${canDeleteSub ? `<button type="button" class="contest-delete-btn" onclick="deleteContestSubmission(${sub.id})" title="Eliminar mi diseño">&times;</button>` : ''}
       <div class="contest-card-avatar">
         ${svgIcon}
       </div>
@@ -3757,6 +3967,7 @@ window.selectUserForCustomization = selectUserForCustomization;
 window.openPusioActionMenu = openPusioActionMenu;
 window.selectPusioForCustomization = selectPusioForCustomization;
 window.openPusioContestModal = openPusioContestModal;
+window.deleteContestSubmission = deleteContestSubmission;
 window.requestCloseStudio = requestCloseStudio;
 window.saveRobotStudioAction = saveRobotStudioAction;
 window.confirmSaveAndCloseStudio = confirmSaveAndCloseStudio;

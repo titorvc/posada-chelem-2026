@@ -8,7 +8,7 @@
   <link rel="apple-touch-icon" href="favicon.svg?v=1">
   <meta name="theme-color" content="#00A896">
 
-  <link rel="stylesheet" href="css/style.css?v=20261119_0625">
+  <link rel="stylesheet" href="css/style.css?v=20261119_0640">
 
   <meta property="og:title" content="El pusio 2026">
   <meta property="og:description" content="Organización colaborativa para la posada en Chelem.">
@@ -198,6 +198,27 @@
        ==================================================================== -->
   <main id="mainAgendaSection" class="container plans-agenda-section" data-mobile-pane="tab-agenda">
 
+    <!-- TABLERO DE GAMIFICACIÓN & EQUIDAD (LO PRIMERO AL BAJAR DESPUÉS DEL BOT) -->
+    <section id="equityBoardSection" class="equity-board-section">
+      <div class="equity-board-header">
+        <div>
+          <span class="column-eyebrow">Gamificaci&oacute;n &bull; Reparto justo entre 13</span>
+          <h2 class="equity-board-title">Tablero de Equidad de la Posada</h2>
+          <p class="equity-board-subtitle">Que nadie cargue de m&aacute;s: todos aportamos parejo para completar el 100% de la posada.</p>
+        </div>
+        <div class="equity-global-meter">
+          <div class="equity-global-stats-row">
+            <span id="equityGlobalPct" class="equity-global-pct">0%</span>
+            <span id="equityGlobalMeta" class="equity-global-meta">0 / 0 insumos cubiertos</span>
+          </div>
+          <div class="transport-capacity-track" style="width:200px;">
+            <div id="equityGlobalFill" class="transport-capacity-fill" style="width:0%;"></div>
+          </div>
+        </div>
+      </div>
+      <div id="equityMembersGrid" class="equity-members-grid"></div>
+    </section>
+
     <div class="plans-section-intro">
       <h2 class="plans-section-title">&iquest;Qu&eacute; haremos?</h2>
       <p class="plans-section-subtitle">Comida, bebidas y din&aacute;micas organizadas colaborativamente.</p>
@@ -279,34 +300,34 @@
       </form>
     </section>
 
-    <!-- BLOQUE FINAL: CRONOGRAMA DINÁMICO DE LA POSADA (3 MOMENTOS) -->
+    <!-- BLOQUE FINAL: CRONOGRAMA DINÁMICO DE 2 DÍAS (SÁBADO TARDE A DOMINGO MEDIODÍA) -->
     <section class="timeline-section">
       <div class="timeline-header">
         <div>
-          <span class="agenda-eyebrow">Agenda</span>
-          <h2 class="timeline-title">Cronograma del Día</h2>
+          <span class="agenda-eyebrow">Agenda de 2 D&iacute;as &bull; S&aacute;bado a Domingo</span>
+          <h2 class="timeline-title">Cronograma de la Posada</h2>
         </div>
       </div>
 
       <div class="timeline-grid">
-        <!-- Momento 1: Tarde de Sol & Bienvenida -->
+        <!-- Momento 1: Día 1 - Sábado Tarde -->
         <div class="timeline-stage-card">
-          <div class="stage-time-tag">14:00 &bull; 17:30</div>
-          <h3 class="stage-name">Tarde & Bienvenida</h3>
+          <div class="stage-time-tag">S&aacute;bado &bull; Tarde (14:00 &ndash; 19:00)</div>
+          <h3 class="stage-name">D&iacute;a 1: Llegada &amp; Playa</h3>
           <div id="timelineStage1" class="stage-plans-container"></div>
         </div>
 
-        <!-- Momento 2: Atardecer & Comida Fuerte -->
+        <!-- Momento 2: Día 1 - Sábado Noche -->
         <div class="timeline-stage-card">
-          <div class="stage-time-tag">17:30 &bull; 20:30</div>
-          <h3 class="stage-name">Atardecer & Comida</h3>
+          <div class="stage-time-tag">S&aacute;bado &bull; Noche (19:00 en adelante)</div>
+          <h3 class="stage-name">D&iacute;a 1: Cena, Fogata &amp; Juegos</h3>
           <div id="timelineStage2" class="stage-plans-container"></div>
         </div>
 
-        <!-- Momento 3: Noche Estelar & Competencia -->
+        <!-- Momento 3: Día 2 - Domingo Mañana / Mediodía -->
         <div class="timeline-stage-card">
-          <div class="stage-time-tag">20:30 en adelante</div>
-          <h3 class="stage-name">Noche & Convivencia</h3>
+          <div class="stage-time-tag">Domingo &bull; Ma&ntilde;ana / Mediod&iacute;a (09:00 &ndash; 14:00)</div>
+          <h3 class="stage-name">D&iacute;a 2: Desayuno &amp; Salida (comida opcional)</h3>
           <div id="timelineStage3" class="stage-plans-container"></div>
         </div>
       </div>
@@ -711,9 +732,9 @@
             <div>
               <label class="form-label" for="moveNewCollabStage">Momento:</label>
               <select id="moveNewCollabStage" class="form-input">
-                <option value="stage1">Tarde de Sol</option>
-                <option value="stage2" selected>Atardecer &amp; Fuego</option>
-                <option value="stage3">Noche Estelar</option>
+                <option value="stage1">S&aacute;bado Tarde (Llegada)</option>
+                <option value="stage2" selected>S&aacute;bado Noche (Cena &amp; Juegos)</option>
+                <option value="stage3">Domingo Ma&ntilde;ana / Mediod&iacute;a</option>
               </select>
             </div>
           </div>
@@ -730,6 +751,6 @@
   <div id="toastNotice" class="toast-notice">Guardado</div>
 
   <script src="js/bottts_parts.js?v=20261119_0358"></script>
-  <script src="js/app.js?v=20261119_0631"></script>
+  <script src="js/app.js?v=20261119_0640"></script>
 </body>
 </html>
