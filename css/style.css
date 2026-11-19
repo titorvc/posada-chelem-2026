@@ -2751,7 +2751,7 @@ body {
   justify-content: center;
   cursor: pointer;
   transition: all 0.18s ease;
-  z-index: 2;
+  z-index: 10;
   padding: 0;
 }
 
@@ -4367,7 +4367,8 @@ body {
   transition: width 0.3s ease;
 }
 
-/* Auras por nivel de aporte: Sin aura -> Verde -> Azul -> Morado -> Dorado */
+/* Auras por nivel de aporte (paleta distinta a asistencia y VIP):
+   Observador (Sin aura) -> Colaborador (Turquesa) -> Impulsor (Índigo) -> Pilar (Magenta) -> Líder (Coral/Rubí) */
 .eq-tier-none {
   border-color: var(--border-subtle);
   box-shadow: none;
@@ -4376,52 +4377,52 @@ body {
   background: #CBD5E1;
 }
 
-.eq-tier-green {
-  border-color: rgba(16, 185, 129, 0.55);
-  background: rgba(16, 185, 129, 0.05);
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.16);
+.eq-tier-colab {
+  border-color: rgba(20, 184, 166, 0.55);
+  background: rgba(20, 184, 166, 0.05);
+  box-shadow: 0 0 12px rgba(20, 184, 166, 0.16);
 }
-.eq-tier-green .equity-member-bar-fill {
-  background: linear-gradient(90deg, #10B981, #059669);
+.eq-tier-colab .equity-member-bar-fill {
+  background: linear-gradient(90deg, #2DD4BF, #0D9488);
 }
-.eq-tier-green .equity-member-badge {
-  color: #059669;
-}
-
-.eq-tier-blue {
-  border-color: rgba(37, 99, 235, 0.62);
-  background: rgba(37, 99, 235, 0.07);
-  box-shadow: 0 0 14px rgba(37, 99, 235, 0.20);
-}
-.eq-tier-blue .equity-member-bar-fill {
-  background: linear-gradient(90deg, #3B82F6, #1D4ED8);
-}
-.eq-tier-blue .equity-member-badge {
-  color: #1D4ED8;
+.eq-tier-colab .equity-member-badge {
+  color: #0F766E;
 }
 
-.eq-tier-purple {
-  border-color: rgba(124, 58, 237, 0.72);
-  background: rgba(124, 58, 237, 0.09);
-  box-shadow: 0 0 16px rgba(124, 58, 237, 0.24);
+.eq-tier-impulsor {
+  border-color: rgba(79, 70, 229, 0.62);
+  background: rgba(79, 70, 229, 0.07);
+  box-shadow: 0 0 14px rgba(79, 70, 229, 0.20);
 }
-.eq-tier-purple .equity-member-bar-fill {
-  background: linear-gradient(90deg, #8B5CF6, #6D28D9);
+.eq-tier-impulsor .equity-member-bar-fill {
+  background: linear-gradient(90deg, #6366F1, #4338CA);
 }
-.eq-tier-purple .equity-member-badge {
-  color: #6D28D9;
+.eq-tier-impulsor .equity-member-badge {
+  color: #4338CA;
 }
 
-.eq-tier-gold {
-  border-color: #D97706;
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.07));
-  box-shadow: 0 0 18px rgba(245, 158, 11, 0.34);
+.eq-tier-pilar {
+  border-color: rgba(217, 70, 239, 0.72);
+  background: rgba(217, 70, 239, 0.08);
+  box-shadow: 0 0 16px rgba(217, 70, 239, 0.24);
 }
-.eq-tier-gold .equity-member-bar-fill {
-  background: linear-gradient(90deg, #F59E0B, #D97706, #B45309);
+.eq-tier-pilar .equity-member-bar-fill {
+  background: linear-gradient(90deg, #E879F9, #A21CAF);
 }
-.eq-tier-gold .equity-member-badge {
-  color: #B45309;
+.eq-tier-pilar .equity-member-badge {
+  color: #A21CAF;
+}
+
+.eq-tier-leader {
+  border-color: #E11D48;
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.14), rgba(236, 72, 153, 0.08));
+  box-shadow: 0 0 18px rgba(244, 63, 94, 0.30);
+}
+.eq-tier-leader .equity-member-bar-fill {
+  background: linear-gradient(90deg, #F43F5E, #EC4899, #BE123C);
+}
+.eq-tier-leader .equity-member-badge {
+  color: #BE123C;
   font-weight: 800;
 }
 
@@ -5528,7 +5529,7 @@ body {
   position: sticky;
   top: 0;
   background: inherit;
-  z-index: 2;
+  z-index: 10;
 }
 
 .modal-title {

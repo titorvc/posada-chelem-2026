@@ -1849,50 +1849,38 @@ function renderEquityBoard() {
   if (!grid) return;
 
   const countsByEmail = {};
-  const totalPlans = (collaborations || []).length;
-  let activePlans = 0;
+  let totalSlots = 0;
+  let filledSlots = 0;
 
   (collaborations || []).forEach(c => {
-    const items = c.items || [];
-    let hasAny = false;
-    items.forEach(it => {
+    (c.items || []).forEach(it => {
+      totalSlots += 1;
       const claimers = getItemClaimers(it);
-      if (claimers.length > 0) hasAny = true;
+      if (claimers.length > 0) filledSlots += 1;
       claimers.forEach(cl => {
         const key = (cl.email || cl.name || "").toLowerCase();
         if (key) countsByEmail[key] = (countsByEmail[key] || 0) + 1;
       });
     });
-    if (hasAny) activePlans += 1;
   });
 
-  const totalBasics = (additionalsList || []).length;
-  let readyBasics = 0;
   (additionalsList || []).forEach(addItem => {
     const qty = Math.max(1, Number(addItem.targetQty) || 1);
     const claimers = getItemClaimers(addItem);
-    if (claimers.length >= qty) readyBasics += 1;
+    totalSlots += qty;
+    filledSlots += Math.min(claimers.length, qty);
     claimers.forEach(cl => {
       const key = (cl.email || cl.name || "").toLowerCase();
       if (key) countsByEmail[key] = (countsByEmail[key] || 0) + 1;
     });
   });
 
-  const activeAttendees = (attendeesList || []).filter(u => u.attendance !== "declined");
-  const fairGoal = 2; // Meta ligera y lograble: 2 aportes por persona
-  const totalMilestones = Math.max(1, activeAttendees.length * fairGoal);
-  const totalParticipantContributions = activeAttendees.reduce((acc, u) => {
-    const eKey = (u.email || "").toLowerCase();
-    const nKey = (u.name || "").toLowerCase();
-    const c = countsByEmail[eKey] || countsByEmail[nKey] || 0;
-    return acc + Math.min(c, fairGoal);
-  }, 0);
-
-  const pct = Math.min(100, Math.round((totalParticipantContributions / totalMilestones) * 100));
+  const pct = totalSlots > 0 ? Math.min(100, Math.round((filledSlots / totalSlots) * 100)) : 0;
   if (pctEl) pctEl.textContent = `${pct}%`;
-  if (metaEl) metaEl.textContent = `${activePlans}/${totalPlans} planes en marcha • ${readyBasics}/${totalBasics} básicos listos`;
+  if (metaEl) metaEl.textContent = "completado";
   if (fillEl) fillEl.style.width = `${pct}%`;
 
+  const activeAttendees = (attendeesList || []).filter(u => u.attendance !== "declined");
   const membersWithScore = activeAttendees.map(u => {
     const eKey = (u.email || "").toLowerCase();
     const nKey = (u.name || "").toLowerCase();
@@ -1907,21 +1895,21 @@ function renderEquityBoard() {
     const isMe = currentUser && currentUser.email.toLowerCase() === (user.email || "").toLowerCase();
     const ratio = count === 0 ? 0 : Math.min(100, Math.max(18, Math.round((count / scaleMax) * 100)));
 
-    let badgeText = "Sin aportes";
+    let badgeText = "Observador";
     let tierClass = "eq-tier-none";
 
     if (count > 0 && count === maxCount && maxCount >= 2) {
       badgeText = "Líder";
-      tierClass = "eq-tier-gold";
+      tierClass = "eq-tier-leader";
     } else if (ratio >= 75) {
-      badgeText = "Muy bien";
-      tierClass = "eq-tier-purple";
+      badgeText = "Pilar";
+      tierClass = "eq-tier-pilar";
     } else if (ratio >= 45) {
-      badgeText = "Bien";
-      tierClass = "eq-tier-blue";
+      badgeText = "Impulsor";
+      tierClass = "eq-tier-impulsor";
     } else if (count > 0) {
-      badgeText = "Empezando";
-      tierClass = "eq-tier-green";
+      badgeText = "Colaborador";
+      tierClass = "eq-tier-colab";
     }
 
     const miniSvg = renderRobotSVG(user.robot, null, null, true);
@@ -2140,7 +2128,12 @@ function isAdminUser() {
   if (!currentUser) return false;
   const email = (currentUser.email || "").trim().toLowerCase();
   const name = (currentUser.name || "").trim().toLowerCase();
-  return email === "titorvc08@gmail.com" || name === "tito";
+  return (
+    email === "titorvc08@gmail.com" ||
+    email === "roberto.vargas99@outlook.com" ||
+    name.includes("tito") ||
+    Number(currentUser.id) === 2
+  );
 }
 
 let editingSubItem = null;
@@ -2291,15 +2284,12 @@ function confirmMoveSubItem(e) {
 
 function canManagePlan(collab) {
   if (!currentUser || !collab) return false;
+  if (isAdminUser()) return true;
   const isAuthor = (
-    (collab.authorEmail && collab.authorEmail.toLowerCase() === currentUser.email.toLowerCase()) ||
-    (collab.author && collab.author.toLowerCase() === currentUser.name.toLowerCase())
+    (collab.authorEmail && collab.authorEmail.toLowerCase() === (currentUser.email || "").toLowerCase()) ||
+    (collab.author && collab.author.toLowerCase() === (currentUser.name || "").toLowerCase())
   );
-  const isAdmin = (
-    (currentUser.email && currentUser.email.toLowerCase() === "titorvc08@gmail.com") ||
-    (currentUser.name && currentUser.name.toLowerCase() === "tito")
-  );
-  return Boolean(isAuthor || isAdmin);
+  return Boolean(isAuthor);
 }
 
 function startEditSubItem(collabId, itemId) {
@@ -2551,11 +2541,13 @@ function createPlanCardElement(collab, catClass) {
             <span>${isGrowing ? 'Ocultar sugerencias pus.io' : 'Desarrollar esta idea con <strong>pus.io</strong>'}</span>
           </button>
           ${
-            showVoteDeleteBar
-              ? `<button type="button" class="vote-delete-plan-btn ${hasVotedDelete ? 'voted' : ''}" onclick="voteDeleteCollab('${collab.id}')" title="Si se alcanza mayoría (${majorityNeeded} votos), esta actividad se elimina automáticamente">
+            canManage
+              ? `<button type="button" class="vote-delete-plan-btn" onclick="deleteCollab('${collab.id}')" title="Eliminar esta actividad definitivamente">
+                   Eliminar actividad
+                 </button>`
+              : `<button type="button" class="vote-delete-plan-btn ${hasVotedDelete ? 'voted' : ''}" onclick="voteDeleteCollab('${collab.id}')" title="Si se alcanza mayoría (${majorityNeeded} votos), esta actividad se elimina automáticamente">
                    ${deleteVotes.length > 0 ? `Eliminar (${deleteVotes.length}/${majorityNeeded})` : 'Solicitar eliminar'}
                  </button>`
-              : ''
           }
         </div>
         ${
