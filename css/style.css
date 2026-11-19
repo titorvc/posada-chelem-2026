@@ -4367,13 +4367,63 @@ body {
   transition: width 0.3s ease;
 }
 
-.eq-tier-zero .equity-member-bar-fill { background: #CBD5E1; }
-.eq-tier-mid .equity-member-bar-fill { background: #3B82F6; }
-.eq-tier-mid .equity-member-badge { color: #1D4ED8; }
-.eq-tier-fair .equity-member-bar-fill { background: #10B981; }
-.eq-tier-fair .equity-member-badge { color: #059669; }
-.eq-tier-over .equity-member-bar-fill { background: linear-gradient(90deg, #F59E0B, #D97706); }
-.eq-tier-over .equity-member-badge { color: #B45309; }
+/* Auras por nivel de aporte: Sin aura -> Verde -> Azul -> Morado -> Dorado */
+.eq-tier-none {
+  border-color: var(--border-subtle);
+  box-shadow: none;
+}
+.eq-tier-none .equity-member-bar-fill {
+  background: #CBD5E1;
+}
+
+.eq-tier-green {
+  border-color: rgba(16, 185, 129, 0.55);
+  background: rgba(16, 185, 129, 0.05);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.16);
+}
+.eq-tier-green .equity-member-bar-fill {
+  background: linear-gradient(90deg, #10B981, #059669);
+}
+.eq-tier-green .equity-member-badge {
+  color: #059669;
+}
+
+.eq-tier-blue {
+  border-color: rgba(37, 99, 235, 0.62);
+  background: rgba(37, 99, 235, 0.07);
+  box-shadow: 0 0 14px rgba(37, 99, 235, 0.20);
+}
+.eq-tier-blue .equity-member-bar-fill {
+  background: linear-gradient(90deg, #3B82F6, #1D4ED8);
+}
+.eq-tier-blue .equity-member-badge {
+  color: #1D4ED8;
+}
+
+.eq-tier-purple {
+  border-color: rgba(124, 58, 237, 0.72);
+  background: rgba(124, 58, 237, 0.09);
+  box-shadow: 0 0 16px rgba(124, 58, 237, 0.24);
+}
+.eq-tier-purple .equity-member-bar-fill {
+  background: linear-gradient(90deg, #8B5CF6, #6D28D9);
+}
+.eq-tier-purple .equity-member-badge {
+  color: #6D28D9;
+}
+
+.eq-tier-gold {
+  border-color: #D97706;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.07));
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.34);
+}
+.eq-tier-gold .equity-member-bar-fill {
+  background: linear-gradient(90deg, #F59E0B, #D97706, #B45309);
+}
+.eq-tier-gold .equity-member-badge {
+  color: #B45309;
+  font-weight: 800;
+}
 
 /* ==========================================================================
    RESUMEN PERSONAL V2 (CLARO, VISUAL Y 100% MÓVIL)

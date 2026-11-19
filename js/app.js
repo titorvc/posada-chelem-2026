@@ -1851,21 +1851,30 @@ function renderEquityBoard() {
     return { user: u, count };
   }).sort((a, b) => b.count - a.count || a.user.name.localeCompare(b.user.name));
 
+  const maxCount = membersWithScore.reduce((m, x) => Math.max(m, x.count), 0);
+  const scaleMax = Math.max(3, maxCount);
+
   grid.innerHTML = membersWithScore.map(({ user, count }) => {
     const isMe = currentUser && currentUser.email.toLowerCase() === (user.email || "").toLowerCase();
-    const ratio = Math.min(100, Math.round((count / fairGoal) * 100));
-    let badgeText = "Falta sumarse";
-    let tierClass = "eq-tier-zero";
-    if (count > fairGoal) {
-      badgeText = "MVP Generoso";
-      tierClass = "eq-tier-over";
-    } else if (count >= fairGoal) {
-      badgeText = "Meta cumplida";
-      tierClass = "eq-tier-fair";
+    const ratio = count === 0 ? 0 : Math.min(100, Math.max(18, Math.round((count / scaleMax) * 100)));
+
+    let badgeText = "Sin aportes";
+    let tierClass = "eq-tier-none";
+
+    if (count > 0 && count === maxCount && maxCount >= 2) {
+      badgeText = "Líder";
+      tierClass = "eq-tier-gold";
+    } else if (ratio >= 75) {
+      badgeText = "Muy bien";
+      tierClass = "eq-tier-purple";
+    } else if (ratio >= 45) {
+      badgeText = "Bien";
+      tierClass = "eq-tier-blue";
     } else if (count > 0) {
-      badgeText = "En marcha";
-      tierClass = "eq-tier-mid";
+      badgeText = "Empezando";
+      tierClass = "eq-tier-green";
     }
+
     const miniSvg = renderRobotSVG(user.robot, null, null, true);
 
     return `
@@ -1876,7 +1885,6 @@ function renderEquityBoard() {
             <span class="equity-member-name">${user.name}${isMe ? ' (Tú)' : ''}</span>
             <span class="equity-member-badge">${badgeText}</span>
           </div>
-          <span class="equity-member-count">${count}/${fairGoal}</span>
         </div>
         <div class="equity-member-bar">
           <div class="equity-member-bar-fill" style="width:${ratio}%;"></div>
