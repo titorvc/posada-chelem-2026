@@ -3887,12 +3887,137 @@ body {
   cursor: pointer;
 }
 
+.task-assignee-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .task-assignee-icon {
   width: 22px;
   height: 22px;
   border-radius: 50%;
   overflow: hidden;
   display: inline-flex;
+}
+
+.task-assignee.is-shared {
+  border-color: rgba(16, 185, 129, 0.45);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.task-join-btn {
+  font-family: var(--font-sans);
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px dashed var(--teal-accent);
+  background: transparent;
+  color: var(--teal-accent);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.task-join-btn:hover {
+  background: var(--teal-accent);
+  color: #FFFFFF;
+  border-style: solid;
+}
+
+/* Modal de mover opción entre actividades */
+.move-mode-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.move-mode-tab {
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-hover);
+  background: var(--bg-page);
+  color: var(--ink-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.move-mode-tab.active {
+  background: var(--ink);
+  color: #FFFFFF;
+  border-color: var(--ink);
+}
+
+.move-mode-section.hidden {
+  display: none;
+}
+
+.subitem-btn-icon.move:hover {
+  color: var(--teal-accent);
+  background: rgba(0, 143, 122, 0.1);
+}
+
+/* Guía breve de funcionamiento de las actividades */
+.activities-guide-box {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 18px;
+}
+
+.activities-guide-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--ink-secondary);
+}
+
+.activities-guide-item strong {
+  color: var(--ink);
+}
+
+.guide-step-badge {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--teal-tint);
+  color: var(--teal-accent);
+  border: 1px solid rgba(0, 143, 122, 0.25);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+@media (max-width: 900px) {
+  .activities-guide-box {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 540px) {
+  .activities-guide-box {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 10px 12px;
+  }
 }
 
 .claim-btn {

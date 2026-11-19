@@ -1528,9 +1528,32 @@ function togglePlanCollapse(planId) {
   renderAgendaBoards();
 }
 
+function getItemClaimers(item) {
+  if (!item) return [];
+  if (Array.isArray(item.claimers) && item.claimers.length > 0) {
+    return item.claimers.filter(c => c && (c.name || c.email));
+  }
+  if (item.claimedBy) {
+    return [{ name: item.claimedBy, email: item.claimedByEmail || "" }];
+  }
+  return [];
+}
+
+function syncItemClaimFields(item, claimers) {
+  const clean = Array.isArray(claimers) ? claimers.filter(c => c && (c.name || c.email)) : [];
+  item.claimers = clean;
+  if (clean.length > 0) {
+    item.claimedBy = clean[0].name;
+    item.claimedByEmail = clean[0].email || null;
+  } else {
+    item.claimedBy = null;
+    item.claimedByEmail = null;
+  }
+}
+
 function calculateCollabTraction(collab) {
   const total = collab.items.length || 1;
-  const claimed = collab.items.filter(i => i.claimedBy).length;
+  const claimed = collab.items.filter(i => getItemClaimers(i).length > 0).length;
   // Prioridad matemática: mayor porcentaje de cobertura y mayor cantidad de asignados
   return (claimed / total) * 100 + (claimed * 10);
 }
@@ -1580,6 +1603,127 @@ function getCollabVibeTier(claimed, total) {
 }
 
 let editingSubItem = null;
+let movingSubItemState = null;
+
+function openMoveSubItemModal(collabId, itemId) {
+  if (!requireAuth()) return;
+  const sourceCollab = collaborations.find(c => c.id === collabId);
+  if (!sourceCollab) return;
+  if (!canManagePlan(sourceCollab)) {
+    showToast("Solo el creador o Tito (Admin) pueden mover este elemento.");
+    return;
+  }
+  const item = sourceCollab.items.find(i => String(i.id) === String(itemId));
+  if (!item) return;
+
+  movingSubItemState = { collabId, itemId, mode: "existing" };
+
+  const labelEl = document.getElementById("moveSubItemLabel");
+  if (labelEl) {
+    labelEl.innerHTML = `Mover <strong>"${item.name}"</strong> desde <em>${sourceCollab.title}</em>`;
+  }
+
+  const selectEl = document.getElementById("moveTargetCollabSelect");
+  const otherCollabs = collaborations.filter(c => c.id !== collabId);
+  if (selectEl) {
+    if (otherCollabs.length > 0) {
+      selectEl.innerHTML = otherCollabs
+        .map(c => `<option value="${c.id}">${c.title} (${c.category})</option>`)
+        .join("");
+    } else {
+      selectEl.innerHTML = `<option value="">No hay otras actividades aún</option>`;
+    }
+  }
+
+  const titleInput = document.getElementById("moveNewCollabTitle");
+  if (titleInput) titleInput.value = "";
+
+  const catSelect = document.getElementById("moveNewCollabCategory");
+  if (catSelect) {
+    const isFood = (sourceCollab.category || "").toLowerCase().includes("comida") || (sourceCollab.category || "").toLowerCase().includes("bebida");
+    catSelect.value = isFood ? "Comida y Bebida" : "Dinámica y Juegos";
+  }
+
+  toggleMoveSubItemMode(otherCollabs.length > 0 ? "existing" : "new");
+  openModal("modalMoveSubItem");
+}
+
+function toggleMoveSubItemMode(mode) {
+  if (movingSubItemState) movingSubItemState.mode = mode;
+
+  const existingBtn = document.getElementById("moveModeExistingBtn");
+  const newBtn = document.getElementById("moveModeNewBtn");
+  const existingSec = document.getElementById("moveExistingSection");
+  const newSec = document.getElementById("moveNewSection");
+
+  if (existingBtn) existingBtn.classList.toggle("active", mode === "existing");
+  if (newBtn) newBtn.classList.toggle("active", mode === "new");
+  if (existingSec) existingSec.classList.toggle("hidden", mode !== "existing");
+  if (newSec) newSec.classList.toggle("hidden", mode !== "new");
+}
+
+function confirmMoveSubItem(e) {
+  e.preventDefault();
+  if (!movingSubItemState) return;
+
+  const { collabId, itemId, mode } = movingSubItemState;
+  const sourceCollab = collaborations.find(c => c.id === collabId);
+  if (!sourceCollab) return;
+
+  const itemIdx = sourceCollab.items.findIndex(i => String(i.id) === String(itemId));
+  if (itemIdx === -1) return;
+
+  if (mode === "existing") {
+    const selectEl = document.getElementById("moveTargetCollabSelect");
+    const targetId = selectEl ? Number(selectEl.value) : null;
+    const targetCollab = collaborations.find(c => c.id === targetId);
+    if (!targetCollab) {
+      showToast("Selecciona una actividad destino o crea una nueva.");
+      return;
+    }
+
+    const [movedItem] = sourceCollab.items.splice(itemIdx, 1);
+    targetCollab.items.push(movedItem);
+    expandedPlanIds.add(targetCollab.id);
+
+    saveState();
+    renderAll();
+    closeModal("modalMoveSubItem");
+    movingSubItemState = null;
+    showToast(`Movido "${movedItem.name}" a ${targetCollab.title}`);
+  } else {
+    const titleInput = document.getElementById("moveNewCollabTitle");
+    const catSelect = document.getElementById("moveNewCollabCategory");
+    const stageSelect = document.getElementById("moveNewCollabStage");
+
+    const newTitle = titleInput ? titleInput.value.trim() : "";
+    if (!newTitle) {
+      showToast("Escribe un nombre para la nueva actividad.");
+      if (titleInput) titleInput.focus();
+      return;
+    }
+
+    const [movedItem] = sourceCollab.items.splice(itemIdx, 1);
+    const newCollab = {
+      id: Date.now(),
+      title: newTitle.charAt(0).toUpperCase() + newTitle.slice(1),
+      category: catSelect ? catSelect.value : "Comida y Bebida",
+      stage: stageSelect ? stageSelect.value : "stage2",
+      author: currentUser ? currentUser.name : "Anfitrión",
+      authorEmail: currentUser ? currentUser.email : "",
+      items: [movedItem]
+    };
+
+    collaborations.unshift(newCollab);
+    expandedPlanIds.add(newCollab.id);
+
+    saveState();
+    renderAll();
+    closeModal("modalMoveSubItem");
+    movingSubItemState = null;
+    showToast(`Creada "${newCollab.title}" con "${movedItem.name}"`);
+  }
+}
 
 function canManagePlan(collab) {
   if (!currentUser || !collab) return false;
@@ -1660,7 +1804,7 @@ function deleteSubItem(collabId, itemId) {
 }
 
 function createPlanCardElement(collab, catClass) {
-  const claimedCount = collab.items.filter(i => i.claimedBy).length;
+  const claimedCount = collab.items.filter(i => getItemClaimers(i).length > 0).length;
   const totalCount = collab.items.length;
   const isComplete = totalCount > 0 && claimedCount === totalCount;
   const hasVolunteers = claimedCount > 0;
@@ -1681,9 +1825,22 @@ function createPlanCardElement(collab, catClass) {
 
   let itemsHtml = "";
   collab.items.forEach(item => {
-    const isClaimed = Boolean(item.claimedBy);
-    const ownerObj = attendeesList.find(u => u.email.toLowerCase() === (item.claimedByEmail || "").toLowerCase());
+    const claimers = getItemClaimers(item);
+    const isClaimed = claimers.length > 0;
+    const isMineClaim = Boolean(
+      currentUser &&
+      claimers.some(c =>
+        (c.email && c.email.toLowerCase() === currentUser.email.toLowerCase()) ||
+        (c.name && c.name.toLowerCase() === currentUser.name.toLowerCase())
+      )
+    );
+    const canJoinShared = isComplete && isClaimed && !isMineClaim;
+    const firstClaimer = claimers[0] || null;
+    const ownerObj = firstClaimer
+      ? attendeesList.find(u => u.email.toLowerCase() === (firstClaimer.email || "").toLowerCase())
+      : null;
     const miniSvg = ownerObj ? renderRobotSVG(ownerObj.robot, null, null, true) : "";
+    const claimersLabel = claimers.map(c => c.name).join(" + ");
     const isEditing = editingSubItem && editingSubItem.collabId === collab.id && String(editingSubItem.itemId) === String(item.id);
 
     if (isEditing) {
@@ -1701,6 +1858,9 @@ function createPlanCardElement(collab, catClass) {
     } else {
       const manageControls = canManage ? `
         <div class="subitem-manage-btns">
+          <button type="button" class="subitem-btn-icon move" onclick="openMoveSubItemModal(${collab.id}, '${item.id}')" title="Mover a otra actividad o crear una nueva">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          </button>
           <button type="button" class="subitem-btn-icon edit" onclick="startEditSubItem(${collab.id}, '${item.id}')" title="Modificar este elemento">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
@@ -1710,6 +1870,12 @@ function createPlanCardElement(collab, catClass) {
         </div>
       ` : "";
 
+      const assigneeTooltip = isMineClaim
+        ? `Asignado a ${claimersLabel}. Clic para salirte de este insumo.`
+        : (canJoinShared
+            ? `Asignado a ${claimersLabel}. Todos los insumos están cubiertos: clic para sumarte.`
+            : `Asignado a ${claimersLabel}. Cubre primero los insumos libres para poder sumarte.`);
+
       itemsHtml += `
         <div class="task-row ${isClaimed ? 'claimed' : ''}">
           <div class="task-info-wrap">
@@ -1718,10 +1884,13 @@ function createPlanCardElement(collab, catClass) {
           </div>
           ${
             isClaimed
-              ? `<button type="button" class="task-assignee" onclick="toggleClaimItem(${collab.id}, '${item.id}')" title="Asignado a ${item.claimedBy}. Clic para liberar si es tuyo.">
-                   <span class="task-assignee-icon">${miniSvg}</span>
-                   <span>${item.claimedBy}</span>
-                 </button>`
+              ? `<div class="task-assignee-wrap">
+                   <button type="button" class="task-assignee ${claimers.length > 1 ? 'is-shared' : ''} ${isMineClaim ? 'is-mine-claim' : ''}" onclick="toggleClaimItem(${collab.id}, '${item.id}')" title="${assigneeTooltip}">
+                     <span class="task-assignee-icon">${miniSvg}</span>
+                     <span>${claimersLabel}</span>
+                   </button>
+                   ${canJoinShared ? `<button type="button" class="task-join-btn" onclick="toggleClaimItem(${collab.id}, '${item.id}')" title="Todos los insumos están cubiertos. ¡Súmate para compartir este!">+ Sumarme</button>` : ''}
+                 </div>`
               : `<button type="button" class="claim-btn" onclick="toggleClaimItem(${collab.id}, '${item.id}')">
                    Yo lo llevo
                  </button>`
@@ -1902,19 +2071,31 @@ function toggleClaimItem(collabId, itemId) {
   const item = collab.items.find(i => String(i.id) === String(itemId));
   if (!item) return;
 
-  if (item.claimedBy) {
-    if (item.claimedByEmail.toLowerCase() === currentUser.email.toLowerCase()) {
-      item.claimedBy = null;
-      item.claimedByEmail = null;
-      showToast(`Liberaste: ${item.name}`);
-    } else {
-      showToast(`Este insumo ya lo lleva ${item.claimedBy}`);
+  const claimers = getItemClaimers(item);
+  const myEmail = (currentUser.email || "").toLowerCase();
+  const myName = (currentUser.name || "").toLowerCase();
+  const existingIdx = claimers.findIndex(c =>
+    (c.email && c.email.toLowerCase() === myEmail) ||
+    (c.name && c.name.toLowerCase() === myName)
+  );
+
+  if (existingIdx !== -1) {
+    claimers.splice(existingIdx, 1);
+    syncItemClaimFields(item, claimers);
+    showToast(`Liberaste: ${item.name}`);
+  } else if (claimers.length === 0) {
+    claimers.push({ name: currentUser.name, email: currentUser.email });
+    syncItemClaimFields(item, claimers);
+    showToast(`${currentUser.name} se encarga de: ${item.name}`);
+  } else {
+    const allCovered = collab.items.every(i => getItemClaimers(i).length > 0);
+    if (!allCovered) {
+      showToast("Primero cubre los insumos disponibles de esta actividad antes de sumarte a uno ya tomado.");
       return;
     }
-  } else {
-    item.claimedBy = currentUser.name;
-    item.claimedByEmail = currentUser.email;
-    showToast(`${currentUser.name} se encarga de: ${item.name}`);
+    claimers.push({ name: currentUser.name, email: currentUser.email });
+    syncItemClaimFields(item, claimers);
+    showToast(`${currentUser.name} se sumó a: ${item.name}`);
   }
 
   saveState();

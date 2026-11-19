@@ -8,7 +8,7 @@
   <link rel="apple-touch-icon" href="favicon.svg?v=1">
   <meta name="theme-color" content="#00A896">
 
-  <link rel="stylesheet" href="css/style.css?v=20261119_0447">
+  <link rel="stylesheet" href="css/style.css?v=20261119_0534">
 
   <meta property="og:title" content="El pusio 2026">
   <meta property="og:description" content="Organización colaborativa para la posada en Chelem.">
@@ -205,6 +205,26 @@
     <div class="plans-section-intro">
       <h2 class="plans-section-title">&iquest;Qu&eacute; haremos?</h2>
       <p class="plans-section-subtitle">Comida, bebidas y din&aacute;micas organizadas colaborativamente.</p>
+    </div>
+
+    <!-- Guía breve de funcionamiento de las tarjetas de actividades -->
+    <div class="activities-guide-box" role="note" aria-label="Cómo funcionan las actividades">
+      <div class="activities-guide-item">
+        <span class="guide-step-badge">1</span>
+        <div><strong>Toma un insumo:</strong> Abre una tarjeta y pulsa <em>&ldquo;Yo lo llevo&rdquo;</em> para apartar algo disponible (puedes soltarlo tocando tu nombre).</div>
+      </div>
+      <div class="activities-guide-item">
+        <span class="guide-step-badge">2</span>
+        <div><strong>S&uacute;mate en equipo:</strong> Cuando todos los insumos de una actividad est&eacute;n cubiertos (100%), aparece <em>&ldquo;+ Sumarme&rdquo;</em> para que varias personas lleven lo mismo.</div>
+      </div>
+      <div class="activities-guide-item">
+        <span class="guide-step-badge">3</span>
+        <div><strong>Reorganiza opciones:</strong> Usa el bot&oacute;n de flechas en cada insumo para moverlo a otra actividad existente o crear una nueva actividad con &eacute;l.</div>
+      </div>
+      <div class="activities-guide-item">
+        <span class="guide-step-badge">4</span>
+        <div><strong>Agrega m&aacute;s:</strong> Escribe en el campo inferior de la tarjeta o usa las sugerencias de <strong>pus.io</strong> para sumar nuevos insumos.</div>
+      </div>
     </div>
 
     <!-- TABLERO A 2 COLUMNAS: COMIDA Y BEBIDA vs JUEGOS & ACTIVIDADES -->
@@ -619,9 +639,62 @@
     </div>
   </div>
 
+  <!-- MODAL: MOVER OPCIÓN / INSUMO A OTRA ACTIVIDAD O CREAR NUEVA -->
+  <div id="modalMoveSubItem" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width:480px;">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">Mover <em>opción</em></h3>
+          <p id="moveSubItemLabel" class="modal-subtitle" style="font-size:0.85rem; color:var(--ink-secondary); margin-top:4px;"></p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('modalMoveSubItem')" title="Cerrar">&times;</button>
+      </div>
+
+      <form id="moveSubItemForm" onsubmit="confirmMoveSubItem(event)">
+        <div class="move-mode-tabs">
+          <button type="button" id="moveModeExistingBtn" class="move-mode-tab active" onclick="toggleMoveSubItemMode('existing')">Actividad existente</button>
+          <button type="button" id="moveModeNewBtn" class="move-mode-tab" onclick="toggleMoveSubItemMode('new')">+ Crear nueva actividad</button>
+        </div>
+
+        <div id="moveExistingSection" class="move-mode-section">
+          <label class="form-label" for="moveTargetCollabSelect">Selecciona la actividad destino:</label>
+          <select id="moveTargetCollabSelect" class="form-input"></select>
+        </div>
+
+        <div id="moveNewSection" class="move-mode-section hidden">
+          <label class="form-label" for="moveNewCollabTitle">Nombre de la nueva actividad:</label>
+          <input type="text" id="moveNewCollabTitle" class="form-input" placeholder="Ej. Carne asada en la terraza" />
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+            <div>
+              <label class="form-label" for="moveNewCollabCategory">Categoría:</label>
+              <select id="moveNewCollabCategory" class="form-input">
+                <option value="Comida y Bebida">Comida y Bebida</option>
+                <option value="Dinámica y Juegos">Dinámica y Juegos</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label" for="moveNewCollabStage">Momento:</label>
+              <select id="moveNewCollabStage" class="form-input">
+                <option value="stage1">Tarde de Sol</option>
+                <option value="stage2" selected>Atardecer &amp; Fuego</option>
+                <option value="stage3">Noche Estelar</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modalMoveSubItem')">Cancelar</button>
+          <button type="submit" class="btn btn-pusio">Mover opción</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div id="toastNotice" class="toast-notice">Guardado</div>
 
   <script src="js/bottts_parts.js?v=20261119_0358"></script>
-  <script src="js/app.js?v=20261119_0447"></script>
+  <script src="js/app.js?v=20261119_0534"></script>
 </body>
 </html>
