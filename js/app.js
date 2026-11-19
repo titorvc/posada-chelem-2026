@@ -820,11 +820,19 @@ let newlyAddedPlanId = null;
 
 function renderInlineRecentPlan() {
   const slot = document.getElementById("pusioInlineRecentPlan");
+  const suggestionsDeck = document.querySelector(".pusio-suggestions-deck");
   if (!slot) return;
 
   if (!pendingPlanProposal) {
     slot.innerHTML = "";
+    if (suggestionsDeck) {
+      suggestionsDeck.classList.remove("is-hidden-by-plan");
+    }
     return;
+  }
+
+  if (suggestionsDeck) {
+    suggestionsDeck.classList.add("is-hidden-by-plan");
   }
 
   const p = pendingPlanProposal;
