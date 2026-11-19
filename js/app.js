@@ -568,7 +568,7 @@ async function syncFetchFromCloud() {
   }
 }
 
-async function flushCloudPushNow() {
+async function flushCloudPushNow(isUnload = false) {
   clearTimeout(syncDebounceTimer);
   pendingCloudPush = false;
   try {
@@ -585,7 +585,8 @@ async function flushCloudPushNow() {
       }
     };
 
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/posada_sync`, {
+    const bodyStr = JSON.stringify(payload);
+    const fetchOpts = {
       method: "POST",
       headers: {
         "apikey": SUPABASE_ANON_KEY,
@@ -593,9 +594,13 @@ async function flushCloudPushNow() {
         "Content-Type": "application/json",
         "Prefer": "resolution=merge-duplicates"
       },
-      body: JSON.stringify(payload),
-      keepalive: true
-    });
+      body: bodyStr
+    };
+    if (isUnload && bodyStr.length < 60000) {
+      fetchOpts.keepalive = true;
+    }
+
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/posada_sync`, fetchOpts);
     if (!res.ok) {
       console.warn("Supabase push HTTP error:", res.status);
     }
@@ -608,20 +613,20 @@ async function syncPushToCloud(immediate = false) {
   pendingCloudPush = true;
   clearTimeout(syncDebounceTimer);
   if (immediate) {
-    await flushCloudPushNow();
+    await flushCloudPushNow(false);
     return;
   }
   syncDebounceTimer = setTimeout(() => {
-    flushCloudPushNow();
+    flushCloudPushNow(false);
   }, 120);
 }
 
 window.addEventListener("pagehide", () => {
-  if (pendingCloudPush) flushCloudPushNow();
+  if (pendingCloudPush) flushCloudPushNow(true);
 });
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "hidden" && pendingCloudPush) {
-    flushCloudPushNow();
+    flushCloudPushNow(true);
   }
 });
 
@@ -2904,9 +2909,6 @@ function deleteCollab(collabId) {
 
   const removedPlan = collaborations[targetIdx];
   collaborations.splice(targetIdx, 1);
-  if (String(lastCreatedPlanId) === String(collabId)) {
-    lastCreatedPlanId = null;
-  }
   saveState(true);
   renderAll();
 
