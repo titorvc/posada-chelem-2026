@@ -800,7 +800,7 @@ function renderMySummary() {
     const myItemsListHtml = claimedItemsCount > 0
       ? `
         <div class="summary-checklist-block">
-          <div class="summary-checklist-title">Lo que llevas (${claimedItemsCount})</div>
+          <div class="summary-checklist-title">Mis aportes (${claimedItemsCount})</div>
           <ul class="summary-checklist-ul">
             ${myCollabItems.map(x => {
               const isFoodCat = (x.category || "").toLowerCase().includes("comida") || (x.category || "").toLowerCase().includes("bebida");
