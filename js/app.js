@@ -372,6 +372,29 @@ const REMOVED_ATTENDEE_EMAILS = new Set([
 ]);
 const REMOVED_ATTENDEE_NAMES = new Set(["beto", "aldo", "andrés", "andres"]);
 
+const MAX_USERNAME_LEN = 11;
+
+function normalizeAttendeeName(rawName) {
+  return (rawName || "").trim().slice(0, MAX_USERNAME_LEN);
+}
+
+function sanitizeAttendeeNames() {
+  if (!Array.isArray(attendeesList)) return false;
+  let changed = false;
+  attendeesList.forEach(u => {
+    if (!u || typeof u.name !== "string") return;
+    const trimmed = u.name.trim();
+    if (trimmed.length > MAX_USERNAME_LEN) {
+      u.name = "Shory";
+      changed = true;
+    }
+  });
+  if (changed) {
+    localStorage.setItem("posada_attendees_v10", JSON.stringify(attendeesList));
+  }
+  return changed;
+}
+
 function filterRemovedAttendees(list) {
   if (!Array.isArray(list)) return [];
   return list.filter(u => {
@@ -507,6 +530,9 @@ async function syncFetchFromCloud() {
       if (stripAdditionalsFromCollabs()) {
         needsCloudCleanup = true;
       }
+      if (sanitizeAttendeeNames()) {
+        needsCloudCleanup = true;
+      }
 
       renderAll();
       if (needsCloudCleanup) {
@@ -637,6 +663,7 @@ function loadState() {
   }
 
   stripAdditionalsFromCollabs();
+  sanitizeAttendeeNames();
 
   // Cargar estado actualizado desde la nube Supabase de inmediato
   syncFetchFromCloud();
@@ -3399,7 +3426,7 @@ function setupEventListeners() {
   document.getElementById("secureAuthForm").onsubmit = (e) => {
     e.preventDefault();
     const emailVal = document.getElementById("authInputEmail").value.trim().toLowerCase();
-    const nameVal = document.getElementById("authInputName").value.trim();
+    const nameVal = normalizeAttendeeName(document.getElementById("authInputName").value);
     const pinVal = document.getElementById("authInputPin").value.trim();
     const errEl = document.getElementById("authErrorMsg");
 
