@@ -84,6 +84,42 @@ const DEFAULT_ATTENDEES = [
 // Tablero inicial completamente limpio y vacío para la versión final de producción
 const DEFAULT_COLLABORATIONS = [];
 
+// Sección de Adicionales & Básicos (calculados para 13 personas; sin vasos desechables)
+const DEFAULT_ADDITIONALS = [
+  { id: "add_botanas",   name: "Botanas / Papas / Totopos",   qtyHint: "~6–8 bolsas grandes (2 c/u)",            targetQty: 3, claimers: [] },
+  { id: "add_refrescos", name: "Refrescos / Bebidas",         qtyHint: "~10–12 L (5–6 botellas de 2L)",          targetQty: 3, claimers: [] },
+  { id: "add_hielo",     name: "Hielo (bolsas de 5 kg)",      qtyHint: "~6 bolsas / 30 kg para hieleras",        targetQty: 3, claimers: [] },
+  { id: "add_agua",      name: "Agua natural",                qtyHint: "~20 L (1 garrafón + 1 paq. botellas)",   targetQty: 2, claimers: [] },
+  { id: "add_platos",    name: "Platos desechables",          qtyHint: "~40–50 platos resistentes (2 paq.)",     targetQty: 2, claimers: [] },
+  { id: "add_cubiertos", name: "Cubiertos y servilletas",     qtyHint: "~2 paq. servilletas + 30 cubiertos",     targetQty: 2, claimers: [] },
+  { id: "add_salsas",    name: "Salsas, limones y sal",       qtyHint: "~1 kg limones + 2–3 salsas + sal",       targetQty: 1, claimers: [] },
+  { id: "add_basura",    name: "Bolsas de basura",            qtyHint: "~1 rollo jumbo resistente",              targetQty: 1, claimers: [] },
+  { id: "add_carbon",    name: "Carbón y encendedor",         qtyHint: "~6 kg (2 bolsas) + encendedor",          targetQty: 1, claimers: [] }
+];
+
+// Estimación automática de cantidades sugeridas para 13 personas en consumibles
+function estimateConsumableFor13(itemName) {
+  const n = (itemName || "").toLowerCase();
+  if (/carne|arrachera|rib|sirloin|bistec|pastor|cochinita|pollo|pechuga|costilla/.test(n)) return "~3–3.5 kg (13 pers.)";
+  if (/hamburguesa|carne molida/.test(n)) return "~20–26 carnes / ~3 kg (13 pers.)";
+  if (/pan|bollo|medias noches|bimbo/.test(n)) return "~20–24 pzas / 3 paq. (13 pers.)";
+  if (/salchicha|chistorra|chorizo|tocino/.test(n)) return "~2–2.5 kg / 3–4 paq. (13 pers.)";
+  if (/queso/.test(n)) return "~1–1.5 kg / 2–3 paq. (13 pers.)";
+  if (/tortilla/.test(n)) return "~3 kg (13 pers.)";
+  if (/totopo|botana|papa|dorito|sabrita|cacahuate/.test(n)) return "~6–8 bolsas grandes (13 pers.)";
+  if (/refresco|coca|soda|jugo|agua|horchata|jamaica/.test(n)) return "~10–12 L (13 pers.)";
+  if (/cerveza|chela|alcohol|ron|tequila|mezcal|vodka/.test(n)) return "~2–3 cartones / 2–3 botellas (13 pers.)";
+  if (/hielo/.test(n)) return "~6 bolsas / 30 kg (13 pers.)";
+  if (/ceviche|camar[oó]n|pescado|pulpo/.test(n)) return "~2.5–3 kg (13 pers.)";
+  if (/verdura|lechuga|tomate|jitomate|cebolla|aguacate|cilantro|guacamole/.test(n)) return "~1.5–2 kg / 6–8 pzas (13 pers.)";
+  if (/lim[oó]n/.test(n)) return "~1–1.5 kg (13 pers.)";
+  if (/salsa|catsup|mayonesa|mostaza|aderezo|chile/.test(n)) return "~2–3 frascos/botellas (13 pers.)";
+  if (/carb[oó]n/.test(n)) return "~6 kg / 2 bolsas (13 pers.)";
+  if (/postre|pastel|brownie|galleta|helado/.test(n)) return "~15–20 porciones (13 pers.)";
+  if (/plato|servilleta|cubierto/.test(n)) return "~40–50 pzas / 2 paq. (13 pers.)";
+  return "";
+}
+
 // Recompensas iniciales sugeridas para el concurso de personalización de Pus.io
 const DEFAULT_REWARD_IDEAS = [
   "Elegir la primera canción que sonará al llegar a la casa de Chelem",
@@ -101,6 +137,7 @@ let activeColorChannel = "pri"; // "pri" o "sec"
 let attendeesList = [];
 let carsList = [];
 let collaborations = [];
+let additionalsList = [];
 let pusioRobot = null;
 let editingTarget = "user"; // "user" o "pusio"
 let studioOriginalState = null; // Snapshot al abrir el estudio para descartar si no guarda
@@ -357,6 +394,11 @@ async function syncFetchFromCloud() {
         localStorage.setItem("posada_collabs_v10", JSON.stringify(collaborations));
       }
 
+      if (Array.isArray(cloud.additionals) && cloud.additionals.length > 0) {
+        additionalsList = cloud.additionals;
+        localStorage.setItem("posada_additionals_v10", JSON.stringify(additionalsList));
+      }
+
       if (cloud.pusioRobot) {
         pusioRobot = cloud.pusioRobot;
         localStorage.setItem("posada_pusio_robot_v10", JSON.stringify(pusioRobot));
@@ -393,6 +435,7 @@ async function syncPushToCloud() {
           attendees: attendeesList,
           cars: carsList,
           collabs: collaborations,
+          additionals: additionalsList,
           pusioRobot: pusioRobot,
           pusioContest: pusioContest,
           lastUpdated: Date.now()
@@ -442,6 +485,20 @@ function loadState() {
   const savedCollabs = localStorage.getItem("posada_collabs_v10");
   collaborations = savedCollabs ? JSON.parse(savedCollabs) : [];
 
+  const savedAdditionals = localStorage.getItem("posada_additionals_v10");
+  if (savedAdditionals) {
+    try {
+      const parsedAdd = JSON.parse(savedAdditionals);
+      additionalsList = Array.isArray(parsedAdd) && parsedAdd.length > 0
+        ? parsedAdd
+        : JSON.parse(JSON.stringify(DEFAULT_ADDITIONALS));
+    } catch (e) {
+      additionalsList = JSON.parse(JSON.stringify(DEFAULT_ADDITIONALS));
+    }
+  } else {
+    additionalsList = JSON.parse(JSON.stringify(DEFAULT_ADDITIONALS));
+  }
+
   const savedSessionEmail = localStorage.getItem("posada_active_email_v10");
   if (savedSessionEmail) {
     currentUser = attendeesList.find(u => u.email.toLowerCase() === savedSessionEmail.toLowerCase()) || null;
@@ -470,6 +527,7 @@ function saveState() {
   localStorage.setItem("posada_attendees_v10", JSON.stringify(attendeesList));
   localStorage.setItem("posada_cars_v10", JSON.stringify(carsList));
   localStorage.setItem("posada_collabs_v10", JSON.stringify(collaborations));
+  localStorage.setItem("posada_additionals_v10", JSON.stringify(additionalsList));
   if (currentUser) {
     localStorage.setItem("posada_active_email_v10", currentUser.email);
   }
@@ -500,6 +558,7 @@ function renderAll() {
   renderDynamicSparks();
   renderInlineRecentPlan();
   renderAgendaBoards();
+  renderAdditionalsSection();
   renderDynamicTimeline();
   renderRobotStudio();
   renderWhosGoing();
@@ -573,10 +632,17 @@ function renderMySummary() {
     let claimedItemsCount = 0;
     collaborations.forEach(c => {
       (c.items || []).forEach(it => {
-        if (it.claimedByEmail && it.claimedByEmail.toLowerCase() === currentUser.email.toLowerCase()) {
+        const claimers = getItemClaimers(it);
+        if (claimers.some(cl => (cl.email || "").toLowerCase() === currentUser.email.toLowerCase())) {
           claimedItemsCount++;
         }
       });
+    });
+    (additionalsList || []).forEach(addItem => {
+      const claimers = getItemClaimers(addItem);
+      if (claimers.some(cl => (cl.email || "").toLowerCase() === currentUser.email.toLowerCase())) {
+        claimedItemsCount++;
+      }
     });
 
     const totalAttendeesConfirmed = attendeesList.filter(u => u.attendance === "confirmed").length;
@@ -599,6 +665,10 @@ function renderMySummary() {
 
         <!-- Columna central: Mis eventos y roles -->
         <div class="my-summary-details-grid">
+          <div class="my-summary-stat-tile yeti-reminder-tile" style="grid-column: 1 / -1;">
+            <span class="stat-tile-label">Recordatorio importante</span>
+            <strong class="stat-tile-value">🧊 LLEVAR YETI (no habrá vasos desechables)</strong>
+          </div>
           <div class="my-summary-stat-tile">
             <span class="stat-tile-label">Tu Transporte</span>
             <strong class="stat-tile-value">${transportSummary}</strong>
@@ -1500,6 +1570,7 @@ function toggleGrowPlan(collabId) {
   if (!requireAuth()) return;
   activeGrowPlanId = activeGrowPlanId === collabId ? null : collabId;
   renderAgendaBoards();
+  renderAdditionalsSection();
 }
 
 function addSuggestedItemToCollab(collabId, itemName) {
@@ -1526,6 +1597,7 @@ function togglePlanCollapse(planId) {
     expandedPlanIds.add(planId);
   }
   renderAgendaBoards();
+  renderAdditionalsSection();
 }
 
 function getItemClaimers(item) {
@@ -1594,6 +1666,153 @@ function renderAgendaBoards() {
   });
 }
 
+function renderAdditionalsSection() {
+  const listEl = document.getElementById("additionalsBoardContainer");
+  const statsEl = document.getElementById("additionalsProgressStats");
+  const fillEl = document.getElementById("additionalsProgressFill");
+  if (!listEl) return;
+
+  const list = Array.isArray(additionalsList) ? additionalsList : [];
+  let totalNeeded = 0;
+  let totalCovered = 0;
+  list.forEach(item => {
+    const qty = Math.max(1, Number(item.targetQty) || 1);
+    const count = getItemClaimers(item).length;
+    totalNeeded += qty;
+    totalCovered += Math.min(count, qty);
+  });
+
+  const allMet = totalNeeded > 0 && totalCovered >= totalNeeded;
+  const pct = totalNeeded > 0 ? Math.min(100, Math.round((totalCovered / totalNeeded) * 100)) : 0;
+
+  if (statsEl) {
+    statsEl.textContent = `${totalCovered} / ${totalNeeded} cubiertos (${pct}%)`;
+  }
+  if (fillEl) {
+    fillEl.style.width = `${pct}%`;
+  }
+
+  listEl.innerHTML = "";
+  list.forEach(item => {
+    const claimers = getItemClaimers(item);
+    const targetQty = Math.max(1, Number(item.targetQty) || 1);
+    const isMet = claimers.length >= targetQty;
+    const isMine = Boolean(
+      currentUser &&
+      claimers.some(c =>
+        (c.email && c.email.toLowerCase() === currentUser.email.toLowerCase()) ||
+        (c.name && c.name.toLowerCase() === currentUser.name.toLowerCase())
+      )
+    );
+    const canJoinExtra = allMet && isMet && !isMine;
+    const claimersText = claimers.map(c => c.name).join(" + ");
+    const qtyHint = item.qtyHint || estimateConsumableFor13(item.name) || "";
+
+    const row = document.createElement("div");
+    row.className = `additional-row ${isMet ? "is-met" : (claimers.length > 0 ? "is-partial" : "")}`;
+
+    let actionHtml = "";
+    if (isMine) {
+      actionHtml = `
+        <button type="button" class="task-assignee is-mine-claim ${claimers.length > 1 ? "is-shared" : ""}" onclick="toggleClaimAdditional('${item.id}')" title="Clic para quitarte de este adicional">
+          <span>${claimersText}</span>
+        </button>
+      `;
+    } else if (!isMet) {
+      actionHtml = `
+        <div class="task-assignee-wrap">
+          ${claimers.length > 0 ? `<span class="additional-claimers-mini">${claimersText}</span>` : ""}
+          <button type="button" class="claim-btn" onclick="toggleClaimAdditional('${item.id}')">Yo lo llevo</button>
+        </div>
+      `;
+    } else {
+      actionHtml = `
+        <div class="task-assignee-wrap">
+          <button type="button" class="task-assignee ${claimers.length > 1 ? "is-shared" : ""}" onclick="toggleClaimAdditional('${item.id}')" title="${canJoinExtra ? 'Todos los adicionales están cubiertos: clic para sumarte.' : 'Cupo completo. Cubre primero los adicionales faltantes.'}">
+            <span>${claimersText}</span>
+          </button>
+          ${canJoinExtra ? `<button type="button" class="task-join-btn" onclick="toggleClaimAdditional('${item.id}')">+ Sumarme</button>` : ""}
+        </div>
+      `;
+    }
+
+    row.innerHTML = `
+      <div class="additional-row-info">
+        <div class="additional-title-line">
+          <span class="additional-name">${item.name}</span>
+          <span class="additional-qty-badge ${isMet ? "met" : ""}">${claimers.length}/${targetQty}</span>
+        </div>
+        ${qtyHint ? `<span class="portion-hint-badge">${qtyHint}</span>` : ""}
+      </div>
+      <div class="additional-row-action">
+        ${actionHtml}
+      </div>
+    `;
+    listEl.appendChild(row);
+  });
+}
+
+function toggleClaimAdditional(addId) {
+  if (!requireAuth()) return;
+  const item = additionalsList.find(a => String(a.id) === String(addId));
+  if (!item) return;
+
+  const claimers = getItemClaimers(item);
+  const targetQty = Math.max(1, Number(item.targetQty) || 1);
+  const myEmail = (currentUser.email || "").toLowerCase();
+  const myName = (currentUser.name || "").toLowerCase();
+  const existingIdx = claimers.findIndex(c =>
+    (c.email && c.email.toLowerCase() === myEmail) ||
+    (c.name && c.name.toLowerCase() === myName)
+  );
+
+  if (existingIdx !== -1) {
+    claimers.splice(existingIdx, 1);
+    syncItemClaimFields(item, claimers);
+    showToast(`Liberaste: ${item.name}`);
+  } else if (claimers.length < targetQty) {
+    claimers.push({ name: currentUser.name, email: currentUser.email });
+    syncItemClaimFields(item, claimers);
+    showToast(`${currentUser.name} lleva: ${item.name}`);
+  } else {
+    const allMet = additionalsList.every(a => getItemClaimers(a).length >= Math.max(1, Number(a.targetQty) || 1));
+    if (!allMet) {
+      showToast("Primero cubre los adicionales faltantes antes de sumarte a uno ya completo.");
+      return;
+    }
+    claimers.push({ name: currentUser.name, email: currentUser.email });
+    syncItemClaimFields(item, claimers);
+    showToast(`${currentUser.name} se sumó a: ${item.name}`);
+  }
+
+  saveState();
+  renderAll();
+}
+
+function addCustomAdditional(e) {
+  e.preventDefault();
+  if (!requireAuth()) return;
+  const nameInput = document.getElementById("newAdditionalName");
+  const qtySelect = document.getElementById("newAdditionalQty");
+  const val = nameInput ? nameInput.value.trim() : "";
+  if (!val) return;
+
+  const targetQty = qtySelect ? Math.max(1, Number(qtySelect.value) || 1) : 1;
+  const formatted = val.charAt(0).toUpperCase() + val.slice(1);
+  additionalsList.push({
+    id: "add_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
+    name: formatted,
+    qtyHint: estimateConsumableFor13(formatted) || `Meta: ${targetQty} pers. (13 invitados)`,
+    targetQty,
+    claimers: []
+  });
+
+  if (nameInput) nameInput.value = "";
+  saveState();
+  renderAll();
+  showToast(`Adicional agregado: ${formatted}`);
+}
+
 function getCollabVibeTier(claimed, total) {
   if (total === 0 || claimed === 0) return { tier: "vibe-tier-low", label: "Sin comenzar" };
   const ratio = claimed / total;
@@ -1653,13 +1872,17 @@ function toggleMoveSubItemMode(mode) {
 
   const existingBtn = document.getElementById("moveModeExistingBtn");
   const newBtn = document.getElementById("moveModeNewBtn");
+  const addBtn = document.getElementById("moveModeAdditionalBtn");
   const existingSec = document.getElementById("moveExistingSection");
   const newSec = document.getElementById("moveNewSection");
+  const addSec = document.getElementById("moveAdditionalSection");
 
   if (existingBtn) existingBtn.classList.toggle("active", mode === "existing");
   if (newBtn) newBtn.classList.toggle("active", mode === "new");
+  if (addBtn) addBtn.classList.toggle("active", mode === "additional");
   if (existingSec) existingSec.classList.toggle("hidden", mode !== "existing");
   if (newSec) newSec.classList.toggle("hidden", mode !== "new");
+  if (addSec) addSec.classList.toggle("hidden", mode !== "additional");
 }
 
 function confirmMoveSubItem(e) {
@@ -1691,6 +1914,25 @@ function confirmMoveSubItem(e) {
     closeModal("modalMoveSubItem");
     movingSubItemState = null;
     showToast(`Movido "${movedItem.name}" a ${targetCollab.title}`);
+  } else if (mode === "additional") {
+    const qtySelect = document.getElementById("moveAdditionalTargetQty");
+    const targetQty = qtySelect ? Math.max(1, Number(qtySelect.value) || 2) : 2;
+    const [movedItem] = sourceCollab.items.splice(itemIdx, 1);
+    const existingClaimers = getItemClaimers(movedItem);
+
+    additionalsList.push({
+      id: "add_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
+      name: movedItem.name,
+      qtyHint: estimateConsumableFor13(movedItem.name) || `Meta: ${targetQty} pers. (13 invitados)`,
+      targetQty,
+      claimers: existingClaimers
+    });
+
+    saveState();
+    renderAll();
+    closeModal("modalMoveSubItem");
+    movingSubItemState = null;
+    showToast(`"${movedItem.name}" transferido a Adicionales`);
   } else {
     const titleInput = document.getElementById("moveNewCollabTitle");
     const catSelect = document.getElementById("moveNewCollabCategory");
@@ -1876,10 +2118,15 @@ function createPlanCardElement(collab, catClass) {
             ? `Asignado a ${claimersLabel}. Todos los insumos están cubiertos: clic para sumarte.`
             : `Asignado a ${claimersLabel}. Cubre primero los insumos libres para poder sumarte.`);
 
+      const portionHint = isFood ? estimateConsumableFor13(item.name) : "";
+
       itemsHtml += `
         <div class="task-row ${isClaimed ? 'claimed' : ''}">
           <div class="task-info-wrap">
-            <span class="task-name">${item.name}</span>
+            <div class="task-name-block">
+              <span class="task-name">${item.name}</span>
+              ${portionHint ? `<span class="portion-hint-badge">${portionHint}</span>` : ''}
+            </div>
             ${manageControls}
           </div>
           ${

@@ -4020,6 +4020,182 @@ body {
   }
 }
 
+/* Estimación de porciones para 13 personas */
+.task-name-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.portion-hint-badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--ink-muted);
+  line-height: 1.2;
+}
+
+/* Recordatorio LLEVAR YETI en resumen individual */
+.yeti-reminder-tile {
+  background: rgba(14, 165, 233, 0.09) !important;
+  border: 1px solid rgba(14, 165, 233, 0.35) !important;
+}
+
+.yeti-reminder-tile .stat-tile-value {
+  color: #0369A1;
+}
+
+/* Modal mover a 3 pestañas */
+.move-mode-tabs-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Sección de Adicionales & Básicos */
+.additionals-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+.additionals-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.additionals-subtitle {
+  font-size: 0.82rem;
+  color: var(--ink-secondary);
+  margin: 4px 0 0;
+  max-width: 640px;
+}
+
+.additionals-progress-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.additionals-progress-stats {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--teal-accent);
+}
+
+.additionals-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.additional-row {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--bg-page);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  transition: border-color 0.15s ease;
+}
+
+.additional-row.is-met {
+  border-color: rgba(16, 185, 129, 0.45);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.additional-row.is-partial {
+  border-color: rgba(0, 143, 122, 0.3);
+}
+
+.additional-row-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.additional-title-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.additional-name {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.additional-qty-badge {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--ink-secondary);
+  flex-shrink: 0;
+}
+
+.additional-qty-badge.met {
+  background: rgba(16, 185, 129, 0.18);
+  color: #047857;
+}
+
+.additional-row-action {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.additional-claimers-mini {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--teal-accent);
+}
+
+.additionals-add-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.additionals-qty-select {
+  width: auto !important;
+  min-width: 130px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 960px) {
+  .additionals-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .additionals-grid {
+    grid-template-columns: 1fr;
+  }
+  .additionals-add-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .additionals-progress-box {
+    align-items: flex-start;
+  }
+}
+
 .claim-btn {
   font-family: var(--font-sans);
   font-size: 0.82rem;

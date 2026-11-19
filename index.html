@@ -8,7 +8,7 @@
   <link rel="apple-touch-icon" href="favicon.svg?v=1">
   <meta name="theme-color" content="#00A896">
 
-  <link rel="stylesheet" href="css/style.css?v=20261119_0534">
+  <link rel="stylesheet" href="css/style.css?v=20261119_0610">
 
   <meta property="og:title" content="El pusio 2026">
   <meta property="og:description" content="Organización colaborativa para la posada en Chelem.">
@@ -253,6 +253,35 @@
         <div id="activityBoardContainer" class="agenda-cards-list"></div>
       </section>
     </div>
+
+    <!-- SECCIÓN DE ADICIONALES & BÁSICOS (CALCULADOS PARA 13 PERSONAS) -->
+    <section id="additionalsSection" class="additionals-section">
+      <div class="additionals-header">
+        <div>
+          <span class="column-eyebrow">B&aacute;sicos para 13 personas &bull; Sin vasos desechables (trae tu Yeti)</span>
+          <h3 class="agenda-column-title">Adicionales &amp; B&aacute;sicos</h3>
+          <p class="additionals-subtitle">Art&iacute;culos compartidos que se necesitan fuera de cada platillo. Botanas, refrescos y hielo requieren m&aacute;s cupos que platos o salsas.</p>
+        </div>
+        <div class="additionals-progress-box">
+          <span id="additionalsProgressStats" class="additionals-progress-stats">0 / 18 cubiertos (0%)</span>
+          <div class="transport-capacity-track" style="width:180px;">
+            <div id="additionalsProgressFill" class="transport-capacity-fill" style="width:0%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="additionalsBoardContainer" class="additionals-grid"></div>
+
+      <form class="additionals-add-form" onsubmit="addCustomAdditional(event)">
+        <input type="text" id="newAdditionalName" class="add-subitem-input" placeholder="+ Agregar otro adicional (ej. Servilletas extra, caf&eacute;, bloqueador)..." required />
+        <select id="newAdditionalQty" class="form-input additionals-qty-select" title="Cantidad de personas necesarias">
+          <option value="1">Meta: 1 pers.</option>
+          <option value="2" selected>Meta: 2 pers.</option>
+          <option value="3">Meta: 3 pers.</option>
+        </select>
+        <button type="submit" class="btn btn-sm">Agregar</button>
+      </form>
+    </section>
 
     <!-- BLOQUE FINAL: CRONOGRAMA DINÁMICO DE LA POSADA (3 MOMENTOS) -->
     <section class="timeline-section">
@@ -651,14 +680,24 @@
       </div>
 
       <form id="moveSubItemForm" onsubmit="confirmMoveSubItem(event)">
-        <div class="move-mode-tabs">
-          <button type="button" id="moveModeExistingBtn" class="move-mode-tab active" onclick="toggleMoveSubItemMode('existing')">Actividad existente</button>
-          <button type="button" id="moveModeNewBtn" class="move-mode-tab" onclick="toggleMoveSubItemMode('new')">+ Crear nueva actividad</button>
+        <div class="move-mode-tabs move-mode-tabs-3">
+          <button type="button" id="moveModeExistingBtn" class="move-mode-tab active" onclick="toggleMoveSubItemMode('existing')">Otra actividad</button>
+          <button type="button" id="moveModeNewBtn" class="move-mode-tab" onclick="toggleMoveSubItemMode('new')">+ Nueva</button>
+          <button type="button" id="moveModeAdditionalBtn" class="move-mode-tab" onclick="toggleMoveSubItemMode('additional')">A Adicionales</button>
         </div>
 
         <div id="moveExistingSection" class="move-mode-section">
           <label class="form-label" for="moveTargetCollabSelect">Selecciona la actividad destino:</label>
           <select id="moveTargetCollabSelect" class="form-input"></select>
+        </div>
+
+        <div id="moveAdditionalSection" class="move-mode-section hidden">
+          <label class="form-label" for="moveAdditionalTargetQty">¿Cuántas personas se necesitan para cubrir este adicional (13 invitados)?</label>
+          <select id="moveAdditionalTargetQty" class="form-input">
+            <option value="1">1 persona (básico / poca cantidad)</option>
+            <option value="2" selected>2 personas (cantidad media)</option>
+            <option value="3">3 personas (alta demanda: botanas, refrescos, hielo)</option>
+          </select>
         </div>
 
         <div id="moveNewSection" class="move-mode-section hidden">
@@ -695,6 +734,6 @@
   <div id="toastNotice" class="toast-notice">Guardado</div>
 
   <script src="js/bottts_parts.js?v=20261119_0358"></script>
-  <script src="js/app.js?v=20261119_0534"></script>
+  <script src="js/app.js?v=20261119_0610"></script>
 </body>
 </html>
