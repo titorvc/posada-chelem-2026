@@ -1606,7 +1606,7 @@ body {
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: repeat(2, 1fr);
   gap: 12px;
-  margin-bottom: 0;
+  margin-bottom: 14px;
   flex: 1;
 }
 
