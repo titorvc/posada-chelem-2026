@@ -66,15 +66,6 @@ INITIAL_USERS = [
         "puedo_dar_coche": 0
     },
     {
-        "email": "cplus.lat@gmail.com",
-        "name": "Beto",
-        "alias": "Beto",
-        "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=beto",
-        "modalidad": "Parejas",
-        "puedo_dar_casa": 1,
-        "puedo_dar_coche": 0
-    },
-    {
         "email": "danielitoestabonito16@gmail.com",
         "name": "Daniel",
         "alias": "Daniel",
@@ -93,28 +84,10 @@ INITIAL_USERS = [
         "puedo_dar_coche": 0
     },
     {
-        "email": "aldo.amigo@posadachelem.com",
-        "name": "Aldo",
-        "alias": "Aldo",
-        "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=aldo",
-        "modalidad": "Solo io",
-        "puedo_dar_casa": 0,
-        "puedo_dar_coche": 0
-    },
-    {
         "email": "noe.amigo@posadachelem.com",
         "name": "Noé",
         "alias": "Noé",
         "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=noe",
-        "modalidad": "Solo io",
-        "puedo_dar_casa": 0,
-        "puedo_dar_coche": 0
-    },
-    {
-        "email": "andres.amigo@posadachelem.com",
-        "name": "Andrés",
-        "alias": "Andrés",
-        "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=andres",
         "modalidad": "Solo io",
         "puedo_dar_casa": 0,
         "puedo_dar_coche": 0

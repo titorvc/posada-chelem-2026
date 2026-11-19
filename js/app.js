@@ -10,23 +10,25 @@
 const EVENT_DATE = new Date("2026-12-19T15:00:00-06:00").getTime();
 
 const CATALOG_KEYS = {
-  face:    ["round01", "round02", "square01", "square02", "square03", "square04"],
-  eyes:    ["eva", "shade01", "robocop", "happy", "glow", "sensor", "roundFrame01", "roundFrame02", "bulging", "hearts", "dizzy", "frame1", "frame2", "round"],
-  mouth:   ["smile01", "smile02", "grill03", "bite", "diagram", "grill01", "grill02", "square01", "square02", "none"],
-  top:     ["radar", "glowingBulb01", "horns", "lights", "pyramid", "antenna", "antennaCrooked", "bulb01", "glowingBulb02", "none"],
-  sides:   ["cables01", "cables02", "antenna01", "antenna02", "round", "square", "squareAssymetric", "none"],
-  texture: ["none", "circuits", "dots", "camo01", "camo02", "grunge01", "grunge02", "dirty01", "dirty02"],
-  bg:      ["solid", "linear", "radial", "rings", "grid", "split"]
+  face:      ["round01", "round02", "square01", "square02", "square03", "square04", "hexagon", "retroTv", "capsule", "diamond", "heartBot", "octagon"],
+  eyes:      ["eva", "shade01", "robocop", "happy", "glow", "sensor", "roundFrame01", "roundFrame02", "bulging", "hearts", "dizzy", "frame1", "frame2", "round", "stars", "wink", "pixelShades", "sleepy", "angry", "laser", "spiral", "money", "cuteSparkle", "monocle"],
+  mouth:     ["smile01", "smile02", "grill03", "bite", "diagram", "grill01", "grill02", "square01", "square02", "mustache", "tongue", "surprised", "whistle", "equalizer", "catSmile", "zigzag", "vampire", "kiss", "none"],
+  top:       ["radar", "glowingBulb01", "horns", "lights", "pyramid", "antenna", "antennaCrooked", "bulb01", "glowingBulb02", "kingCrown", "propeller", "starAntenna", "catEars", "mohawk", "satellite", "none"],
+  sides:     ["cables01", "cables02", "antenna01", "antenna02", "round", "square", "squareAssymetric", "headphones", "elfEars", "ornaments", "wings", "thrusters", "gears", "none"],
+  texture:   ["none", "circuits", "dots", "camo01", "camo02", "grunge01", "grunge02", "dirty01", "dirty02", "snowflakes", "candyStripes", "starsTex", "sweater", "cyberGrid", "beachWaves"],
+  accessory: ["none", "santaHat", "reindeerAntlers", "elfHat", "scarf", "santaBeard", "giftBow", "fairyLights", "starCrown", "treeGlasses", "holly", "snowmanHat", "partyGlasses", "rudolphNose", "angelHalo"],
+  bg:        ["solid", "linear", "radial", "rings", "grid", "split", "snow", "sparkles", "sunburst", "bokeh", "confetti", "waves"]
 };
 
 const PART_LABELS = {
-  face:    { title: "Diseños de Cabeza",    pri: "Color Principal",   sec: "Sombra y Detalle" },
-  eyes:    { title: "Diseños de Ojos",      pri: "Mirada",            sec: "Marco y Gafas" },
-  mouth:   { title: "Diseños de Boca",      pri: "Sonrisa",           sec: "Contorno" },
-  top:     { title: "Detalle Superior",     pri: "Elemento Superior", sec: "Base" },
-  sides:   { title: "Diseños Laterales",    pri: "Laterales",         sec: "Conectores" },
-  texture: { title: "Patrón y Acabado",     pri: "Color del Patrón",  sec: "Fondo del Patrón" },
-  bg:      { title: "Estilo de Fondo",      pri: "Fondo Primario",    sec: "Fondo Secundario" }
+  face:      { title: "Diseños de Cabeza",    pri: "Color Principal",   sec: "Sombra y Detalle" },
+  eyes:      { title: "Diseños de Ojos",      pri: "Mirada",            sec: "Marco y Gafas" },
+  mouth:     { title: "Diseños de Boca",      pri: "Sonrisa",           sec: "Contorno" },
+  top:       { title: "Detalle Superior",     pri: "Elemento Superior", sec: "Base" },
+  sides:     { title: "Diseños Laterales",    pri: "Laterales",         sec: "Conectores" },
+  texture:   { title: "Patrón y Acabado",     pri: "Color del Patrón",  sec: "Fondo del Patrón" },
+  accessory: { title: "Accesorios y Navidad", pri: "Color Principal",   sec: "Detalle / Adorno" },
+  bg:        { title: "Estilo de Fondo",      pri: "Fondo Primario",    sec: "Fondo Secundario" }
 };
 
 const QUICK_HSL_SWATCHES = [
@@ -44,14 +46,23 @@ const QUICK_HSL_SWATCHES = [
 
 function createBotConfig(hue, fIdx, eIdx, mIdx, tIdx, sIdx, txIdx = 0) {
   return {
-    face:    { shape: CATALOG_KEYS.face[fIdx % 6],       pri: { h: hue, s: 82, l: 52 }, sec: { h: (hue + 20) % 360, s: 75, l: 32 } },
-    eyes:    { shape: CATALOG_KEYS.eyes[eIdx % 14],      pri: { h: (hue + 150) % 360, s: 95, l: 60 }, sec: { h: 215, s: 30, l: 15 } },
-    mouth:   { shape: CATALOG_KEYS.mouth[mIdx % 9],      pri: { h: 165, s: 90, l: 62 }, sec: { h: 215, s: 28, l: 16 } },
-    top:     { shape: CATALOG_KEYS.top[tIdx % 9],        pri: { h: (hue + 45) % 360, s: 88, l: 56 }, sec: { h: 42, s: 92, l: 58 } },
-    sides:   { shape: CATALOG_KEYS.sides[sIdx % 7],      pri: { h: hue, s: 78, l: 48 }, sec: { h: 210, s: 32, l: 24 } },
-    texture: { shape: CATALOG_KEYS.texture[txIdx % 9],   pri: { h: (hue + 180) % 360, s: 80, l: 75 }, sec: { h: hue, s: 82, l: 52 } },
-    bg:      { shape: "linear",                          pri: { h: hue, s: 68, l: 92 }, sec: { h: (hue + 35) % 360, s: 65, l: 83 } }
+    face:      { shape: CATALOG_KEYS.face[fIdx % 6],       pri: { h: hue, s: 82, l: 52 }, sec: { h: (hue + 20) % 360, s: 75, l: 32 } },
+    eyes:      { shape: CATALOG_KEYS.eyes[eIdx % 14],      pri: { h: (hue + 150) % 360, s: 95, l: 60 }, sec: { h: 215, s: 30, l: 15 } },
+    mouth:     { shape: CATALOG_KEYS.mouth[mIdx % 9],      pri: { h: 165, s: 90, l: 62 }, sec: { h: 215, s: 28, l: 16 } },
+    top:       { shape: CATALOG_KEYS.top[tIdx % 9],        pri: { h: (hue + 45) % 360, s: 88, l: 56 }, sec: { h: 42, s: 92, l: 58 } },
+    sides:     { shape: CATALOG_KEYS.sides[sIdx % 7],      pri: { h: hue, s: 78, l: 48 }, sec: { h: 210, s: 32, l: 24 } },
+    texture:   { shape: CATALOG_KEYS.texture[txIdx % 9],   pri: { h: (hue + 180) % 360, s: 80, l: 75 }, sec: { h: hue, s: 82, l: 52 } },
+    accessory: { shape: "none",                            pri: { h: 355, s: 84, l: 50 }, sec: { h: 42, s: 88, l: 92 } },
+    bg:        { shape: "linear",                          pri: { h: hue, s: 68, l: 92 }, sec: { h: (hue + 35) % 360, s: 65, l: 83 } }
   };
+}
+
+function ensureRobotParts(r) {
+  if (!r) return createBotConfig(200, 0, 0, 0, 0, 0);
+  if (!r.accessory) {
+    r.accessory = { shape: "none", pri: { h: 355, s: 84, l: 50 }, sec: { h: 42, s: 88, l: 92 } };
+  }
+  return r;
 }
 
 const DEFAULT_ATTENDEES = [
@@ -140,8 +151,9 @@ function renderRobotSVG(robotCfg, overridePart = null, overrideShape = null, noB
   const lib = window.BOTTTS_LIBRARY;
   if (!lib) return `<svg viewBox="0 0 180 180"></svg>`;
 
-  const r = JSON.parse(JSON.stringify(robotCfg || createBotConfig(200, 0, 0, 0, 0, 0)));
+  const r = ensureRobotParts(JSON.parse(JSON.stringify(robotCfg || createBotConfig(200, 0, 0, 0, 0, 0))));
   if (overridePart && overrideShape !== null) {
+    if (!r[overridePart]) ensureRobotParts(r);
     r[overridePart].shape = overrideShape;
   }
 
@@ -163,6 +175,18 @@ function renderRobotSVG(robotCfg, overridePart = null, overrideShape = null, noB
       bgSvg = `<rect width="180" height="180" fill="${bgPri}"/><path d="M0 45 H180 M0 90 H180 M0 135 H180 M45 0 V180 M90 0 V180 M135 0 V180" stroke="${bgSec}" stroke-width="2.5"/>`;
     } else if (r.bg.shape === "split") {
       bgSvg = `<rect width="180" height="180" fill="${bgPri}"/><polygon points="0,180 180,0 180,180" fill="${bgSec}"/>`;
+    } else if (r.bg.shape === "snow") {
+      bgSvg = `<rect width="180" height="180" fill="${bgPri}"/><g fill="${bgSec}" fill-opacity=".85"><circle cx="24" cy="24" r="4"/><circle cx="62" cy="16" r="2.5"/><circle cx="118" cy="22" r="3.5"/><circle cx="158" cy="34" r="4.5"/><circle cx="18" cy="78" r="3"/><circle cx="164" cy="86" r="3.5"/><circle cx="28" cy="144" r="4"/><circle cx="148" cy="148" r="3.5"/><circle cx="88" cy="164" r="3"/></g>`;
+    } else if (r.bg.shape === "sparkles") {
+      bgSvg = `<rect width="180" height="180" fill="${bgPri}"/><g fill="${bgSec}"><path d="M26 18 L29 27 L38 30 L29 33 L26 42 L23 33 L14 30 L23 27 Z"/><path d="M150 20 L152 27 L159 29 L152 31 L150 38 L148 31 L141 29 L148 27 Z"/><path d="M22 136 L24 142 L30 144 L24 146 L22 152 L20 146 L14 144 L20 142 Z"/><path d="M154 134 L157 142 L165 145 L157 148 L154 156 L151 148 L143 145 L151 142 Z"/></g>`;
+    } else if (r.bg.shape === "sunburst") {
+      bgSvg = `<rect width="180" height="180" fill="${bgPri}"/><g fill="${bgSec}" fill-opacity=".55"><polygon points="90,90 70,0 110,0"/><polygon points="90,90 180,70 180,110"/><polygon points="90,90 70,180 110,180"/><polygon points="90,90 0,70 0,110"/><polygon points="90,90 155,0 180,25"/><polygon points="90,90 0,25 25,0"/><polygon points="90,90 180,155 155,180"/><polygon points="90,90 25,180 0,155"/></g>`;
+    } else if (r.bg.shape === "bokeh") {
+      bgSvg = `<rect width="180" height="180" fill="${bgPri}"/><g fill="${bgSec}"><circle cx="30" cy="34" r="22" fill-opacity=".35"/><circle cx="152" cy="40" r="26" fill-opacity=".3"/><circle cx="24" cy="146" r="24" fill-opacity=".3"/><circle cx="150" cy="148" r="20" fill-opacity=".4"/><circle cx="92" cy="24" r="14" fill-opacity=".28"/></g>`;
+    } else if (r.bg.shape === "confetti") {
+      bgSvg = `<rect width="180" height="180" fill="${bgPri}"/><g fill="${bgSec}"><rect x="18" y="20" width="12" height="5" rx="2" transform="rotate(25 18 20)"/><rect x="144" y="24" width="12" height="5" rx="2" transform="rotate(-30 144 24)"/><rect x="22" y="142" width="12" height="5" rx="2" transform="rotate(-20 22 142)"/><rect x="148" y="146" width="12" height="5" rx="2" transform="rotate(35 148 146)"/><circle cx="52" cy="22" r="3.5"/><circle cx="126" cy="18" r="3.5"/><circle cx="162" cy="96" r="3.5"/><circle cx="16" cy="90" r="3.5"/></g>`;
+    } else if (r.bg.shape === "waves") {
+      bgSvg = `<rect width="180" height="180" fill="${bgPri}"/><path d="M0 124 Q45 104 90 124 T180 124 V180 H0 Z" fill="${bgSec}" fill-opacity=".55"/><path d="M0 148 Q45 130 90 148 T180 148 V180 H0 Z" fill="${bgSec}" fill-opacity=".85"/>`;
     }
   }
 
@@ -217,7 +241,17 @@ function renderRobotSVG(robotCfg, overridePart = null, overrideShape = null, noB
     .replace(/\{\{PRI\}\}/g, hslStr(r.eyes.pri))
     .replace(/\{\{SEC\}\}/g, hslStr(r.eyes.sec));
 
-  return `<svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">${bgSvg}${sidesSvg}${topSvg}${faceSvg}${mouthSvg}${eyesSvg}</svg>`;
+  // 8. Accesorios / Navidad (capa frontal)
+  let accSvg = "";
+  const accKey = r.accessory ? r.accessory.shape : "none";
+  if (accKey && accKey !== "none" && lib.accessory && lib.accessory[accKey]) {
+    accSvg = lib.accessory[accKey]
+      .replace(/\{\{UID\}\}/g, uid)
+      .replace(/\{\{PRI\}\}/g, hslStr(r.accessory.pri))
+      .replace(/\{\{SEC\}\}/g, hslStr(r.accessory.sec));
+  }
+
+  return `<svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">${bgSvg}${sidesSvg}${topSvg}${faceSvg}${mouthSvg}${eyesSvg}${accSvg}</svg>`;
 }
 
 // ----------------- Contador y Metadatos ----------------- //
@@ -263,6 +297,29 @@ const SUPABASE_ANON_KEY = "sb_publishable_kRulPNGJbnmw-Gj8FG_ljg_RWMFbzL2";
 
 let syncDebounceTimer = null;
 
+// Perfiles redundantes eliminados (conservando Otis, Alpaquiña y Shalom)
+const REMOVED_ATTENDEE_IDS = new Set([8, 11, 13]);
+const REMOVED_ATTENDEE_EMAILS = new Set([
+  "cplus.lat@gmail.com",
+  "aldo.amigo@posadachelem.com",
+  "andres.amigo@posadachelem.com"
+]);
+const REMOVED_ATTENDEE_NAMES = new Set(["beto", "aldo", "andrés", "andres"]);
+
+function filterRemovedAttendees(list) {
+  if (!Array.isArray(list)) return [];
+  return list.filter(u => {
+    if (!u) return false;
+    const idNum = Number(u.id);
+    const email = (u.email || "").trim().toLowerCase();
+    const name = (u.name || "").trim().toLowerCase();
+    if (REMOVED_ATTENDEE_IDS.has(idNum)) return false;
+    if (REMOVED_ATTENDEE_EMAILS.has(email)) return false;
+    if (REMOVED_ATTENDEE_NAMES.has(name)) return false;
+    return true;
+  });
+}
+
 async function syncFetchFromCloud() {
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/posada_sync?key=eq.global_state&select=data`, {
@@ -275,10 +332,15 @@ async function syncFetchFromCloud() {
     const rows = await res.json();
     if (rows && rows.length > 0 && rows[0].data) {
       const cloud = rows[0].data;
+      let needsCloudCleanup = false;
 
       // Fusionar lista de participantes conservando los datos más recientes
       if (Array.isArray(cloud.attendees) && cloud.attendees.length > 0) {
-        attendeesList = cloud.attendees.map(u => ({
+        const cleanedAttendees = filterRemovedAttendees(cloud.attendees);
+        if (cleanedAttendees.length !== cloud.attendees.length) {
+          needsCloudCleanup = true;
+        }
+        attendeesList = cleanedAttendees.map(u => ({
           ...u,
           attendance: u.attendance || (u.pinHash ? "seen" : "unanswered")
         }));
@@ -312,6 +374,9 @@ async function syncFetchFromCloud() {
       }
 
       renderAll();
+      if (needsCloudCleanup) {
+        syncPushToCloud();
+      }
     }
   } catch (err) {
     console.warn("Supabase fetch warning:", err);
@@ -354,12 +419,13 @@ function loadState() {
   const savedAttendees = localStorage.getItem("posada_attendees_v10");
   if (savedAttendees) {
     try {
-      const parsed = JSON.parse(savedAttendees);
+      const parsed = filterRemovedAttendees(JSON.parse(savedAttendees));
       if (Array.isArray(parsed) && parsed.length > 0) {
         attendeesList = parsed.map(u => ({
           ...u,
           attendance: u.attendance || (u.pinHash ? "seen" : "unanswered")
         }));
+        localStorage.setItem("posada_attendees_v10", JSON.stringify(attendeesList));
       } else {
         attendeesList = JSON.parse(JSON.stringify(DEFAULT_ATTENDEES));
       }
@@ -1041,10 +1107,10 @@ function renderSummaryPanel() {
 function getEditingRobot() {
   if (editingTarget === "pusio") {
     if (!pusioRobot) pusioRobot = JSON.parse(JSON.stringify(DEFAULT_PUSIO_ROBOT));
-    return pusioRobot;
+    return ensureRobotParts(pusioRobot);
   }
-  if (currentUser) return currentUser.robot;
-  return attendeesList[1].robot;
+  if (currentUser) return ensureRobotParts(currentUser.robot);
+  return ensureRobotParts(attendeesList[1].robot);
 }
 
 function initQuickSwatches() {
