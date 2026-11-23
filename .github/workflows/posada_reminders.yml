@@ -1,0 +1,35 @@
+name: Posada Chelem 2026 - Recordatorios cada 5 dias
+
+on:
+  schedule:
+    # Cada 5 días a las 10:00 AM hora de Mérida (UTC-6 = 16:00 UTC)
+    - cron: '0 16 */5 * *'
+  workflow_dispatch:
+    inputs:
+      test_email:
+        description: 'Correo único para prueba (déjalo vacío para enviar a todos)'
+        required: false
+        default: 'titorvc08@gmail.com'
+
+jobs:
+  send-reminders:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Enviar recordatorios de la Posada
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: |
+          if [ -n "${{ github.event.inputs.test_email }}" ]; then
+            python3 scripts/send_posada_reminders.py --test-email "${{ github.event.inputs.test_email }}"
+          else
+            python3 scripts/send_posada_reminders.py --send-all
+          fi
