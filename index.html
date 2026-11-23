@@ -8,7 +8,7 @@
   <link rel="apple-touch-icon" href="favicon.svg?v=1">
   <meta name="theme-color" content="#00A896">
 
-  <link rel="stylesheet" href="css/style.css?v=20261119_0727">
+  <link rel="stylesheet" href="css/style.css?v=20261123_0240">
 
   <meta property="og:title" content="El pusio 2026">
   <meta property="og:description" content="Organización colaborativa para la posada en Chelem.">
@@ -63,6 +63,9 @@
         <div class="cd-unit">Segundos</div>
       </div>
     </div>
+
+    <!-- CLIMA EN VIVO DE CHELEM (OPEN-METEO WEATHER + MARINE API) -->
+    <div id="chelemWeatherBar" class="chelem-weather-strip hidden" aria-live="polite"></div>
 
     <!-- BARRA DE PESTAÑAS MÓVIL MINIMALISTA (SOLO PANTALLAS PEQUEÑAS) -->
     <nav class="mobile-tabs-bar" aria-label="Navegación móvil de la posada">
@@ -143,6 +146,24 @@
               <span class="vip-chip-dot"></span>
               <span>Voto de oro de la noche</span>
             </div>
+          </div>
+        </div>
+
+        <!-- Ruta rápida Mérida -> Chelem (Google Maps & Waze) -->
+        <div class="route-quick-bar">
+          <div class="route-quick-meta">
+            <span class="route-quick-title">Ruta M&eacute;rida &rarr; Chelem</span>
+            <span class="route-quick-sub">~45 km &bull; 45 min</span>
+          </div>
+          <div class="route-quick-actions">
+            <a href="https://www.google.com/maps/dir/?api=1&amp;destination=21.2694,-89.7442&amp;travelmode=driving" target="_blank" rel="noopener noreferrer" class="route-nav-btn">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span>Maps</span>
+            </a>
+            <a href="https://waze.com/ul?ll=21.2694,-89.7442&amp;navigate=yes" target="_blank" rel="noopener noreferrer" class="route-nav-btn">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+              <span>Waze</span>
+            </a>
           </div>
         </div>
       </div>
@@ -487,17 +508,29 @@
   <div id="modalAuth" class="modal-overlay hidden">
     <div class="modal-box">
       <div class="modal-header">
-        <h3 class="modal-title">Acceso personal único</h3>
+        <h3 class="modal-title" id="authModalTitle">Iniciar sesión</h3>
         <button type="button" class="modal-close-btn" data-close="modalAuth" onclick="closeModal('modalAuth')" title="Cerrar">&times;</button>
       </div>
 
-      <div class="auth-security-note">
-        <strong>Identidad protegida:</strong> Para que nadie pueda entrar como alguien más, cada correo queda bloqueado con la clave o PIN secreto que tú elijas la primera vez que inicies sesión.
+      <div class="auth-security-note" id="authSecurityNote">
+        <strong>Acceso con Google:</strong> Inicia sesión con tu cuenta de Google para conservar siempre tu personaje y recibir recordatorios de tus participaciones cada 5 días en tu Google Calendar.
       </div>
+
+      <button type="button" id="btnGoogleLogin" class="btn-google-oauth" onclick="handleGoogleSignIn()">
+        <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        </svg>
+        <span>Continuar con Google</span>
+      </button>
+
+      <div class="auth-divider"><span>o con correo y contraseña</span></div>
 
       <form id="secureAuthForm">
         <div class="form-item">
-          <label for="authInputEmail">Tu correo electrónico (Gmail)</label>
+          <label for="authInputEmail">Tu correo electrónico</label>
           <input type="email" id="authInputEmail" class="form-ctrl" placeholder="tucorreo@gmail.com" required autocomplete="email">
         </div>
 
@@ -505,23 +538,20 @@
         <div id="claimMatchBanner" class="claim-match-banner" style="display:none;">
           <div class="claim-match-avatar" id="claimMatchAvatar"></div>
           <div class="claim-match-text">
-            <span class="claim-match-tag">Coincidencia detectada</span>
+            <span class="claim-match-tag">Tu personaje en la lista</span>
             <strong id="claimMatchName">¿Eres tú?</strong>
-            <p>Este personaje está en la lista. Puedes reclamarlo con tu correo real y ponerte un apodo.</p>
+            <p>Al iniciar sesión se vinculará automáticamente a este personaje sin crear una cuenta nueva.</p>
           </div>
-          <button type="button" id="btnClaimMatch" class="btn btn-pusio btn-sm">Reclamar</button>
+          <button type="button" id="btnClaimMatch" class="btn btn-pusio btn-sm">Soy yo</button>
         </div>
 
         <div class="form-item">
-          <label for="authInputName">Tu nombre o apodo personalizado (m&aacute;x. 11 letras)</label>
-          <input type="text" id="authInputName" class="form-ctrl" maxlength="11" placeholder="Ej. Tito, Daniel, Shory..." required>
-        </div>
-        <div class="form-item">
-          <label for="authInputPin">Tu PIN o clave secreta (mínimo 4 caracteres)</label>
-          <input type="password" id="authInputPin" class="form-ctrl" placeholder="Crea o ingresa tu clave secreta..." minlength="4" required>
+          <label for="authInputPin">Tu contraseña (mínimo 6 caracteres)</label>
+          <input type="password" id="authInputPin" class="form-ctrl" placeholder="Ingresa tu contraseña..." minlength="6" required autocomplete="current-password">
         </div>
         <div id="authErrorMsg" style="color:var(--berry); font-size:0.8rem; font-weight:700; margin-bottom:10px; display:none;"></div>
-        <button type="submit" class="btn btn-pusio" style="width:100%;">Verificar y entrar</button>
+        <div id="authSuccessMsg" class="auth-success-msg" style="display:none;"></div>
+        <button type="submit" id="btnAuthSubmit" class="btn btn-pusio" style="width:100%;">Iniciar sesión</button>
       </form>
     </div>
   </div>
@@ -764,7 +794,8 @@
 
   <div id="toastNotice" class="toast-notice">Guardado</div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/bottts_parts.js?v=20261119_0358"></script>
-  <script src="js/app.js?v=20261119_0729"></script>
+  <script src="js/app.js?v=20261123_0240"></script>
 </body>
 </html>

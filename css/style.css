@@ -6014,3 +6014,303 @@ body {
   font-size: 0.68rem;
   color: var(--ink-secondary);
 }
+
+/* ==========================================================================
+   SUPABASE AUTH, GOOGLE CALENDAR, CLIMA CHELEM & COMPARTIR
+   ========================================================================== */
+.auth-success-msg {
+  background: var(--teal-tint);
+  color: var(--teal-accent);
+  border: 1px solid rgba(0, 143, 122, 0.25);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.btn-logout-subtle {
+  margin-top: 8px;
+  width: 100%;
+  background: transparent;
+  color: var(--coral-accent);
+  border: 1px solid rgba(222, 85, 66, 0.35);
+}
+
+.btn-logout-subtle:hover {
+  background: var(--coral-tint);
+  border-color: var(--coral-accent);
+}
+
+/* Google OAuth Button & Divider */
+.btn-google-oauth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 16px;
+  background: var(--bg-card);
+  color: var(--ink);
+  border: 1px solid var(--border-hover);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  margin-bottom: 14px;
+}
+
+.btn-google-oauth:hover {
+  background: var(--bg-subtle);
+  border-color: var(--border-strong);
+  box-shadow: 0 2px 6px rgba(17, 18, 20, 0.06);
+}
+
+.btn-google-oauth:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 14px;
+  color: var(--ink-muted);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Clima en vivo de Chelem (Open-Meteo Weather + Marine) */
+.chelem-weather-strip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin: 14px auto 0;
+  padding: 8px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  color: var(--ink-secondary);
+  box-shadow: 0 1px 4px rgba(17, 18, 20, 0.04);
+}
+
+.chelem-weather-strip.hidden {
+  display: none;
+}
+
+.weather-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.weather-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--teal-accent);
+  box-shadow: 0 0 0 3px var(--teal-tint);
+}
+
+.weather-sep {
+  width: 1px;
+  height: 12px;
+  background: var(--border-hover);
+}
+
+.weather-metric {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.weather-metric strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* Ruta rápida Mérida -> Chelem (Maps & Waze) */
+.route-quick-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.route-quick-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.route-quick-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.route-quick-sub {
+  font-size: 0.72rem;
+  color: var(--ink-secondary);
+}
+
+.route-quick-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.route-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-hover);
+  color: var(--ink);
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.route-nav-btn:hover {
+  background: var(--teal-tint);
+  border-color: var(--teal-accent);
+  color: var(--teal-accent);
+}
+
+/* Integraciones en Mi Resumen (Google Calendar + .ics + WhatsApp) */
+.summary-integrations-box {
+  width: 100%;
+  padding: 12px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summary-integrations-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.summary-integrations-title {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-secondary);
+}
+
+.cal-status-pill {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--bg-card);
+  color: var(--ink-secondary);
+  border: 1px solid var(--border);
+}
+
+.cal-status-pill.is-synced {
+  background: var(--teal-tint);
+  color: var(--teal-accent);
+  border-color: rgba(0, 143, 122, 0.28);
+}
+
+.summary-integrations-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.btn-cal-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--teal-accent);
+  background: var(--teal-tint);
+  color: var(--teal-accent);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.btn-cal-primary:hover {
+  background: var(--teal-accent);
+  color: #ffffff;
+}
+
+.btn-cal-primary:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.btn-integration-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-hover);
+  background: var(--bg-card);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-integration-secondary:hover {
+  background: var(--bg-subtle);
+  border-color: var(--border-strong);
+}
+
+.btn-whatsapp-share {
+  border-color: rgba(37, 211, 102, 0.4);
+  color: #15803d;
+}
+
+.btn-whatsapp-share:hover {
+  background: rgba(37, 211, 102, 0.1);
+  border-color: #16a34a;
+}

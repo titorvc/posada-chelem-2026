@@ -77,7 +77,7 @@ const DEFAULT_ATTENDEES = [
   { id: 10, name: "César",     email: "cesar.amigo@posadachelem.com",   pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(140, 2, 8,  6, 3, 2, 1) },
   { id: 12, name: "Noé",       email: "noe.amigo@posadachelem.com",     pinHash: null, attendance: "pending", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(45,  1, 10, 2, 5, 0, 2) },
   { id: 1795018647356, name: "Otis",      email: "alberto34188@gmail.com",         pinHash: null, attendance: "seen", travelMode: "driver", puedo_dar_coche: 1, robot: createBotConfig(150, 0, 1, 0, 3, 2, 0) },
-  { id: 1795019785482, name: "Shalom",    email: "ayorasuasteandresmiguel@gmai.com",pinHash: null, attendance: "confirmed", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(51, 1, 3, 2, 1, 0, 0) },
+  { id: 1795137186754, name: "Shalom",    email: "ayorasuasteandresmiguel@gmail.com",pinHash: null, attendance: "seen", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(51, 1, 3, 2, 1, 0, 0) },
   { id: 1795022352684, name: "Alpaquiña", email: "aldopantoja2002@gmail.com",       pinHash: null, attendance: "seen", travelMode: null, puedo_dar_coche: 0, robot: createBotConfig(166, 0, 1, 0, 3, 2, 0) }
 ];
 
@@ -184,6 +184,8 @@ document.addEventListener("DOMContentLoaded", () => {
   setupEventListeners();
   setupModernHueWheel();
   setupMobileTabs();
+  initSupabaseAuth();
+  initChelemWeather();
 });
 
 function hslStr(c) {
@@ -352,9 +354,630 @@ function initCountdown() {
   setInterval(update, 1000);
 }
 
-// ----------------- Estado Local & Nube (Supabase Sync) ----------------- //
+// ----------------- Estado Local & Nube (Supabase Sync + Auth) ----------------- //
 const SUPABASE_URL = "https://zrxingfpnczypophqbai.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_kRulPNGJbnmw-Gj8FG_ljg_RWMFbzL2";
+
+const supabaseClient = (window.supabase && typeof window.supabase.createClient === "function")
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    })
+  : null;
+
+let supabaseAuthUser = null;
+let googleProviderToken = null;
+let calendarSyncInFlight = false;
+
+function getGoogleCalendarToken() {
+  if (googleProviderToken) return googleProviderToken;
+  try {
+    const cached = sessionStorage.getItem("posada_google_calendar_token");
+    if (cached) {
+      googleProviderToken = cached;
+      return cached;
+    }
+  } catch (e) {}
+  return null;
+}
+
+function getCalendarSyncMeta() {
+  try {
+    const raw = localStorage.getItem("posada_gcal_sync_meta_v1");
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function saveCalendarSyncMeta(meta) {
+  try {
+    localStorage.setItem("posada_gcal_sync_meta_v1", JSON.stringify(meta));
+  } catch (e) {}
+}
+
+function buildUserSummaryData(user) {
+  if (!user) return null;
+  const emailLow = (user.email || "").toLowerCase();
+  const driverCar = (carsList || []).find(c => (c.driverEmail || "").toLowerCase() === emailLow);
+  const passengerCar = (carsList || []).find(c =>
+    Array.isArray(c.passengers) && c.passengers.some(p => (p.email || "").toLowerCase() === emailLow)
+  );
+  let transport = "Sin auto asignado todavía";
+  if (driverCar) {
+    transport = `Conductor de ${driverCar.model} (${(driverCar.passengers || []).length}/${driverCar.seats} ocupados)`;
+  } else if (passengerCar) {
+    transport = `Pasajero en auto de ${passengerCar.driver} (${passengerCar.model})`;
+  }
+
+  const items = [];
+  let myTotal = 0;
+
+  (collaborations || []).forEach(c => {
+    (c.items || []).forEach(it => {
+      const claimers = getItemClaimers(it);
+      if (claimers.some(cl => (cl.email || "").toLowerCase() === emailLow)) {
+        const shareCount = Math.max(1, claimers.length);
+        const myCost = Math.round(estimateTotalCostMXNFor13(it.name) / shareCount);
+        myTotal += myCost;
+        const others = claimers.filter(cl => (cl.email || "").toLowerCase() !== emailLow).map(cl => cl.name);
+        const qtyHint = estimateConsumableFor13(it.name);
+        items.push({
+          name: it.name,
+          context: c.title,
+          qtyHint,
+          others,
+          myCost
+        });
+      }
+    });
+  });
+
+  (additionalsList || []).forEach(addItem => {
+    const claimers = getItemClaimers(addItem);
+    if (claimers.some(cl => (cl.email || "").toLowerCase() === emailLow)) {
+      const shareCount = Math.max(1, claimers.length);
+      const divisor = Math.max(shareCount, Math.max(1, Number(addItem.targetQty) || 1));
+      const myCost = Math.round(estimateTotalCostMXNFor13(addItem.name) / divisor);
+      myTotal += myCost;
+      const others = claimers.filter(cl => (cl.email || "").toLowerCase() !== emailLow).map(cl => cl.name);
+      items.push({
+        name: addItem.name,
+        context: "Adicionales y básicos",
+        qtyHint: addItem.qtyHint || "",
+        others,
+        myCost
+      });
+    }
+  });
+
+  return { transport, items, myTotal };
+}
+
+function buildUserSummaryPlainText(user) {
+  const data = buildUserSummaryData(user);
+  if (!data) return "";
+  const attMap = {
+    confirmed: "Confirmado",
+    seen: "Visto",
+    pending: "Pendiente",
+    declined: "No voy"
+  };
+  const attLabel = attMap[user.attendance] || "Pendiente";
+  const lines = [
+    `Posada Chelem 2026 — Resumen de ${user.name}`,
+    `Fecha: Sábado 19 de diciembre 2026 (Casa de Reyvell, Chelem)`,
+    `Asistencia: ${attLabel}`,
+    `Transporte: ${data.transport}`,
+    `Recordatorio obligatorio: Llevar YETI (no habrá vasos desechables)`,
+    ""
+  ];
+  if (data.items.length > 0) {
+    lines.push(`Mis aportes (${data.items.length}) — Estimado: ~$${data.myTotal} MXN:`);
+    data.items.forEach(it => {
+      const shared = it.others.length > 0 ? ` [compartido con ${it.others.join(", ")}]` : "";
+      const qty = it.qtyHint ? ` (${it.qtyHint})` : "";
+      lines.push(`- ${it.name}${qty}${shared} (~$${it.myCost} MXN)`);
+    });
+  } else {
+    lines.push("Aportes: Todavía sin insumos apartados. Entra al tablero para elegir uno.");
+  }
+  lines.push("");
+  lines.push("Tablero en vivo: https://titorvc.github.io/posada-chelem-2026/");
+  return lines.join("\n");
+}
+
+async function upsertGoogleCalendarEvent(token, posadaKey, eventBody) {
+  const baseUrl = "https://www.googleapis.com/calendar/v3/calendars/primary/events";
+  const queryUrl = `${baseUrl}?privateExtendedProperty=${encodeURIComponent(`posadaKey=${posadaKey}`)}&maxResults=5`;
+  const listRes = await fetch(queryUrl, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (listRes.status === 401) {
+    const err = new Error("TOKEN_EXPIRED");
+    err.code = 401;
+    throw err;
+  }
+  let existingId = null;
+  if (listRes.ok) {
+    const listJson = await listRes.json();
+    const active = (listJson.items || []).find(ev => ev.status !== "cancelled");
+    if (active) existingId = active.id;
+  }
+
+  const targetUrl = existingId ? `${baseUrl}/${encodeURIComponent(existingId)}` : baseUrl;
+  const method = existingId ? "PATCH" : "POST";
+  const writeRes = await fetch(targetUrl, {
+    method,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(eventBody)
+  });
+  if (writeRes.status === 401) {
+    const err = new Error("TOKEN_EXPIRED");
+    err.code = 401;
+    throw err;
+  }
+  if (!writeRes.ok) {
+    const errText = await writeRes.text().catch(() => "");
+    throw new Error(`Calendar API HTTP ${writeRes.status}: ${errText.slice(0, 140)}`);
+  }
+  return writeRes.json();
+}
+
+async function syncPosadaToGoogleCalendar({ silent = false } = {}) {
+  if (calendarSyncInFlight) return false;
+  if (!currentUser) {
+    if (!silent) openModal("modalAuth");
+    return false;
+  }
+
+  const token = getGoogleCalendarToken();
+  if (!token) {
+    if (!silent) {
+      showToast("Conecta tu cuenta de Google para activar recordatorios en Calendar.");
+      handleGoogleSignIn();
+    }
+    return false;
+  }
+
+  calendarSyncInFlight = true;
+  const btn = document.getElementById("btnSyncGoogleCalendar");
+  const prevText = btn ? btn.textContent : "";
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "Sincronizando con Google Calendar...";
+  }
+
+  try {
+    const description = buildUserSummaryPlainText(currentUser);
+    const tz = "America/Merida";
+
+    // 1. Evento principal de la Posada (Sábado 19 Dic 2026 14:00 -> Domingo 20 Dic 2026 14:00)
+    const mainEvent = {
+      summary: "Posada Chelem 2026 — Casa de Reyvell",
+      location: "Chelem, Yucatán, México",
+      description,
+      start: { dateTime: "2026-12-19T14:00:00-06:00", timeZone: tz },
+      end: { dateTime: "2026-12-20T14:00:00-06:00", timeZone: tz },
+      reminders: {
+        useDefault: false,
+        overrides: [
+          { method: "popup", minutes: 1440 },
+          { method: "popup", minutes: 120 }
+        ]
+      },
+      extendedProperties: {
+        private: { posadaKey: "posada_chelem_2026_main" }
+      }
+    };
+    await upsertGoogleCalendarEvent(token, "posada_chelem_2026_main", mainEvent);
+
+    // 2. Recordatorio recurrente cada 5 días hasta la fecha de la Posada
+    const now = new Date();
+    const posadaCutoff = new Date("2026-12-19T00:00:00-06:00");
+    if (now < posadaCutoff) {
+      const firstRem = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      const yyyy = firstRem.getFullYear();
+      const mm = String(firstRem.getMonth() + 1).padStart(2, "0");
+      const dd = String(firstRem.getDate()).padStart(2, "0");
+      const reminderEvent = {
+        summary: "Recordatorio Posada Chelem — Tus aportes",
+        location: "https://titorvc.github.io/posada-chelem-2026/",
+        description,
+        start: { dateTime: `${yyyy}-${mm}-${dd}T10:00:00-06:00`, timeZone: tz },
+        end: { dateTime: `${yyyy}-${mm}-${dd}T10:30:00-06:00`, timeZone: tz },
+        recurrence: ["RRULE:FREQ=DAILY;INTERVAL=5;UNTIL=20261219T055959Z"],
+        reminders: {
+          useDefault: false,
+          overrides: [
+            { method: "popup", minutes: 30 }
+          ]
+        },
+        extendedProperties: {
+          private: { posadaKey: "posada_chelem_2026_reminder" }
+        }
+      };
+      await upsertGoogleCalendarEvent(token, "posada_chelem_2026_reminder", reminderEvent);
+    }
+
+    saveCalendarSyncMeta({
+      email: currentUser.email,
+      syncedAt: Date.now()
+    });
+    if (!silent) {
+      showToast("Google Calendar actualizado: evento + recordatorio cada 5 días.");
+    }
+    renderMySummary();
+    return true;
+  } catch (err) {
+    console.warn("Google Calendar sync error:", err);
+    if (err && err.code === 401) {
+      googleProviderToken = null;
+      try { sessionStorage.removeItem("posada_google_calendar_token"); } catch (e) {}
+      if (!silent) {
+        showToast("Tu sesión de Google Calendar expiró. Vuelve a conectar con Google.");
+      }
+      renderMySummary();
+    } else if (!silent) {
+      showToast("No se pudo sincronizar Google Calendar. Puedes descargar el archivo .ics.");
+    }
+    return false;
+  } finally {
+    calendarSyncInFlight = false;
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = prevText || "Sincronizar Google Calendar";
+    }
+  }
+}
+
+function downloadPosadaICS() {
+  if (!currentUser) {
+    openModal("modalAuth");
+    return;
+  }
+  const desc = buildUserSummaryPlainText(currentUser).replace(/\n/g, "\\n");
+  const nowStamp = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+  const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  const y = tomorrow.getFullYear();
+  const m = String(tomorrow.getMonth() + 1).padStart(2, "0");
+  const d = String(tomorrow.getDate()).padStart(2, "0");
+
+  const ics = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Posada Chelem 2026//El Pusio//ES",
+    "CALSCALE:GREGORIAN",
+    "BEGIN:VEVENT",
+    "UID:posada-chelem-2026-main@pusio",
+    `DTSTAMP:${nowStamp}`,
+    "DTSTART:20261219T200000Z",
+    "DTEND:20261220T200000Z",
+    "SUMMARY:Posada Chelem 2026 — Casa de Reyvell",
+    "LOCATION:Chelem\\, Yucatán\\, México",
+    `DESCRIPTION:${desc}`,
+    "END:VEVENT",
+    "BEGIN:VEVENT",
+    "UID:posada-chelem-2026-reminder@pusio",
+    `DTSTAMP:${nowStamp}`,
+    `DTSTART:${y}${m}${d}T160000Z`,
+    `DTEND:${y}${m}${d}T163000Z`,
+    "RRULE:FREQ=DAILY;INTERVAL=5;UNTIL=20261219T055959Z",
+    "SUMMARY:Recordatorio Posada Chelem — Tus aportes",
+    `DESCRIPTION:${desc}`,
+    "END:VEVENT",
+    "END:VCALENDAR"
+  ].join("\r\n");
+
+  const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "posada-chelem-2026.ics";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast("Archivo posada-chelem-2026.ics descargado.");
+}
+
+async function shareMySummaryWhatsApp() {
+  if (!currentUser) {
+    openModal("modalAuth");
+    return;
+  }
+  const text = buildUserSummaryPlainText(currentUser);
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+  window.open(waUrl, "_blank", "noopener,noreferrer");
+}
+
+function wmoWeatherLabel(code) {
+  const map = {
+    0: "Despejado",
+    1: "Mayormente despejado",
+    2: "Parcialmente nublado",
+    3: "Nublado",
+    45: "Neblina",
+    48: "Neblina densa",
+    51: "Llovizna ligera",
+    53: "Llovizna",
+    55: "Llovizna fuerte",
+    61: "Lluvia ligera",
+    63: "Lluvia moderada",
+    65: "Lluvia fuerte",
+    80: "Chubascos ligeros",
+    81: "Chubascos",
+    82: "Chubascos fuertes",
+    95: "Tormenta eléctrica"
+  };
+  return map[code] || "Clima costero";
+}
+
+function renderChelemWeatherStrip(payload) {
+  const bar = document.getElementById("chelemWeatherBar");
+  if (!bar || !payload) return;
+
+  const tempStr = typeof payload.temp === "number" ? `${Math.round(payload.temp)}°C` : "--";
+  const condStr = payload.condition || "Clima costero";
+  const windStr = typeof payload.wind === "number" ? `${Math.round(payload.wind)} km/h` : null;
+  const rainStr = typeof payload.rainProb === "number" ? `${Math.round(payload.rainProb)}%` : null;
+  const sunsetStr = payload.sunset || null;
+  const waveStr = typeof payload.wave === "number" ? `${payload.wave.toFixed(1)} m` : null;
+
+  const parts = [
+    `<span class="weather-live-badge"><span class="weather-live-dot"></span>Chelem hoy: ${tempStr} &bull; ${condStr}</span>`
+  ];
+  if (windStr) parts.push(`<span class="weather-sep"></span><span class="weather-metric">Viento <strong>${windStr}</strong></span>`);
+  if (waveStr) parts.push(`<span class="weather-sep"></span><span class="weather-metric">Oleaje <strong>${waveStr}</strong></span>`);
+  if (rainStr) parts.push(`<span class="weather-sep"></span><span class="weather-metric">Lluvia <strong>${rainStr}</strong></span>`);
+  if (sunsetStr) parts.push(`<span class="weather-sep"></span><span class="weather-metric">Atardecer <strong>${sunsetStr}</strong></span>`);
+
+  bar.innerHTML = parts.join("");
+  bar.classList.remove("hidden");
+}
+
+async function initChelemWeather() {
+  const CACHE_KEY = "posada_chelem_weather_v1";
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY);
+    if (raw) {
+      const cached = JSON.parse(raw);
+      if (cached && cached.ts && Date.now() - cached.ts < 30 * 60 * 1000 && cached.data) {
+        renderChelemWeatherStrip(cached.data);
+        return;
+      }
+    }
+  } catch (e) {}
+
+  const weatherUrl =
+    "https://api.open-meteo.com/v1/forecast?latitude=21.2694&longitude=-89.7442" +
+    "&current=temperature_2m,weather_code,wind_speed_10m" +
+    "&daily=precipitation_probability_max,sunset&timezone=America%2FMerida&forecast_days=1";
+  const marineUrl =
+    "https://marine-api.open-meteo.com/v1/marine?latitude=21.2694&longitude=-89.7442" +
+    "&current=wave_height&timezone=America%2FMerida";
+
+  try {
+    const [wRes, mRes] = await Promise.allSettled([
+      fetch(weatherUrl).then(r => (r.ok ? r.json() : null)),
+      fetch(marineUrl).then(r => (r.ok ? r.json() : null))
+    ]);
+
+    const wData = wRes.status === "fulfilled" ? wRes.value : null;
+    const mData = mRes.status === "fulfilled" ? mRes.value : null;
+    if (!wData || !wData.current) return;
+
+    const sunsetRaw = wData.daily && Array.isArray(wData.daily.sunset) ? wData.daily.sunset[0] : "";
+    const sunsetTime = sunsetRaw && sunsetRaw.includes("T") ? sunsetRaw.split("T")[1].slice(0, 5) : null;
+    const rainProb = wData.daily && Array.isArray(wData.daily.precipitation_probability_max)
+      ? wData.daily.precipitation_probability_max[0]
+      : null;
+
+    const payload = {
+      temp: wData.current.temperature_2m,
+      condition: wmoWeatherLabel(wData.current.weather_code),
+      wind: wData.current.wind_speed_10m,
+      rainProb,
+      sunset: sunsetTime,
+      wave: mData && mData.current ? mData.current.wave_height : null
+    };
+
+    try {
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: payload }));
+    } catch (e) {}
+    renderChelemWeatherStrip(payload);
+  } catch (err) {
+    console.warn("Open-Meteo weather fetch warning:", err);
+  }
+}
+
+async function handleGoogleSignIn() {
+  const errEl = document.getElementById("authErrorMsg");
+  const googleBtn = document.getElementById("btnGoogleLogin");
+  if (errEl) errEl.style.display = "none";
+
+  if (!supabaseClient) {
+    if (errEl) {
+      errEl.textContent = "No se pudo inicializar Supabase Auth. Recarga la página.";
+      errEl.style.display = "block";
+    }
+    return;
+  }
+
+  if (googleBtn) googleBtn.disabled = true;
+  try {
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin + window.location.pathname,
+        scopes: "https://www.googleapis.com/auth/calendar.events",
+        queryParams: {
+          access_type: "offline",
+          prompt: "consent"
+        }
+      }
+    });
+    if (error) {
+      if (errEl) {
+        errEl.textContent = error.message || "No se pudo iniciar sesión con Google.";
+        errEl.style.display = "block";
+      }
+      if (googleBtn) googleBtn.disabled = false;
+    }
+  } catch (err) {
+    if (errEl) {
+      errEl.textContent = "Error al conectar con Google OAuth.";
+      errEl.style.display = "block";
+    }
+    if (googleBtn) googleBtn.disabled = false;
+  }
+}
+
+function linkSupabaseUserToAttendee(authUser, preferredName = "", allowCreate = true) {
+  if (!authUser || !authUser.email) return null;
+  const emailVal = authUser.email.trim().toLowerCase();
+  const authId = authUser.id;
+  const metaName = normalizeAttendeeName(
+    preferredName ||
+    (authUser.user_metadata && (authUser.user_metadata.name || authUser.user_metadata.full_name)) ||
+    ""
+  );
+
+  // 1. Coincidencia exacta por Supabase Auth UUID (conserva la cuenta siempre)
+  let existing = attendeesList.find(u => u.authUserId && u.authUserId === authId);
+
+  // 2. Coincidencia exacta por correo (migra cuentas previas sin duplicar)
+  if (!existing) {
+    existing = attendeesList.find(u => u.email && u.email.toLowerCase() === emailVal);
+  }
+
+  // 3. Reclamo explícito o coincidencia inteligente con personaje pre-cargado
+  if (!existing && pendingClaimedMatch) {
+    existing = pendingClaimedMatch;
+    pendingClaimedMatch = null;
+  }
+  if (!existing) {
+    existing = findPotentialMatch(emailVal, metaName);
+  }
+
+  if (existing) {
+    let mutated = false;
+    if (existing.authUserId !== authId) {
+      existing.authUserId = authId;
+      mutated = true;
+    }
+    if (!existing.email || existing.email.toLowerCase() !== emailVal) {
+      existing.email = emailVal;
+      mutated = true;
+    }
+    if (!existing.attendance || (!existing.attendanceSetByUser && existing.attendance !== "confirmed" && existing.attendance !== "declined")) {
+      existing.attendance = "seen";
+      mutated = true;
+    }
+    currentUser = existing;
+    setSavedSessionEmail(existing.email);
+    if (mutated) saveState(true);
+    return existing;
+  }
+
+  if (!allowCreate) return null;
+
+  // 4. Solo si realmente no existe ningún perfil previo, crear uno nuevo vinculado al authUserId
+  const fallbackName = metaName || normalizeAttendeeName(emailVal.split("@")[0]) || "Invitado";
+  const rndHue = Math.floor(Math.random() * 360);
+  const newUser = {
+    id: Date.now(),
+    authUserId: authId,
+    name: fallbackName,
+    email: emailVal,
+    attendance: "seen",
+    attendanceSetByUser: false,
+    travelMode: null,
+    puedo_dar_coche: 0,
+    robot: createBotConfig(rndHue, 0, 0, 0, 0, 0)
+  };
+  attendeesList.push(newUser);
+  currentUser = newUser;
+  setSavedSessionEmail(newUser.email);
+  saveState(true);
+  return newUser;
+}
+
+async function initSupabaseAuth() {
+  if (!supabaseClient) return;
+  try {
+    const { data, error } = await supabaseClient.auth.getSession();
+    if (!error && data && data.session && data.session.user) {
+      supabaseAuthUser = data.session.user;
+      if (data.session.provider_token) {
+        googleProviderToken = data.session.provider_token;
+        try { sessionStorage.setItem("posada_google_calendar_token", googleProviderToken); } catch (e) {}
+      }
+      await syncFetchFromCloud();
+      const pendingName = localStorage.getItem("posada_pending_signup_name") || "";
+      linkSupabaseUserToAttendee(supabaseAuthUser, pendingName, true);
+      if (pendingName) localStorage.removeItem("posada_pending_signup_name");
+      renderAll();
+    }
+  } catch (err) {
+    console.warn("Supabase Auth getSession error:", err);
+  }
+
+  supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    if (session && session.user) {
+      supabaseAuthUser = session.user;
+      if (session.provider_token) {
+        googleProviderToken = session.provider_token;
+        try { sessionStorage.setItem("posada_google_calendar_token", googleProviderToken); } catch (e) {}
+      }
+      if (event === "SIGNED_IN") {
+        await syncFetchFromCloud();
+        const pendingName = localStorage.getItem("posada_pending_signup_name") || "";
+        linkSupabaseUserToAttendee(supabaseAuthUser, pendingName, true);
+        if (pendingName) localStorage.removeItem("posada_pending_signup_name");
+        renderAll();
+        if (session.provider_token && currentUser) {
+          const alreadyAutoSynced = sessionStorage.getItem("posada_gcal_autosynced") === "1";
+          if (!alreadyAutoSynced) {
+            try { sessionStorage.setItem("posada_gcal_autosynced", "1"); } catch (e) {}
+            syncPosadaToGoogleCalendar({ silent: true });
+          }
+        }
+      }
+    } else if (event === "SIGNED_OUT") {
+      supabaseAuthUser = null;
+      googleProviderToken = null;
+      currentUser = null;
+      try { sessionStorage.removeItem("posada_google_calendar_token"); } catch (e) {}
+      setSavedSessionEmail("");
+      renderAll();
+    }
+  });
+}
+
+async function handleSignOut() {
+  if (supabaseClient) {
+    try {
+      await supabaseClient.auth.signOut();
+    } catch (err) {
+      console.warn("Supabase signOut error:", err);
+    }
+  }
+  supabaseAuthUser = null;
+  googleProviderToken = null;
+  currentUser = null;
+  try { sessionStorage.removeItem("posada_google_calendar_token"); } catch (e) {}
+  setSavedSessionEmail("");
+  closeModal("modalUserSummary");
+  renderAll();
+  showToast("Sesión cerrada");
+}
 
 let syncDebounceTimer = null;
 let lastLocalMutationAt = 0;
@@ -388,11 +1011,12 @@ function setSavedSessionEmail(email) {
 }
 
 // Perfiles redundantes eliminados (conservando Otis, Alpaquiña y Shalom)
-const REMOVED_ATTENDEE_IDS = new Set([8, 11, 13]);
+const REMOVED_ATTENDEE_IDS = new Set([8, 11, 13, 1795019785482]);
 const REMOVED_ATTENDEE_EMAILS = new Set([
   "cplus.lat@gmail.com",
   "aldo.amigo@posadachelem.com",
-  "andres.amigo@posadachelem.com"
+  "andres.amigo@posadachelem.com",
+  "ayorasuasteandresmiguel@gmai.com"
 ]);
 const REMOVED_ATTENDEE_NAMES = new Set(["beto", "aldo", "andrés", "andres"]);
 
@@ -545,10 +1169,18 @@ async function syncFetchFromCloud() {
         localStorage.setItem("posada_pusio_contest_v10", JSON.stringify(pusioContest));
       }
 
-      // Re-vincular sesión activa del usuario local (localStorage o cookie)
-      const savedEmail = getSavedSessionEmail();
-      if (savedEmail) {
-        currentUser = attendeesList.find(u => u.email.toLowerCase() === savedEmail.toLowerCase()) || currentUser;
+      // Re-vincular sesión activa del usuario local (prioridad: Supabase Auth UUID -> correo guardado)
+      if (supabaseAuthUser && supabaseAuthUser.id) {
+        const byAuthId = attendeesList.find(u => u.authUserId === supabaseAuthUser.id);
+        const byEmail = supabaseAuthUser.email
+          ? attendeesList.find(u => u.email && u.email.toLowerCase() === supabaseAuthUser.email.toLowerCase())
+          : null;
+        currentUser = byAuthId || byEmail || currentUser;
+      } else {
+        const savedEmail = getSavedSessionEmail();
+        if (savedEmail) {
+          currentUser = attendeesList.find(u => u.email && u.email.toLowerCase() === savedEmail.toLowerCase()) || currentUser;
+        }
       }
 
       if (stripAdditionalsFromCollabs()) {
@@ -977,6 +1609,41 @@ function renderMySummary() {
         <!-- Checklist explícito de qué lleva / hace -->
         ${myItemsListHtml}
 
+        <!-- Integraciones: Google Calendar (cada 5 días), .ics y WhatsApp -->
+        ${(() => {
+          const hasGcalToken = Boolean(getGoogleCalendarToken());
+          const syncMeta = getCalendarSyncMeta();
+          const isSyncedForUser = syncMeta && syncMeta.email && syncMeta.email.toLowerCase() === (currentUser.email || "").toLowerCase();
+          const statusLabel = isSyncedForUser
+            ? `Sincronizado (${new Date(syncMeta.syncedAt).toLocaleDateString("es-MX", { day: "2-digit", month: "short" })})`
+            : (hasGcalToken ? "Google listo" : "Sin conectar");
+          const calBtnLabel = hasGcalToken
+            ? "Actualizar recordatorios cada 5 días (Google Calendar)"
+            : "Conectar Google Calendar (recordatorios cada 5 días)";
+          return `
+            <div class="summary-integrations-box">
+              <div class="summary-integrations-head">
+                <span class="summary-integrations-title">Calendario y compartir</span>
+                <span class="cal-status-pill ${isSyncedForUser ? "is-synced" : ""}">${statusLabel}</span>
+              </div>
+              <button type="button" id="btnSyncGoogleCalendar" class="btn-cal-primary" onclick="syncPosadaToGoogleCalendar({ silent: false })">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span>${calBtnLabel}</span>
+              </button>
+              <div class="summary-integrations-row">
+                <button type="button" class="btn-integration-secondary" onclick="downloadPosadaICS()">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  <span>Descargar .ics</span>
+                </button>
+                <button type="button" class="btn-integration-secondary btn-whatsapp-share" onclick="shareMySummaryWhatsApp()">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                  <span>Enviar a WhatsApp</span>
+                </button>
+              </div>
+            </div>
+          `;
+        })()}
+
         <!-- Acciones rápidas de confirmación -->
         <div class="my-summary-action-col" style="width:100%;">
           <span class="my-summary-action-title">Cambiar tu asistencia:</span>
@@ -988,6 +1655,9 @@ function renderMySummary() {
           </div>
           <button type="button" class="btn btn-secondary btn-sm" style="margin-top:8px; width:100%;" onclick="closeModal('modalUserSummary'); selectUserForCustomization(${currentUser.id})">
             Personalizar mi personaje
+          </button>
+          <button type="button" class="btn btn-sm btn-logout-subtle" onclick="handleSignOut()">
+            Cerrar sesión
           </button>
         </div>
       </div>
@@ -1335,30 +2005,6 @@ function renderSummaryPanel() {
       avatarsGrid.appendChild(btn);
     });
 
-    // Botón para sumar nuevo participante a la lista
-    const addToken = document.createElement("button");
-    addToken.type = "button";
-    addToken.className = "avatar-token avatar-token-add";
-    addToken.title = "No votaste en la encuesta o eres nuevo? Haz clic para unirte a la posada.";
-    addToken.onclick = () => {
-      document.getElementById("authErrorMsg").style.display = "none";
-      document.getElementById("authInputEmail").value = "";
-      document.getElementById("authInputName").value = "";
-      document.getElementById("authInputPin").value = "";
-      openModal("modalAuth");
-      showToast("Ingresa tu correo, nombre y un PIN de 4 dígitos para sumarte.");
-    };
-    addToken.innerHTML = `
-      <div class="avatar-svg-wrap avatar-add-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-      </div>
-      <span class="avatar-token-name">+ Unirme</span>
-      <span class="avatar-token-status">Nuevo</span>
-    `;
-    avatarsGrid.appendChild(addToken);
   }
 
   // 2. Lado central: 5 siluetas de vehículos y medidor de capacidad para 13 participantes
@@ -3265,10 +3911,10 @@ function checkAuthDeduplication() {
   const bannerAvatar = document.getElementById("claimMatchAvatar");
   const bannerName = document.getElementById("claimMatchName");
 
-  if (!emailInput || !nameInput || !banner) return;
+  if (!emailInput || !banner) return;
 
   const emailVal = emailInput.value.trim().toLowerCase();
-  const nameVal = nameInput.value.trim();
+  const nameVal = nameInput ? nameInput.value.trim() : "";
 
   // Si el correo ya pertenece exactamente a un usuario existente, no mostramos banner de "reclamar"
   const exact = attendeesList.find(u => u.email.toLowerCase() === emailVal);
@@ -3572,27 +4218,26 @@ function setupEventListeners() {
       openModal("modalUserSummary");
       return;
     }
-    document.getElementById("authErrorMsg").style.display = "none";
+    const errEl = document.getElementById("authErrorMsg");
+    const okEl = document.getElementById("authSuccessMsg");
+    if (errEl) errEl.style.display = "none";
+    if (okEl) okEl.style.display = "none";
     checkAuthDeduplication();
     openModal("modalAuth");
   };
 
-  // Escuchar tipeo en email y nombre para detectar coincidencias al instante
+  // Escuchar tipeo en email para detectar coincidencias con personajes existentes
   const emailInput = document.getElementById("authInputEmail");
-  const nameInput = document.getElementById("authInputName");
   if (emailInput) emailInput.addEventListener("input", checkAuthDeduplication);
-  if (nameInput) nameInput.addEventListener("input", checkAuthDeduplication);
 
-  // Botón para reclamar personaje coincidente
+  // Botón para confirmar personaje coincidente
   const btnClaim = document.getElementById("btnClaimMatch");
   if (btnClaim) {
     btnClaim.onclick = () => {
       if (pendingClaimedMatch) {
-        if (!nameInput.value.trim()) {
-          nameInput.value = pendingClaimedMatch.name;
-        }
-        showToast(`Personaje vinculado: ${pendingClaimedMatch.name}. Elige tu apodo y PIN.`);
-        nameInput.focus();
+        showToast(`Personaje seleccionado: ${pendingClaimedMatch.name}. Ingresa tu contraseña para entrar.`);
+        const pinInput = document.getElementById("authInputPin");
+        if (pinInput) pinInput.focus();
       }
     };
   }
@@ -3605,78 +4250,106 @@ function setupEventListeners() {
     };
   }
 
-  document.getElementById("secureAuthForm").onsubmit = (e) => {
+  document.getElementById("secureAuthForm").onsubmit = async (e) => {
     e.preventDefault();
     const emailVal = document.getElementById("authInputEmail").value.trim().toLowerCase();
-    const nameVal = normalizeAttendeeName(document.getElementById("authInputName").value);
-    const pinVal = document.getElementById("authInputPin").value.trim();
+    const passwordVal = document.getElementById("authInputPin").value;
     const errEl = document.getElementById("authErrorMsg");
-
-    if (!emailVal || !nameVal || pinVal.length < 4) return;
-
-    const candidateHash = computePinHash(emailVal, pinVal);
-    let existing = attendeesList.find(u => u.email.toLowerCase() === emailVal);
-
-    if (existing) {
-      if (existing.pinHash && existing.pinHash !== candidateHash) {
-        errEl.textContent = "Clave o PIN incorrecto para este correo. Nadie puede entrar a una cuenta ajena.";
-        errEl.style.display = "block";
-        return;
-      }
-      existing.pinHash = candidateHash;
-      if (nameVal && nameVal.trim()) {
-        existing.name = nameVal.trim();
-      }
-      if (!existing.attendance || (!existing.attendanceSetByUser && existing.attendance !== "confirmed" && existing.attendance !== "declined")) {
-        existing.attendance = "seen";
-      }
-      currentUser = existing;
-    } else if (pendingClaimedMatch) {
-      // Reclamar el perfil del participante existente (evitando duplicado)
-      pendingClaimedMatch.email = emailVal;
-      pendingClaimedMatch.name = nameVal;
-      pendingClaimedMatch.pinHash = candidateHash;
-      if (!pendingClaimedMatch.attendance || (!pendingClaimedMatch.attendanceSetByUser && pendingClaimedMatch.attendance !== "confirmed" && pendingClaimedMatch.attendance !== "declined")) {
-        pendingClaimedMatch.attendance = "seen";
-      }
-      currentUser = pendingClaimedMatch;
-      pendingClaimedMatch = null;
-    } else {
-      // Si no hay reclamo explícito, hacer un último chequeo de coincidencia por prefijo/nombre
-      const autoMatch = findPotentialMatch(emailVal, nameVal);
-      if (autoMatch) {
-        autoMatch.email = emailVal;
-        autoMatch.name = nameVal;
-        autoMatch.pinHash = candidateHash;
-        if (!autoMatch.attendance || (!autoMatch.attendanceSetByUser && autoMatch.attendance !== "confirmed" && autoMatch.attendance !== "declined")) {
-          autoMatch.attendance = "seen";
-        }
-        currentUser = autoMatch;
-      } else {
-        const rndHue = Math.floor(Math.random() * 360);
-        const newUser = {
-          id: Date.now(),
-          name: nameVal,
-          email: emailVal,
-          pinHash: candidateHash,
-          attendance: "seen",
-          attendanceSetByUser: false,
-          travelMode: null,
-          puedo_dar_coche: 0,
-          robot: createBotConfig(rndHue, 0, 0, 0, 0, 0)
-        };
-        attendeesList.push(newUser);
-        currentUser = newUser;
-      }
-    }
+    const okEl = document.getElementById("authSuccessMsg");
+    const submitBtn = document.getElementById("btnAuthSubmit");
 
     errEl.style.display = "none";
-    document.getElementById("authInputPin").value = "";
-    document.getElementById("claimMatchBanner").style.display = "none";
-    saveState(true);
-    renderAll();
-    closeModal("modalAuth");
-    showToast(`Sesión verificada: ${currentUser.name}`);
+    if (okEl) okEl.style.display = "none";
+
+    if (!emailVal || passwordVal.length < 6) {
+      errEl.textContent = "Ingresa un correo válido y una contraseña de al menos 6 caracteres.";
+      errEl.style.display = "block";
+      return;
+    }
+    if (!supabaseClient) {
+      errEl.textContent = "No se pudo inicializar Supabase Auth. Recarga la página e intenta de nuevo.";
+      errEl.style.display = "block";
+      return;
+    }
+
+    const originalBtnText = submitBtn ? submitBtn.textContent : "Iniciar sesión";
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Iniciando sesión...";
+    }
+
+    try {
+      // Sincronizar primero con la nube para tener siempre la lista real de cuentas existentes
+      await syncFetchFromCloud();
+
+      // 1. Intentar iniciar sesión con Supabase Auth
+      const { data: signInData, error: signInError } = await supabaseClient.auth.signInWithPassword({
+        email: emailVal,
+        password: passwordVal
+      });
+
+      if (!signInError && signInData && signInData.user) {
+        supabaseAuthUser = signInData.user;
+        linkSupabaseUserToAttendee(supabaseAuthUser, "", true);
+      } else {
+        const msg = ((signInError && signInError.message) || "").toLowerCase();
+
+        if (msg.includes("email not confirmed")) {
+          errEl.textContent = "Tu correo aún no está confirmado. Revisa tu bandeja de entrada o spam.";
+          errEl.style.display = "block";
+          return;
+        }
+
+        // 2. Si es la primera vez que entra con Supabase Auth, activar su acceso y vincular su cuenta existente
+        if (msg.includes("invalid login credentials")) {
+          const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
+            email: emailVal,
+            password: passwordVal
+          });
+
+          if (signUpError) {
+            const upMsg = (signUpError.message || "").toLowerCase();
+            if (upMsg.includes("already registered") || upMsg.includes("already exists")) {
+              errEl.textContent = "Contraseña incorrecta para este correo.";
+            } else {
+              errEl.textContent = signUpError.message || "Correo o contraseña incorrectos.";
+            }
+            errEl.style.display = "block";
+            return;
+          }
+
+          if (!signUpData.session) {
+            if (okEl) {
+              okEl.textContent = "¡Acceso activado! Revisa tu correo para confirmar tu cuenta y luego vuelve a iniciar sesión aquí.";
+              okEl.style.display = "block";
+            }
+            document.getElementById("authInputPin").value = "";
+            return;
+          }
+
+          supabaseAuthUser = signUpData.user;
+          linkSupabaseUserToAttendee(supabaseAuthUser, "", true);
+        } else {
+          errEl.textContent = (signInError && signInError.message) || "Error al iniciar sesión.";
+          errEl.style.display = "block";
+          return;
+        }
+      }
+
+      document.getElementById("authInputPin").value = "";
+      document.getElementById("claimMatchBanner").style.display = "none";
+      renderAll();
+      closeModal("modalAuth");
+      showToast(`Sesión iniciada: ${currentUser ? currentUser.name : emailVal}`);
+    } catch (err) {
+      errEl.textContent = "Error de conexión con Supabase Auth. Intenta de nuevo.";
+      errEl.style.display = "block";
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalBtnText;
+      }
+    }
   };
 
   // Pestañas de anatomía del robot
