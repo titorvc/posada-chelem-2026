@@ -369,35 +369,6 @@ const supabaseClient = (window.supabase && typeof window.supabase.createClient =
   : null;
 
 let supabaseAuthUser = null;
-let googleProviderToken = null;
-let calendarSyncInFlight = false;
-
-function getGoogleCalendarToken() {
-  if (googleProviderToken) return googleProviderToken;
-  try {
-    const cached = sessionStorage.getItem("posada_google_calendar_token");
-    if (cached) {
-      googleProviderToken = cached;
-      return cached;
-    }
-  } catch (e) {}
-  return null;
-}
-
-function getCalendarSyncMeta() {
-  try {
-    const raw = localStorage.getItem("posada_gcal_sync_meta_v1");
-    return raw ? JSON.parse(raw) : null;
-  } catch (e) {
-    return null;
-  }
-}
-
-function saveCalendarSyncMeta(meta) {
-  try {
-    localStorage.setItem("posada_gcal_sync_meta_v1", JSON.stringify(meta));
-  } catch (e) {}
-}
 
 function buildUserSummaryData(user) {
   if (!user) return null;
@@ -488,203 +459,6 @@ function buildUserSummaryPlainText(user) {
   lines.push("");
   lines.push("Tablero en vivo: https://titorvc.github.io/posada-chelem-2026/");
   return lines.join("\n");
-}
-
-async function upsertGoogleCalendarEvent(token, posadaKey, eventBody) {
-  const baseUrl = "https://www.googleapis.com/calendar/v3/calendars/primary/events";
-  const queryUrl = `${baseUrl}?privateExtendedProperty=${encodeURIComponent(`posadaKey=${posadaKey}`)}&maxResults=5`;
-  const listRes = await fetch(queryUrl, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  if (listRes.status === 401) {
-    const err = new Error("TOKEN_EXPIRED");
-    err.code = 401;
-    throw err;
-  }
-  let existingId = null;
-  if (listRes.ok) {
-    const listJson = await listRes.json();
-    const active = (listJson.items || []).find(ev => ev.status !== "cancelled");
-    if (active) existingId = active.id;
-  }
-
-  const targetUrl = existingId ? `${baseUrl}/${encodeURIComponent(existingId)}` : baseUrl;
-  const method = existingId ? "PATCH" : "POST";
-  const writeRes = await fetch(targetUrl, {
-    method,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(eventBody)
-  });
-  if (writeRes.status === 401) {
-    const err = new Error("TOKEN_EXPIRED");
-    err.code = 401;
-    throw err;
-  }
-  if (!writeRes.ok) {
-    const errText = await writeRes.text().catch(() => "");
-    throw new Error(`Calendar API HTTP ${writeRes.status}: ${errText.slice(0, 140)}`);
-  }
-  return writeRes.json();
-}
-
-async function syncPosadaToGoogleCalendar({ silent = false } = {}) {
-  if (calendarSyncInFlight) return false;
-  if (!currentUser) {
-    if (!silent) openModal("modalAuth");
-    return false;
-  }
-
-  const token = getGoogleCalendarToken();
-  if (!token) {
-    if (!silent) {
-      showToast("Conecta tu cuenta de Google para activar recordatorios en Calendar.");
-      handleGoogleSignIn();
-    }
-    return false;
-  }
-
-  calendarSyncInFlight = true;
-  const btn = document.getElementById("btnSyncGoogleCalendar");
-  const prevText = btn ? btn.textContent : "";
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = "Sincronizando con Google Calendar...";
-  }
-
-  try {
-    const description = buildUserSummaryPlainText(currentUser);
-    const tz = "America/Merida";
-
-    // 1. Evento principal de la Posada (Sábado 19 Dic 2026 14:00 -> Domingo 20 Dic 2026 14:00)
-    const mainEvent = {
-      summary: "Posada Chelem 2026 — Casa de Reyvell",
-      location: "Chelem, Yucatán, México",
-      description,
-      start: { dateTime: "2026-12-19T14:00:00-06:00", timeZone: tz },
-      end: { dateTime: "2026-12-20T14:00:00-06:00", timeZone: tz },
-      reminders: {
-        useDefault: false,
-        overrides: [
-          { method: "popup", minutes: 1440 },
-          { method: "popup", minutes: 120 }
-        ]
-      },
-      extendedProperties: {
-        private: { posadaKey: "posada_chelem_2026_main" }
-      }
-    };
-    await upsertGoogleCalendarEvent(token, "posada_chelem_2026_main", mainEvent);
-
-    // 2. Recordatorio recurrente cada 5 días hasta la fecha de la Posada
-    const now = new Date();
-    const posadaCutoff = new Date("2026-12-19T00:00:00-06:00");
-    if (now < posadaCutoff) {
-      const firstRem = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-      const yyyy = firstRem.getFullYear();
-      const mm = String(firstRem.getMonth() + 1).padStart(2, "0");
-      const dd = String(firstRem.getDate()).padStart(2, "0");
-      const reminderEvent = {
-        summary: "Recordatorio Posada Chelem — Tus aportes",
-        location: "https://titorvc.github.io/posada-chelem-2026/",
-        description,
-        start: { dateTime: `${yyyy}-${mm}-${dd}T10:00:00-06:00`, timeZone: tz },
-        end: { dateTime: `${yyyy}-${mm}-${dd}T10:30:00-06:00`, timeZone: tz },
-        recurrence: ["RRULE:FREQ=DAILY;INTERVAL=5;UNTIL=20261219T055959Z"],
-        reminders: {
-          useDefault: false,
-          overrides: [
-            { method: "popup", minutes: 30 }
-          ]
-        },
-        extendedProperties: {
-          private: { posadaKey: "posada_chelem_2026_reminder" }
-        }
-      };
-      await upsertGoogleCalendarEvent(token, "posada_chelem_2026_reminder", reminderEvent);
-    }
-
-    saveCalendarSyncMeta({
-      email: currentUser.email,
-      syncedAt: Date.now()
-    });
-    if (!silent) {
-      showToast("Google Calendar actualizado: evento + recordatorio cada 5 días.");
-    }
-    renderMySummary();
-    return true;
-  } catch (err) {
-    console.warn("Google Calendar sync error:", err);
-    if (err && err.code === 401) {
-      googleProviderToken = null;
-      try { sessionStorage.removeItem("posada_google_calendar_token"); } catch (e) {}
-      if (!silent) {
-        showToast("Tu sesión de Google Calendar expiró. Vuelve a conectar con Google.");
-      }
-      renderMySummary();
-    } else if (!silent) {
-      showToast("No se pudo sincronizar Google Calendar. Puedes descargar el archivo .ics.");
-    }
-    return false;
-  } finally {
-    calendarSyncInFlight = false;
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = prevText || "Sincronizar Google Calendar";
-    }
-  }
-}
-
-function downloadPosadaICS() {
-  if (!currentUser) {
-    openModal("modalAuth");
-    return;
-  }
-  const desc = buildUserSummaryPlainText(currentUser).replace(/\n/g, "\\n");
-  const nowStamp = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-  const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
-  const y = tomorrow.getFullYear();
-  const m = String(tomorrow.getMonth() + 1).padStart(2, "0");
-  const d = String(tomorrow.getDate()).padStart(2, "0");
-
-  const ics = [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//Posada Chelem 2026//El Pusio//ES",
-    "CALSCALE:GREGORIAN",
-    "BEGIN:VEVENT",
-    "UID:posada-chelem-2026-main@pusio",
-    `DTSTAMP:${nowStamp}`,
-    "DTSTART:20261219T200000Z",
-    "DTEND:20261220T200000Z",
-    "SUMMARY:Posada Chelem 2026 — Casa de Reyvell",
-    "LOCATION:Chelem\\, Yucatán\\, México",
-    `DESCRIPTION:${desc}`,
-    "END:VEVENT",
-    "BEGIN:VEVENT",
-    "UID:posada-chelem-2026-reminder@pusio",
-    `DTSTAMP:${nowStamp}`,
-    `DTSTART:${y}${m}${d}T160000Z`,
-    `DTEND:${y}${m}${d}T163000Z`,
-    "RRULE:FREQ=DAILY;INTERVAL=5;UNTIL=20261219T055959Z",
-    "SUMMARY:Recordatorio Posada Chelem — Tus aportes",
-    `DESCRIPTION:${desc}`,
-    "END:VEVENT",
-    "END:VCALENDAR"
-  ].join("\r\n");
-
-  const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "posada-chelem-2026.ics";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-  showToast("Archivo posada-chelem-2026.ics descargado.");
 }
 
 async function shareMySummaryWhatsApp() {
@@ -820,12 +594,7 @@ async function handleGoogleSignIn() {
     const { error } = await supabaseClient.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: window.location.origin + window.location.pathname,
-        scopes: "https://www.googleapis.com/auth/calendar.events",
-        queryParams: {
-          access_type: "offline",
-          prompt: "consent"
-        }
+        redirectTo: window.location.origin + window.location.pathname
       }
     });
     if (error) {
@@ -920,10 +689,6 @@ async function initSupabaseAuth() {
     const { data, error } = await supabaseClient.auth.getSession();
     if (!error && data && data.session && data.session.user) {
       supabaseAuthUser = data.session.user;
-      if (data.session.provider_token) {
-        googleProviderToken = data.session.provider_token;
-        try { sessionStorage.setItem("posada_google_calendar_token", googleProviderToken); } catch (e) {}
-      }
       await syncFetchFromCloud();
       const pendingName = localStorage.getItem("posada_pending_signup_name") || "";
       linkSupabaseUserToAttendee(supabaseAuthUser, pendingName, true);
@@ -937,29 +702,16 @@ async function initSupabaseAuth() {
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
     if (session && session.user) {
       supabaseAuthUser = session.user;
-      if (session.provider_token) {
-        googleProviderToken = session.provider_token;
-        try { sessionStorage.setItem("posada_google_calendar_token", googleProviderToken); } catch (e) {}
-      }
       if (event === "SIGNED_IN") {
         await syncFetchFromCloud();
         const pendingName = localStorage.getItem("posada_pending_signup_name") || "";
         linkSupabaseUserToAttendee(supabaseAuthUser, pendingName, true);
         if (pendingName) localStorage.removeItem("posada_pending_signup_name");
         renderAll();
-        if (session.provider_token && currentUser) {
-          const alreadyAutoSynced = sessionStorage.getItem("posada_gcal_autosynced") === "1";
-          if (!alreadyAutoSynced) {
-            try { sessionStorage.setItem("posada_gcal_autosynced", "1"); } catch (e) {}
-            syncPosadaToGoogleCalendar({ silent: true });
-          }
-        }
       }
     } else if (event === "SIGNED_OUT") {
       supabaseAuthUser = null;
-      googleProviderToken = null;
       currentUser = null;
-      try { sessionStorage.removeItem("posada_google_calendar_token"); } catch (e) {}
       setSavedSessionEmail("");
       renderAll();
     }
@@ -975,9 +727,7 @@ async function handleSignOut() {
     }
   }
   supabaseAuthUser = null;
-  googleProviderToken = null;
   currentUser = null;
-  try { sessionStorage.removeItem("posada_google_calendar_token"); } catch (e) {}
   setSavedSessionEmail("");
   closeModal("modalUserSummary");
   renderAll();
@@ -1670,40 +1420,13 @@ function renderMySummary() {
         <!-- Checklist explícito de qué lleva / hace -->
         ${myItemsListHtml}
 
-        <!-- Integraciones: Google Calendar (cada 5 días), .ics y WhatsApp -->
-        ${(() => {
-          const hasGcalToken = Boolean(getGoogleCalendarToken());
-          const syncMeta = getCalendarSyncMeta();
-          const isSyncedForUser = syncMeta && syncMeta.email && syncMeta.email.toLowerCase() === (currentUser.email || "").toLowerCase();
-          const statusLabel = isSyncedForUser
-            ? `Sincronizado (${new Date(syncMeta.syncedAt).toLocaleDateString("es-MX", { day: "2-digit", month: "short" })})`
-            : (hasGcalToken ? "Google listo" : "Sin conectar");
-          const calBtnLabel = hasGcalToken
-            ? "Actualizar recordatorios cada 5 días (Google Calendar)"
-            : "Conectar Google Calendar (recordatorios cada 5 días)";
-          return `
-            <div class="summary-integrations-box">
-              <div class="summary-integrations-head">
-                <span class="summary-integrations-title">Calendario y compartir</span>
-                <span class="cal-status-pill ${isSyncedForUser ? "is-synced" : ""}">${statusLabel}</span>
-              </div>
-              <button type="button" id="btnSyncGoogleCalendar" class="btn-cal-primary" onclick="syncPosadaToGoogleCalendar({ silent: false })">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                <span>${calBtnLabel}</span>
-              </button>
-              <div class="summary-integrations-row">
-                <button type="button" class="btn-integration-secondary" onclick="downloadPosadaICS()">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                  <span>Descargar .ics</span>
-                </button>
-                <button type="button" class="btn-integration-secondary btn-whatsapp-share" onclick="shareMySummaryWhatsApp()">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-                  <span>Enviar a WhatsApp</span>
-                </button>
-              </div>
-            </div>
-          `;
-        })()}
+        <!-- Compartir resumen por WhatsApp -->
+        <div class="summary-integrations-box">
+          <button type="button" class="btn-integration-secondary btn-whatsapp-share" style="width:100%;" onclick="shareMySummaryWhatsApp()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            <span>Enviar mi resumen a WhatsApp</span>
+          </button>
+        </div>
 
         <!-- Acciones rápidas de confirmación -->
         <div class="my-summary-action-col" style="width:100%;">
@@ -2781,7 +2504,7 @@ function renderMemberQuickModal() {
       ${isMe ? `
         <div class="modal-member-self-actions">
           <button type="button" class="btn btn-pusio btn-sm" onclick="closeModal('modalMemberQuickSummary'); selectUserForCustomization(${user.id})">Personalizar mi personaje</button>
-          <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('modalMemberQuickSummary'); openModal('modalUserSummary')">Google Calendar / WhatsApp</button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('modalMemberQuickSummary'); openModal('modalUserSummary')">Mi resumen / WhatsApp</button>
         </div>
       ` : ""}
 
@@ -3070,7 +2793,7 @@ function renderEquityMemberSpotlight(membersWithScore = []) {
       </div>
 
       <div class="spotlight-controls">
-        ${isMe ? `<button type="button" class="btn btn-secondary btn-sm" onclick="openModal('modalUserSummary')">Mi resumen / Calendar</button>` : ""}
+        ${isMe ? `<button type="button" class="btn btn-secondary btn-sm" onclick="openModal('modalUserSummary')">Mi resumen / WhatsApp</button>` : ""}
         <button type="button" class="spotlight-nav-btn" onclick="stepEquityMemberSpotlight(-1)" title="Persona anterior" aria-label="Persona anterior">&lsaquo;</button>
         <button type="button" class="spotlight-nav-btn" onclick="stepEquityMemberSpotlight(1)" title="Siguiente persona" aria-label="Siguiente persona">&rsaquo;</button>
         <button type="button" class="spotlight-close-btn" onclick="toggleEquityMemberSpotlight('${(user.email || "").replace(/'/g, "\\'")}')" title="Cerrar resumen" aria-label="Cerrar resumen">&times;</button>

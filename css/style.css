@@ -6016,7 +6016,7 @@ body {
 }
 
 /* ==========================================================================
-   SUPABASE AUTH, GOOGLE CALENDAR, CLIMA CHELEM & COMPARTIR
+   SUPABASE AUTH, CLIMA CHELEM & COMPARTIR
    ========================================================================== */
 .auth-success-msg {
   background: var(--teal-tint);
@@ -6207,82 +6207,12 @@ body {
   color: var(--teal-accent);
 }
 
-/* Integraciones en Mi Resumen (Google Calendar + .ics + WhatsApp) */
+/* Compartir en Mi Resumen (WhatsApp) */
 .summary-integrations-box {
   width: 100%;
-  padding: 12px;
-  background: var(--bg-subtle);
-  border: 1px solid var(--border);
-  border-radius: 12px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
-
-.summary-integrations-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.summary-integrations-title {
-  font-size: 0.76rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--ink-secondary);
-}
-
-.cal-status-pill {
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--bg-card);
-  color: var(--ink-secondary);
-  border: 1px solid var(--border);
-}
-
-.cal-status-pill.is-synced {
-  background: var(--teal-tint);
-  color: var(--teal-accent);
-  border-color: rgba(0, 143, 122, 0.28);
-}
-
-.summary-integrations-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.btn-cal-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  width: 100%;
-  padding: 9px 12px;
-  border-radius: 9px;
-  border: 1px solid var(--teal-accent);
-  background: var(--teal-tint);
-  color: var(--teal-accent);
-  font-family: inherit;
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.btn-cal-primary:hover {
-  background: var(--teal-accent);
-  color: #ffffff;
-}
-
-.btn-cal-primary:disabled {
-  opacity: 0.6;
-  cursor: wait;
 }
 
 .btn-integration-secondary {
