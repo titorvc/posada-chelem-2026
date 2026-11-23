@@ -1376,6 +1376,62 @@ function renderAll() {
   renderDynamicTimeline();
   renderRobotStudio();
   renderWhosGoing();
+  renderQuickNavBar();
+}
+
+function jumpToSection(elementId) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  if (elementId === "colAttendees" && window.innerWidth <= 900) {
+    const tabBtn = document.querySelector('[data-mobile-tab="tab-attendees"]');
+    if (tabBtn) tabBtn.click();
+  }
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function jumpToPlanFromTimeline(collabId) {
+  expandedPlanIds.add(collabId);
+  renderAgendaBoards();
+  const el = document.getElementById(`planCard_${collabId}`);
+  if (!el) return;
+  el.scrollIntoView({ behavior: "smooth", block: "center" });
+  el.classList.remove("plan-card-flash");
+  void el.offsetWidth;
+  el.classList.add("plan-card-flash");
+  setTimeout(() => el.classList.remove("plan-card-flash"), 1400);
+}
+
+function renderQuickNavBar() {
+  const attEl = document.getElementById("qnAttendCount");
+  const eqEl = document.getElementById("qnEquityPct");
+  const plansEl = document.getElementById("qnPlansCount");
+  const basicsEl = document.getElementById("qnBasicsCount");
+
+  const totalAtt = (attendeesList || []).length;
+  const confirmedAtt = (attendeesList || []).filter(u => u.attendance === "confirmed").length;
+  if (attEl) attEl.textContent = `${confirmedAtt}/${totalAtt || 13}`;
+
+  if (plansEl) plansEl.textContent = String((collaborations || []).length);
+
+  const adds = Array.isArray(additionalsList) ? additionalsList : [];
+  const readyAdds = adds.filter(it => getItemClaimers(it).length >= Math.max(1, Number(it.targetQty) || 1)).length;
+  if (basicsEl) basicsEl.textContent = `${readyAdds}/${adds.length}`;
+
+  let totalSlots = 0;
+  let filledSlots = 0;
+  (collaborations || []).forEach(c => {
+    (c.items || []).forEach(it => {
+      totalSlots += 1;
+      if (getItemClaimers(it).length > 0) filledSlots += 1;
+    });
+  });
+  adds.forEach(a => {
+    const qty = Math.max(1, Number(a.targetQty) || 1);
+    totalSlots += qty;
+    filledSlots += Math.min(getItemClaimers(a).length, qty);
+  });
+  const pct = totalSlots > 0 ? Math.min(100, Math.round((filledSlots / totalSlots) * 100)) : 0;
+  if (eqEl) eqEl.textContent = `${pct}%`;
 }
 
 function renderMySummary() {
@@ -1958,9 +2014,9 @@ function renderSummaryPanel() {
     avatarsGrid.innerHTML = "";
     attendeesList.forEach(person => {
       const isMe = currentUser && currentUser.email.toLowerCase() === person.email.toLowerCase();
-      const hasSession = Boolean(person.pinHash);
+      const hasSession = Boolean(person.pinHash || person.authUserId);
       const isVIP = person.puedo_dar_coche === 1;
-      const att = person.attendance || (person.pinHash ? "seen" : "unanswered");
+      const att = person.attendance || (hasSession ? "seen" : "unanswered");
 
       let statusClass = "status-unanswered";
       let statusText = "Sin entrar";
@@ -1992,8 +2048,8 @@ function renderSummaryPanel() {
       const loggedClass = isMe ? "is-logged-in" : "";
       const vipClass = isVIP ? "is-vip" : "";
       btn.className = `avatar-token ${statusClass} ${vipClass} ${loggedClass}`;
-      btn.title = `${person.name}: ${statusText}${isMe ? ' (En línea / Sesión activa)' : ''}. Clic para personalizar.`;
-      btn.onclick = () => selectUserForCustomization(person.id);
+      btn.title = `${person.name}: ${statusText}${isMe ? " (Tu sesión)" : ""}. Clic para ver su resumen visual.`;
+      btn.onclick = () => openMemberSummaryModal(person.email || person.id);
 
       // Render robot sin fondo (únicamente los íconos vectoriales)
       const svgIcon = renderRobotSVG(person.robot, null, null, true);
@@ -2601,6 +2657,145 @@ function calculateCollabTraction(collab) {
 }
 
 let selectedEquityMemberEmail = null;
+let modalMemberSummaryEmail = null;
+let additionalsFilter = "all";
+
+function setAdditionalsFilter(mode) {
+  additionalsFilter = mode || "all";
+  renderAdditionalsSection();
+}
+
+function openMemberSummaryModal(identifier) {
+  if (!identifier) return;
+  const target = (attendeesList || []).find(u =>
+    String(u.id) === String(identifier) ||
+    (u.email && u.email.toLowerCase() === String(identifier).toLowerCase()) ||
+    (u.name && u.name.toLowerCase() === String(identifier).toLowerCase())
+  );
+  if (!target) return;
+  modalMemberSummaryEmail = (target.email || "").toLowerCase();
+  renderMemberQuickModal();
+  openModal("modalMemberQuickSummary");
+}
+
+function stepMemberSummaryModal(delta) {
+  const list = (attendeesList || []).filter(u => u.attendance !== "declined");
+  if (list.length === 0) return;
+  const idx = list.findIndex(u => (u.email || "").toLowerCase() === modalMemberSummaryEmail);
+  const nextIdx = idx === -1 ? 0 : (idx + delta + list.length) % list.length;
+  modalMemberSummaryEmail = (list[nextIdx].email || "").toLowerCase();
+  renderMemberQuickModal();
+}
+
+function renderMemberQuickModal() {
+  const body = document.getElementById("modalMemberQuickBody");
+  if (!body || !modalMemberSummaryEmail) return;
+  const user = (attendeesList || []).find(u => (u.email || "").toLowerCase() === modalMemberSummaryEmail);
+  if (!user) return;
+
+  const isMe = currentUser && (currentUser.email || "").toLowerCase() === (user.email || "").toLowerCase();
+  const detail = getMemberDetailedContributions(user);
+  const hue = (user.robot && user.robot.face && user.robot.face.pri && typeof user.robot.face.pri.h === "number")
+    ? user.robot.face.pri.h
+    : 185;
+
+  const attMap = {
+    confirmed: { label: "Confirmado", cls: "status-confirmed" },
+    seen: { label: "Visto", cls: "status-seen" },
+    pending: { label: "Pendiente", cls: "status-pending" },
+    declined: { label: "No voy", cls: "status-declined" }
+  };
+  const attInfo = attMap[user.attendance] || attMap.pending;
+  const costRatio = detail.fairAvgCost > 0
+    ? Math.min(100, Math.round((detail.myTotalCost / Math.max(detail.fairAvgCost * 1.4, detail.myTotalCost, 1)) * 100))
+    : 0;
+
+  const cardsHtml = detail.items.length > 0
+    ? `<div class="spotlight-items-grid">
+        ${detail.items.map(it => {
+          const companionsHtml = it.companions.length > 0
+            ? `<div class="spotlight-shared-row">
+                <div class="spotlight-mini-avatars">
+                  ${it.companions.slice(0, 4).map(c =>
+                    c.robot
+                      ? `<span class="spotlight-mini-bot" title="Compartido con ${c.name}">${renderRobotSVG(c.robot, null, null, true)}</span>`
+                      : `<span class="spotlight-mini-initial" title="Compartido con ${c.name}">${(c.name || "?").slice(0, 1).toUpperCase()}</span>`
+                  ).join("")}
+                </div>
+                <span class="spotlight-shared-text">Con ${it.companions.map(c => c.name).join(", ")}</span>
+              </div>`
+            : `<span class="spotlight-solo-tag">Aporte individual</span>`;
+          return `
+            <div class="spotlight-item-card is-${it.kind}">
+              <div class="spotlight-item-icon">${getItemVisualIconSvg(it.name, it.kind)}</div>
+              <div class="spotlight-item-body">
+                <div class="spotlight-item-top">
+                  <span class="spotlight-item-cat">${it.kindLabel}</span>
+                  <span class="spotlight-item-cost">~$${it.myShareCost} MXN</span>
+                </div>
+                <strong class="spotlight-item-name">${it.name}</strong>
+                <span class="spotlight-item-context">${it.context}${it.qtyHint ? ` &bull; ${it.qtyHint}` : ""}</span>
+                <div class="spotlight-item-foot">${companionsHtml}</div>
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>`
+    : `<div class="spotlight-empty-visual">
+        <div class="spotlight-empty-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div>
+          <strong>${user.name} aún no aparta insumos</strong>
+          <p>Puede elegir comida, dinámicas o básicos pulsando <em>&ldquo;Yo lo llevo&rdquo;</em>.</p>
+        </div>
+      </div>`;
+
+  body.innerHTML = `
+    <div class="equity-spotlight modal-spotlight-wrap" style="--spotlight-hue:${Math.round(hue)}; margin-top:0; border:none; box-shadow:none; padding:4px 0 0;">
+      <div class="spotlight-header">
+        <div class="spotlight-identity">
+          <div class="spotlight-avatar-lg">${renderRobotSVG(user.robot, null, null, true)}</div>
+          <div class="spotlight-id-meta">
+            <div class="spotlight-name-row">
+              <h3 class="spotlight-name">${user.name}${isMe ? " (Tú)" : ""}</h3>
+              <span class="attendance-badge ${attInfo.cls}">${attInfo.label}</span>
+              ${detail.isVIP ? '<span class="avatar-vip-badge" style="position:static; display:inline-block;">VIP</span>' : ""}
+            </div>
+            <div class="spotlight-sub-pills">
+              <span class="spotlight-meta-chip">${detail.transport}</span>
+              <span class="spotlight-meta-chip is-cost">Gasto: <strong>~$${detail.myTotalCost} MXN</strong> (prom. ~$${detail.fairAvgCost})</span>
+            </div>
+            <div class="spotlight-cost-bar">
+              <div class="spotlight-cost-fill" style="width:${costRatio}%;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="spotlight-controls">
+          <button type="button" class="spotlight-nav-btn" onclick="stepMemberSummaryModal(-1)" title="Anterior" aria-label="Anterior">&lsaquo;</button>
+          <button type="button" class="spotlight-nav-btn" onclick="stepMemberSummaryModal(1)" title="Siguiente" aria-label="Siguiente">&rsaquo;</button>
+          <button type="button" class="spotlight-close-btn" onclick="closeModal('modalMemberQuickSummary')" title="Cerrar" aria-label="Cerrar">&times;</button>
+        </div>
+      </div>
+
+      ${isMe ? `
+        <div class="modal-member-self-actions">
+          <button type="button" class="btn btn-pusio btn-sm" onclick="closeModal('modalMemberQuickSummary'); selectUserForCustomization(${user.id})">Personalizar mi personaje</button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('modalMemberQuickSummary'); openModal('modalUserSummary')">Google Calendar / WhatsApp</button>
+        </div>
+      ` : ""}
+
+      <div class="spotlight-summary-strip">
+        <span class="spot-cat-pill is-food"><strong>${detail.counts.food}</strong> Comida</span>
+        <span class="spot-cat-pill is-activity"><strong>${detail.counts.activity}</strong> Juegos</span>
+        <span class="spot-cat-pill is-additional"><strong>${detail.counts.additional}</strong> Básicos</span>
+        <span class="spot-yeti-note">Yeti obligatorio</span>
+      </div>
+
+      ${cardsHtml}
+    </div>
+  `;
+}
 
 function getItemVisualIconSvg(itemName = "", kind = "food") {
   const n = (itemName || "").toLowerCase();
@@ -2943,6 +3138,28 @@ function renderEquityBoard() {
   if (metaEl) metaEl.textContent = "completado";
   if (fillEl) fillEl.style.width = `${pct}%`;
 
+  const kpiStrip = document.getElementById("equityKpiStrip");
+  if (kpiStrip) {
+    const confirmedCount = (attendeesList || []).filter(u => u.attendance === "confirmed").length;
+    const totalSeats = (carsList || []).reduce((acc, c) => acc + Math.max(0, Number(c.seats) || 0), 0);
+    const missingSlots = Math.max(0, totalSlots - filledSlots);
+    let totalEstPosada = 0;
+    (collaborations || []).forEach(c => (c.items || []).forEach(it => { totalEstPosada += estimateTotalCostMXNFor13(it.name); }));
+    (additionalsList || []).forEach(a => { totalEstPosada += estimateTotalCostMXNFor13(a.name); });
+    const activeCnt = Math.max(1, (attendeesList || []).filter(u => u.attendance !== "declined").length);
+    const avgCost = Math.round(totalEstPosada / activeCnt);
+
+    kpiStrip.innerHTML = `
+      <div class="eq-kpi-chip"><span>Confirmados</span><strong>${confirmedCount}/${(attendeesList || []).length || 13}</strong></div>
+      <div class="eq-kpi-chip"><span>Asientos auto</span><strong>${totalSeats}/13</strong></div>
+      <div class="eq-kpi-chip"><span>Promedio est.</span><strong>~$${avgCost} MXN</strong></div>
+      <button type="button" class="eq-kpi-chip is-action ${missingSlots > 0 ? "is-alert" : "is-done"}" onclick="setAdditionalsFilter('missing'); jumpToSection('additionalsSection')">
+        <span>${missingSlots > 0 ? "Por cubrir" : "Todo cubierto"}</span>
+        <strong>${missingSlots > 0 ? `${missingSlots} cupos →` : "100%"}</strong>
+      </button>
+    `;
+  }
+
   const activeAttendees = (attendeesList || []).filter(u => u.attendance !== "declined");
   const membersRaw = activeAttendees.map(u => {
     const eKey = (u.email || "").toLowerCase();
@@ -3075,6 +3292,7 @@ function renderAdditionalsSection() {
   const pct = totalNeeded > 0 ? Math.min(100, Math.round((totalCovered / totalNeeded) * 100)) : 0;
 
   const readyCount = list.filter(it => getItemClaimers(it).length >= Math.max(1, Number(it.targetQty) || 1)).length;
+  const missingCount = Math.max(0, list.length - readyCount);
   if (statsEl) {
     statsEl.textContent = `${readyCount} de ${list.length} básicos listos (${pct}%)`;
   }
@@ -3082,10 +3300,33 @@ function renderAdditionalsSection() {
     fillEl.style.width = `${pct}%`;
   }
 
+  const filterBar = document.getElementById("additionalsFilterBar");
+  if (filterBar) {
+    filterBar.querySelectorAll(".pantry-filter-pill").forEach(btn => {
+      const f = btn.dataset.filter;
+      btn.classList.toggle("active", f === additionalsFilter);
+      if (f === "all") btn.textContent = `Todos (${list.length})`;
+      if (f === "missing") btn.textContent = `Faltan (${missingCount})`;
+      if (f === "ready") btn.textContent = `Listos (${readyCount})`;
+    });
+  }
+
+  const filteredList = list.filter(item => {
+    const isMet = getItemClaimers(item).length >= Math.max(1, Number(item.targetQty) || 1);
+    if (additionalsFilter === "missing") return !isMet;
+    if (additionalsFilter === "ready") return isMet;
+    return true;
+  });
+
   listEl.innerHTML = "";
   listEl.classList.add("pantry-cards-grid");
 
-  list.forEach(item => {
+  if (filteredList.length === 0) {
+    listEl.innerHTML = `<div class="pantry-empty-filter">No hay básicos en esta vista. <button type="button" class="btn btn-secondary btn-sm" onclick="setAdditionalsFilter('all')">Ver todos</button></div>`;
+    return;
+  }
+
+  filteredList.forEach(item => {
     const claimers = getItemClaimers(item);
     const targetQty = Math.max(1, Number(item.targetQty) || 1);
     const isMet = claimers.length >= targetQty;
@@ -3127,11 +3368,12 @@ function renderAdditionalsSection() {
           </button>
         `;
       }
+      const targetKey = ((matchedUser && matchedUser.email) || cl.email || cl.name || "").replace(/'/g, "\\'");
       return `
-        <div class="pantry-slot pantry-slot-filled" title="${matchedUser ? matchedUser.name : cl.name} lleva esto">
+        <button type="button" class="pantry-slot pantry-slot-filled is-inspectable" onclick="openMemberSummaryModal('${targetKey}')" title="Ver qué más lleva ${matchedUser ? matchedUser.name : cl.name}">
           ${avatarHtml}
           <span class="pantry-slot-name">${matchedUser ? matchedUser.name : cl.name}</span>
-        </div>
+        </button>
       `;
     }).join("");
 
@@ -3826,17 +4068,18 @@ function renderDynamicTimeline() {
             (cl.email && a.email && a.email.toLowerCase() === cl.email.toLowerCase()) ||
             (cl.name && a.name && a.name.toLowerCase() === cl.name.toLowerCase())
           );
-          uniqueClaimers.push({ name: matched ? matched.name : cl.name, robot: matched ? matched.robot : null });
+          uniqueClaimers.push({ name: matched ? matched.name : cl.name, email: matched ? matched.email : (cl.email || cl.name), robot: matched ? matched.robot : null });
         });
       });
 
       const avatarsHtml = uniqueClaimers.length > 0
-        ? `<div class="tl-avatars-stack" title="Participan: ${uniqueClaimers.map(u => u.name).join(", ")}">
-            ${uniqueClaimers.slice(0, 4).map(u =>
-              u.robot
-                ? `<span class="tl-mini-bot">${renderRobotSVG(u.robot, null, null, true)}</span>`
-                : `<span class="tl-mini-init">${(u.name || "?").slice(0, 1).toUpperCase()}</span>`
-            ).join("")}
+        ? `<div class="tl-avatars-stack" title="Clic para ver aportes de cada participante">
+            ${uniqueClaimers.slice(0, 4).map(u => {
+              const uKey = (u.email || u.name || "").replace(/'/g, "\\'");
+              return u.robot
+                ? `<button type="button" class="tl-mini-bot" onclick="event.stopPropagation(); openMemberSummaryModal('${uKey}')" title="Ver resumen de ${u.name}">${renderRobotSVG(u.robot, null, null, true)}</button>`
+                : `<button type="button" class="tl-mini-init" onclick="event.stopPropagation(); openMemberSummaryModal('${uKey}')" title="Ver resumen de ${u.name}">${(u.name || "?").slice(0, 1).toUpperCase()}</button>`;
+            }).join("")}
             ${uniqueClaimers.length > 4 ? `<span class="tl-mini-more">+${uniqueClaimers.length - 4}</span>` : ""}
           </div>`
         : "";
@@ -3858,7 +4101,7 @@ function renderDynamicTimeline() {
         <div class="tl-atmo-icon">${getItemVisualIconSvg(collab.title, kind)}</div>
         <div class="timeline-plan-info">
           <div class="tl-title-row">
-            <span class="timeline-plan-title">${collab.title}</span>
+            <button type="button" class="timeline-plan-title tl-title-jump" onclick="jumpToPlanFromTimeline(${collab.id})" title="Ir a esta actividad en ¿Qué haremos?">${collab.title}</button>
             <span class="tl-cat-tag is-${kind}">${isFood ? "Comida" : "Dinámica"}</span>
           </div>
           <div class="tl-meta-row">
