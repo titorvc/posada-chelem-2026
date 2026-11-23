@@ -8,7 +8,7 @@
   <link rel="apple-touch-icon" href="favicon.svg?v=1">
   <meta name="theme-color" content="#00A896">
 
-  <link rel="stylesheet" href="css/style.css?v=20261123_0240">
+  <link rel="stylesheet" href="css/style.css?v=20261123_0332">
 
   <meta property="og:title" content="El pusio 2026">
   <meta property="og:description" content="Organización colaborativa para la posada en Chelem.">
@@ -224,8 +224,9 @@
     <section id="equityBoardSection" class="equity-board-section">
       <div class="equity-board-header">
         <div>
-          <span class="column-eyebrow">Progreso colaborativo</span>
+          <span class="column-eyebrow">Progreso colaborativo &bull; Resumen por persona</span>
           <h2 class="equity-board-title">Avance de la Posada</h2>
+          <p class="equity-board-subtitle">Toca cualquier avatar o nombre para ver de forma visual qu&eacute; va a llevar.</p>
         </div>
         <div class="equity-global-meter">
           <div class="equity-global-stats-row">
@@ -238,6 +239,7 @@
         </div>
       </div>
       <div id="equityMembersGrid" class="equity-members-grid"></div>
+      <div id="equityMemberSpotlight" class="equity-spotlight hidden" aria-live="polite"></div>
     </section>
 
     <div class="plans-section-intro">
@@ -321,49 +323,93 @@
       </form>
     </section>
 
-    <!-- BLOQUE FINAL: CRONOGRAMA DINÁMICO DE 2 DÍAS CON ARRASTRE ESTILO SPOTIFY -->
-    <section class="timeline-section">
+    <!-- BLOQUE FINAL: CRONOGRAMA ATMOSFÉRICO DE 2 DÍAS CON ARRASTRE -->
+    <section class="timeline-section timeline-atmo-section">
       <div class="timeline-header">
         <div>
-          <span class="agenda-eyebrow">Agenda de 2 D&iacute;as &bull; S&aacute;bado a Domingo</span>
+          <span class="agenda-eyebrow">Agenda de 2 D&iacute;as &bull; S&aacute;bado 19 a Domingo 20 de Diciembre</span>
           <h2 class="timeline-title">Cronograma de la Posada</h2>
-          <p class="timeline-drag-hint">Arrastra el &iacute;cono <strong>&#8942;&#8942;</strong> de cualquier tarjeta (o usa su selector de horario) para moverla de momento u orden.</p>
+          <p class="timeline-drag-hint">Arrastra el &iacute;cono <strong>&#8942;&#8942;</strong> de cualquier actividad (o usa su selector de horario) para moverla entre playa, noche de fogata y ma&ntilde;ana.</p>
         </div>
       </div>
 
-      <!-- DÍA 1: SÁBADO -->
-      <div class="timeline-day-group">
-        <div class="timeline-day-banner">
-          <span class="timeline-day-pill">D&iacute;a 1</span>
-          <span class="timeline-day-label">S&aacute;bado &mdash; Llegada, Playa y Noche</span>
-        </div>
-        <div class="timeline-grid timeline-grid-2col">
-          <!-- Momento 1: Sábado Tarde -->
-          <div class="timeline-stage-card" data-stage="stage1" ondragover="handleTimelineDragOver(event)" ondragleave="handleTimelineDragLeave(event)" ondrop="handleTimelineDrop(event, 'stage1')">
-            <div class="stage-time-tag">S&aacute;bado &bull; 14:00 &ndash; 19:00</div>
-            <h3 class="stage-name">Tarde: Llegada &amp; Playa</h3>
+      <div class="timeline-atmo-flow">
+        <!-- DÍA 1 · SÁBADO TARDE (PLAYA & ATARDECER) -->
+        <div class="timeline-atmo-row">
+          <div class="timeline-atmo-rail">
+            <span class="atmo-node node-afternoon" title="Sábado 14:00">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+            </span>
+            <span class="atmo-rail-line line-afternoon"></span>
+          </div>
+          <div class="timeline-stage-card stage-atmo stage-afternoon" data-stage="stage1" ondragover="handleTimelineDragOver(event)" ondragleave="handleTimelineDragLeave(event)" ondrop="handleTimelineDrop(event, 'stage1')">
+            <div class="stage-atmo-head">
+              <div>
+                <div class="stage-atmo-pills">
+                  <span class="stage-day-badge is-day1">D&iacute;a 1 &bull; S&aacute;bado</span>
+                  <span class="stage-time-pill">14:00 &ndash; 19:00</span>
+                  <span id="timelineSunsetChip" class="stage-sunset-chip">Atardecer ~17:15</span>
+                </div>
+                <h3 class="stage-name">Tarde: Llegada &amp; Playa</h3>
+                <p class="stage-atmo-desc">Instalaci&oacute;n en Casa de Reyvell, hieleras listas, playa y puesta de sol frente al mar.</p>
+              </div>
+              <div class="stage-atmo-emblem emblem-afternoon" aria-hidden="true">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10V2"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m8 6 4-4 4 4"/><path d="M16 18a4 4 0 0 0-8 0"/></svg>
+              </div>
+            </div>
             <div id="timelineStage1" class="stage-plans-container"></div>
           </div>
+        </div>
 
-          <!-- Momento 2: Sábado Noche -->
-          <div class="timeline-stage-card" data-stage="stage2" ondragover="handleTimelineDragOver(event)" ondragleave="handleTimelineDragLeave(event)" ondrop="handleTimelineDrop(event, 'stage2')">
-            <div class="stage-time-tag">S&aacute;bado &bull; 19:00 en adelante</div>
-            <h3 class="stage-name">Noche: Cena, Fogata &amp; Juegos</h3>
+        <!-- DÍA 1 · SÁBADO NOCHE (CENA, FOGATA & JUEGOS — MODO NOCHE EDITORIAL) -->
+        <div class="timeline-atmo-row">
+          <div class="timeline-atmo-rail">
+            <span class="atmo-node node-night" title="Sábado 19:00 en adelante">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </span>
+            <span class="atmo-rail-line line-night"></span>
+          </div>
+          <div class="timeline-stage-card stage-atmo stage-night" data-stage="stage2" ondragover="handleTimelineDragOver(event)" ondragleave="handleTimelineDragLeave(event)" ondrop="handleTimelineDrop(event, 'stage2')">
+            <div class="stage-atmo-head">
+              <div>
+                <div class="stage-atmo-pills">
+                  <span class="stage-day-badge is-night">D&iacute;a 1 &bull; S&aacute;bado Noche</span>
+                  <span class="stage-time-pill">19:00 en adelante</span>
+                </div>
+                <h3 class="stage-name">Noche: Cena, Fogata &amp; Juegos</h3>
+                <p class="stage-atmo-desc">Asador encendido, cena principal, din&aacute;micas, concurso Pus.io y fogata bajo las estrellas.</p>
+              </div>
+              <div class="stage-atmo-emblem emblem-night" aria-hidden="true">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1 4 5 5.5 5 10a5 5 0 1 1-10 0c0-2.5 1.5-4.5 2.5-6 0 2 1.5 3 2.5 3 0-2.5-.5-5 0-7z"/></svg>
+              </div>
+            </div>
             <div id="timelineStage2" class="stage-plans-container"></div>
           </div>
         </div>
-      </div>
 
-      <!-- DÍA 2: DOMINGO -->
-      <div class="timeline-day-group" style="margin-top:16px;">
-        <div class="timeline-day-banner">
-          <span class="timeline-day-pill day-2">D&iacute;a 2</span>
-          <span class="timeline-day-label">Domingo &mdash; Ma&ntilde;ana, Despedida y Comida opcional</span>
-        </div>
-        <div class="timeline-stage-card" data-stage="stage3" ondragover="handleTimelineDragOver(event)" ondragleave="handleTimelineDragLeave(event)" ondrop="handleTimelineDrop(event, 'stage3')">
-          <div class="stage-time-tag">Domingo &bull; 09:00 &ndash; 14:00</div>
-          <h3 class="stage-name">Ma&ntilde;ana / Mediod&iacute;a: Desayuno &amp; Salida</h3>
-          <div id="timelineStage3" class="stage-plans-container stage-plans-grid-2col"></div>
+        <!-- DÍA 2 · DOMINGO MAÑANA (DESAYUNO & SALIDA) -->
+        <div class="timeline-atmo-row">
+          <div class="timeline-atmo-rail">
+            <span class="atmo-node node-morning" title="Domingo 09:00">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+            </span>
+          </div>
+          <div class="timeline-stage-card stage-atmo stage-morning" data-stage="stage3" ondragover="handleTimelineDragOver(event)" ondragleave="handleTimelineDragLeave(event)" ondrop="handleTimelineDrop(event, 'stage3')">
+            <div class="stage-atmo-head">
+              <div>
+                <div class="stage-atmo-pills">
+                  <span class="stage-day-badge is-day2">D&iacute;a 2 &bull; Domingo</span>
+                  <span class="stage-time-pill">09:00 &ndash; 14:00</span>
+                </div>
+                <h3 class="stage-name">Ma&ntilde;ana / Mediod&iacute;a: Desayuno &amp; Salida</h3>
+                <p class="stage-atmo-desc">Caf&eacute;, desayuno tranquilo, recoger la casa y regreso en caravana a M&eacute;rida.</p>
+              </div>
+              <div class="stage-atmo-emblem emblem-morning" aria-hidden="true">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M2 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><circle cx="12" cy="6" r="3"/></svg>
+              </div>
+            </div>
+            <div id="timelineStage3" class="stage-plans-container stage-plans-grid-2col"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -796,6 +842,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/bottts_parts.js?v=20261119_0358"></script>
-  <script src="js/app.js?v=20261123_0240"></script>
+  <script src="js/app.js?v=20261123_0332"></script>
 </body>
 </html>

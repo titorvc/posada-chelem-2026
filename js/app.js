@@ -740,6 +740,11 @@ function renderChelemWeatherStrip(payload) {
 
   bar.innerHTML = parts.join("");
   bar.classList.remove("hidden");
+
+  const sunsetChip = document.getElementById("timelineSunsetChip");
+  if (sunsetChip && sunsetStr) {
+    sunsetChip.textContent = `Atardecer hoy ${sunsetStr}`;
+  }
 }
 
 async function initChelemWeather() {
@@ -2595,6 +2600,300 @@ function calculateCollabTraction(collab) {
   return (claimed / total) * 100 + (claimed * 10);
 }
 
+let selectedEquityMemberEmail = null;
+
+function getItemVisualIconSvg(itemName = "", kind = "food") {
+  const n = (itemName || "").toLowerCase();
+  if (/hielo/.test(n)) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M19.07 4.93L4.93 19.07"/></svg>`;
+  }
+  if (/agua|garraf/.test(n)) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>`;
+  }
+  if (/refresco|coca|soda|bebida|cerveza|chela|alcohol|trago|mezcal|tequila|ron|vino/.test(n)) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2h8l-1 7a4 4 0 0 1-6 0L8 2z"/><path d="M12 11v9"/><path d="M8 20h8"/></svg>`;
+  }
+  if (/carb[oó]n|encendedor|fogata|le[ñn]a|asador/.test(n)) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2c1 4 5 5.5 5 10a5 5 0 1 1-10 0c0-2.5 1.5-4.5 2.5-6 0 2 1.5 3 2.5 3 0-2.5-.5-5 0-7z"/></svg>`;
+  }
+  if (/botana|papa|totopo|dorito|sabrita|cacahuate|guacamole|dip/.test(n)) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11h16a8 8 0 0 1-16 0z"/><path d="M7 11l2-5 3 3 3-4 2 6"/></svg>`;
+  }
+  if (/plato|cubierto|servilleta|tenedor|cuchillo/.test(n)) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/></svg>`;
+  }
+  if (/basura|bolsa/.test(n)) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>`;
+  }
+  if (/salsa|lim[oó]n|sal|chile/.test(n)) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3h4v3l3 4v9a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-9l3-4V3z"/><line x1="8" y1="13" x2="16" y2="13"/></svg>`;
+  }
+  if (kind === "activity" || /juego|carta|uno|karaoke|bocina|m[uú]sica|pel[ií]cula|pi[ñn]ata|torneo|regalo|intercambio/.test(n)) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="3"/><line x1="7" y1="12" x2="11" y2="12"/><line x1="9" y1="10" x2="9" y2="14"/><circle cx="15.5" cy="11" r="1"/><circle cx="17.5" cy="13" r="1"/></svg>`;
+  }
+  if (kind === "additional") {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`;
+  }
+  // Comida / platillo genérico
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18"/><path d="M5 12a7 7 0 0 1 14 0"/><path d="M12 5V3"/><path d="M4 16h16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg>`;
+}
+
+function getMemberDetailedContributions(user) {
+  if (!user) return { items: [], counts: { food: 0, activity: 0, additional: 0 }, myTotalCost: 0, fairAvgCost: 0, transport: "Sin auto asignado todavía", isVIP: false };
+  const emailLow = (user.email || "").toLowerCase();
+  const nameLow = (user.name || "").toLowerCase();
+  const matchesUser = (cl) =>
+    (cl.email && emailLow && cl.email.toLowerCase() === emailLow) ||
+    (!cl.email && cl.name && nameLow && cl.name.toLowerCase() === nameLow);
+
+  const driverCar = (carsList || []).find(c => (c.driverEmail || "").toLowerCase() === emailLow);
+  const passengerCar = (carsList || []).find(c =>
+    Array.isArray(c.passengers) && c.passengers.some(p => (p.email || "").toLowerCase() === emailLow)
+  );
+  let transport = "Sin auto asignado todavía";
+  if (driverCar) {
+    transport = `Conductor VIP · ${driverCar.model} (${(driverCar.passengers || []).length}/${driverCar.seats})`;
+  } else if (passengerCar) {
+    transport = `Pasajero con ${passengerCar.driver} (${passengerCar.model})`;
+  }
+
+  let totalPosadaCost = 0;
+  let myTotalCost = 0;
+  const items = [];
+  const counts = { food: 0, activity: 0, additional: 0 };
+
+  (collaborations || []).forEach(c => {
+    const isFood = (c.category || "").toLowerCase().includes("comida") || (c.category || "").toLowerCase().includes("bebida");
+    const kind = isFood ? "food" : "activity";
+    (c.items || []).forEach(it => {
+      const claimers = getItemClaimers(it);
+      const itemCost = estimateTotalCostMXNFor13(it.name);
+      totalPosadaCost += itemCost;
+      if (claimers.some(matchesUser)) {
+        const shareCount = Math.max(1, claimers.length);
+        const myShareCost = Math.round(itemCost / shareCount);
+        myTotalCost += myShareCost;
+        counts[kind] += 1;
+        const companions = claimers
+          .filter(cl => !matchesUser(cl))
+          .map(cl => {
+            const found = (attendeesList || []).find(a =>
+              (cl.email && a.email && a.email.toLowerCase() === cl.email.toLowerCase()) ||
+              (cl.name && a.name && a.name.toLowerCase() === cl.name.toLowerCase())
+            );
+            return { name: found ? found.name : cl.name, robot: found ? found.robot : null };
+          });
+        items.push({
+          kind,
+          kindLabel: isFood ? "Comida & Bebida" : "Juego / Dinámica",
+          name: it.name,
+          context: c.title,
+          qtyHint: estimateConsumableFor13(it.name) || "",
+          myShareCost,
+          shareCount,
+          companions
+        });
+      }
+    });
+  });
+
+  (additionalsList || []).forEach(addItem => {
+    const claimers = getItemClaimers(addItem);
+    const itemCost = estimateTotalCostMXNFor13(addItem.name);
+    totalPosadaCost += itemCost;
+    if (claimers.some(matchesUser)) {
+      const shareCount = Math.max(1, claimers.length);
+      const divisor = Math.max(shareCount, Math.max(1, Number(addItem.targetQty) || 1));
+      const myShareCost = Math.round(itemCost / divisor);
+      myTotalCost += myShareCost;
+      counts.additional += 1;
+      const companions = claimers
+        .filter(cl => !matchesUser(cl))
+        .map(cl => {
+          const found = (attendeesList || []).find(a =>
+            (cl.email && a.email && a.email.toLowerCase() === cl.email.toLowerCase()) ||
+            (cl.name && a.name && a.name.toLowerCase() === cl.name.toLowerCase())
+          );
+          return { name: found ? found.name : cl.name, robot: found ? found.robot : null };
+        });
+      items.push({
+        kind: "additional",
+        kindLabel: "Adicional / Básico",
+        name: addItem.name,
+        context: "Básicos para 13 personas",
+        qtyHint: addItem.qtyHint || estimateConsumableFor13(addItem.name) || "",
+        myShareCost,
+        shareCount,
+        companions
+      });
+    }
+  });
+
+  const activeCount = Math.max(1, (attendeesList || []).filter(u => u.attendance !== "declined").length);
+  const fairAvgCost = Math.round(totalPosadaCost / activeCount);
+
+  return {
+    items,
+    counts,
+    myTotalCost,
+    fairAvgCost,
+    transport,
+    isVIP: user.puedo_dar_coche === 1 || Boolean(driverCar)
+  };
+}
+
+function toggleEquityMemberSpotlight(email) {
+  const clean = (email || "").trim().toLowerCase();
+  if (!clean) return;
+  if (selectedEquityMemberEmail === clean) {
+    selectedEquityMemberEmail = null;
+  } else {
+    selectedEquityMemberEmail = clean;
+  }
+  renderEquityBoard();
+  if (selectedEquityMemberEmail) {
+    const spot = document.getElementById("equityMemberSpotlight");
+    if (spot) {
+      spot.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }
+}
+
+function stepEquityMemberSpotlight(delta) {
+  const activeAttendees = (attendeesList || []).filter(u => u.attendance !== "declined");
+  if (activeAttendees.length === 0) return;
+  const idx = activeAttendees.findIndex(u => (u.email || "").toLowerCase() === selectedEquityMemberEmail);
+  const nextIdx = idx === -1 ? 0 : (idx + delta + activeAttendees.length) % activeAttendees.length;
+  selectedEquityMemberEmail = (activeAttendees[nextIdx].email || "").toLowerCase();
+  renderEquityBoard();
+}
+
+function renderEquityMemberSpotlight(membersWithScore = []) {
+  const spot = document.getElementById("equityMemberSpotlight");
+  if (!spot) return;
+
+  if (!selectedEquityMemberEmail) {
+    spot.classList.add("hidden");
+    spot.innerHTML = "";
+    return;
+  }
+
+  const entry = membersWithScore.find(m => (m.user.email || "").toLowerCase() === selectedEquityMemberEmail);
+  if (!entry) {
+    selectedEquityMemberEmail = null;
+    spot.classList.add("hidden");
+    spot.innerHTML = "";
+    return;
+  }
+
+  const { user, badgeText, tierClass } = entry;
+  const isMe = currentUser && (currentUser.email || "").toLowerCase() === (user.email || "").toLowerCase();
+  const detail = getMemberDetailedContributions(user);
+  const hue = (user.robot && user.robot.face && user.robot.face.pri && typeof user.robot.face.pri.h === "number")
+    ? user.robot.face.pri.h
+    : 185;
+
+  const attMap = {
+    confirmed: { label: "Confirmado", cls: "status-confirmed" },
+    seen: { label: "Visto", cls: "status-seen" },
+    pending: { label: "Pendiente", cls: "status-pending" },
+    declined: { label: "No voy", cls: "status-declined" }
+  };
+  const attInfo = attMap[user.attendance] || attMap.pending;
+
+  const costRatio = detail.fairAvgCost > 0
+    ? Math.min(100, Math.round((detail.myTotalCost / Math.max(detail.fairAvgCost * 1.4, detail.myTotalCost, 1)) * 100))
+    : 0;
+
+  const cardsHtml = detail.items.length > 0
+    ? `<div class="spotlight-items-grid">
+        ${detail.items.map(it => {
+          const companionsHtml = it.companions.length > 0
+            ? `<div class="spotlight-shared-row">
+                <div class="spotlight-mini-avatars">
+                  ${it.companions.slice(0, 4).map(c =>
+                    c.robot
+                      ? `<span class="spotlight-mini-bot" title="Compartido con ${c.name}">${renderRobotSVG(c.robot, null, null, true)}</span>`
+                      : `<span class="spotlight-mini-initial" title="Compartido con ${c.name}">${(c.name || "?").slice(0, 1).toUpperCase()}</span>`
+                  ).join("")}
+                </div>
+                <span class="spotlight-shared-text">Con ${it.companions.map(c => c.name).join(", ")}</span>
+              </div>`
+            : `<span class="spotlight-solo-tag">Aporte individual</span>`;
+
+          return `
+            <div class="spotlight-item-card is-${it.kind}">
+              <div class="spotlight-item-icon">${getItemVisualIconSvg(it.name, it.kind)}</div>
+              <div class="spotlight-item-body">
+                <div class="spotlight-item-top">
+                  <span class="spotlight-item-cat">${it.kindLabel}</span>
+                  <span class="spotlight-item-cost">~$${it.myShareCost} MXN</span>
+                </div>
+                <strong class="spotlight-item-name">${it.name}</strong>
+                <span class="spotlight-item-context">${it.context}${it.qtyHint ? ` &bull; ${it.qtyHint}` : ""}</span>
+                <div class="spotlight-item-foot">${companionsHtml}</div>
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>`
+    : `<div class="spotlight-empty-visual">
+        <div class="spotlight-empty-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div>
+          <strong>${user.name} aún no aparta ningún insumo</strong>
+          <p>Puede elegir comida, dinámicas o básicos en las secciones de abajo pulsando <em>&ldquo;Yo lo llevo&rdquo;</em>.</p>
+        </div>
+      </div>`;
+
+  spot.style.setProperty("--spotlight-hue", String(Math.round(hue)));
+  spot.innerHTML = `
+    <div class="spotlight-header">
+      <div class="spotlight-identity">
+        <div class="spotlight-avatar-lg">${renderRobotSVG(user.robot, null, null, true)}</div>
+        <div class="spotlight-id-meta">
+          <div class="spotlight-name-row">
+            <h3 class="spotlight-name">${user.name}${isMe ? " (Tú)" : ""}</h3>
+            <span class="attendance-badge ${attInfo.cls}">${attInfo.label}</span>
+            <span class="spotlight-tier-pill ${tierClass}">${badgeText}</span>
+            ${detail.isVIP ? '<span class="avatar-vip-badge" style="position:static; display:inline-block;">VIP</span>' : ""}
+          </div>
+          <div class="spotlight-sub-pills">
+            <span class="spotlight-meta-chip">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 17h14v-5l-2-5H7l-2 5v5z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg>
+              ${detail.transport}
+            </span>
+            <span class="spotlight-meta-chip is-cost">
+              Gasto estimado: <strong>~$${detail.myTotalCost} MXN</strong> (prom. ~$${detail.fairAvgCost})
+            </span>
+          </div>
+          <div class="spotlight-cost-bar" title="Comparativa de gasto estimado contra el promedio del grupo">
+            <div class="spotlight-cost-fill" style="width:${costRatio}%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="spotlight-controls">
+        ${isMe ? `<button type="button" class="btn btn-secondary btn-sm" onclick="openModal('modalUserSummary')">Mi resumen / Calendar</button>` : ""}
+        <button type="button" class="spotlight-nav-btn" onclick="stepEquityMemberSpotlight(-1)" title="Persona anterior" aria-label="Persona anterior">&lsaquo;</button>
+        <button type="button" class="spotlight-nav-btn" onclick="stepEquityMemberSpotlight(1)" title="Siguiente persona" aria-label="Siguiente persona">&rsaquo;</button>
+        <button type="button" class="spotlight-close-btn" onclick="toggleEquityMemberSpotlight('${(user.email || "").replace(/'/g, "\\'")}')" title="Cerrar resumen" aria-label="Cerrar resumen">&times;</button>
+      </div>
+    </div>
+
+    <div class="spotlight-summary-strip">
+      <span class="spot-cat-pill is-food"><strong>${detail.counts.food}</strong> Comida</span>
+      <span class="spot-cat-pill is-activity"><strong>${detail.counts.activity}</strong> Juegos</span>
+      <span class="spot-cat-pill is-additional"><strong>${detail.counts.additional}</strong> Básicos</span>
+      <span class="spot-yeti-note">Yeti obligatorio</span>
+    </div>
+
+    ${cardsHtml}
+  `;
+  spot.classList.remove("hidden");
+}
+
 function renderEquityBoard() {
   const grid = document.getElementById("equityMembersGrid");
   const pctEl = document.getElementById("equityGlobalPct");
@@ -2603,17 +2902,27 @@ function renderEquityBoard() {
   if (!grid) return;
 
   const countsByEmail = {};
+  const catCountsByEmail = {};
   let totalSlots = 0;
   let filledSlots = 0;
 
+  const bumpCat = (key, kind) => {
+    if (!key) return;
+    countsByEmail[key] = (countsByEmail[key] || 0) + 1;
+    if (!catCountsByEmail[key]) catCountsByEmail[key] = { food: 0, activity: 0, additional: 0 };
+    catCountsByEmail[key][kind] += 1;
+  };
+
   (collaborations || []).forEach(c => {
+    const isFood = (c.category || "").toLowerCase().includes("comida") || (c.category || "").toLowerCase().includes("bebida");
+    const kind = isFood ? "food" : "activity";
     (c.items || []).forEach(it => {
       totalSlots += 1;
       const claimers = getItemClaimers(it);
       if (claimers.length > 0) filledSlots += 1;
       claimers.forEach(cl => {
         const key = (cl.email || cl.name || "").toLowerCase();
-        if (key) countsByEmail[key] = (countsByEmail[key] || 0) + 1;
+        bumpCat(key, kind);
       });
     });
   });
@@ -2625,7 +2934,7 @@ function renderEquityBoard() {
     filledSlots += Math.min(claimers.length, qty);
     claimers.forEach(cl => {
       const key = (cl.email || cl.name || "").toLowerCase();
-      if (key) countsByEmail[key] = (countsByEmail[key] || 0) + 1;
+      bumpCat(key, "additional");
     });
   });
 
@@ -2635,23 +2944,21 @@ function renderEquityBoard() {
   if (fillEl) fillEl.style.width = `${pct}%`;
 
   const activeAttendees = (attendeesList || []).filter(u => u.attendance !== "declined");
-  const membersWithScore = activeAttendees.map(u => {
+  const membersRaw = activeAttendees.map(u => {
     const eKey = (u.email || "").toLowerCase();
     const nKey = (u.name || "").toLowerCase();
     const count = countsByEmail[eKey] || countsByEmail[nKey] || 0;
-    return { user: u, count };
+    const cats = catCountsByEmail[eKey] || catCountsByEmail[nKey] || { food: 0, activity: 0, additional: 0 };
+    return { user: u, count, cats };
   }).sort((a, b) => b.count - a.count || a.user.name.localeCompare(b.user.name));
 
-  const maxCount = membersWithScore.reduce((m, x) => Math.max(m, x.count), 0);
+  const maxCount = membersRaw.reduce((m, x) => Math.max(m, x.count), 0);
   const scaleMax = Math.max(3, maxCount);
 
-  grid.innerHTML = membersWithScore.map(({ user, count }) => {
-    const isMe = currentUser && currentUser.email.toLowerCase() === (user.email || "").toLowerCase();
+  const membersWithScore = membersRaw.map(({ user, count, cats }) => {
     const ratio = count === 0 ? 0 : Math.min(100, Math.max(18, Math.round((count / scaleMax) * 100)));
-
     let badgeText = "Observador";
     let tierClass = "eq-tier-none";
-
     if (count > 0 && count === maxCount && maxCount >= 2) {
       badgeText = "Líder";
       tierClass = "eq-tier-leader";
@@ -2665,24 +2972,43 @@ function renderEquityBoard() {
       badgeText = "Colaborador";
       tierClass = "eq-tier-colab";
     }
+    return { user, count, cats, ratio, badgeText, tierClass };
+  });
 
+  grid.innerHTML = membersWithScore.map(({ user, count, cats, ratio, badgeText, tierClass }) => {
+    const emailLow = (user.email || "").toLowerCase();
+    const isMe = currentUser && (currentUser.email || "").toLowerCase() === emailLow;
+    const isSelected = selectedEquityMemberEmail === emailLow;
     const miniSvg = renderRobotSVG(user.robot, null, null, true);
 
+    const catPills = [];
+    if (cats.food > 0) catPills.push(`<span class="eq-mini-pill is-food" title="${cats.food} de Comida/Bebida">${cats.food} Com.</span>`);
+    if (cats.activity > 0) catPills.push(`<span class="eq-mini-pill is-activity" title="${cats.activity} de Juegos/Dinámicas">${cats.activity} Jueg.</span>`);
+    if (cats.additional > 0) catPills.push(`<span class="eq-mini-pill is-additional" title="${cats.additional} de Básicos">${cats.additional} Bás.</span>`);
+
+    const catsHtml = catPills.length > 0
+      ? `<div class="equity-member-cats">${catPills.join("")}</div>`
+      : `<div class="equity-member-cats"><span class="eq-mini-empty">Sin aportes aún</span></div>`;
+
     return `
-      <div class="equity-member-card ${tierClass} ${isMe ? 'is-me' : ''}">
+      <button type="button" class="equity-member-card ${tierClass} ${isMe ? "is-me" : ""} ${isSelected ? "is-selected" : ""}" onclick="toggleEquityMemberSpotlight('${emailLow.replace(/'/g, "\\'")}')" aria-expanded="${isSelected ? "true" : "false"}">
         <div class="equity-member-top">
           <span class="equity-member-avatar">${miniSvg}</span>
           <div class="equity-member-info">
-            <span class="equity-member-name">${user.name}${isMe ? ' (Tú)' : ''}</span>
+            <span class="equity-member-name">${user.name}${isMe ? " (Tú)" : ""}</span>
             <span class="equity-member-badge">${badgeText}</span>
           </div>
+          <span class="equity-member-chevron" aria-hidden="true">${isSelected ? "▾" : "▸"}</span>
         </div>
+        ${catsHtml}
         <div class="equity-member-bar">
           <div class="equity-member-bar-fill" style="width:${ratio}%;"></div>
         </div>
-      </div>
+      </button>
     `;
   }).join("");
+
+  renderEquityMemberSpotlight(membersWithScore);
 }
 
 function renderAgendaBoards() {
@@ -2721,6 +3047,14 @@ function renderAgendaBoards() {
   });
 }
 
+function getPantryThemeClass(itemName = "") {
+  const n = (itemName || "").toLowerCase();
+  if (/hielo|agua|refresco|coca|soda|bebida/.test(n)) return "pantry-cold";
+  if (/carb[oó]n|encendedor|fogata|salsa|lim[oó]n/.test(n)) return "pantry-fire";
+  if (/botana|papa|totopo|dorito|sabrita|cacahuate/.test(n)) return "pantry-snack";
+  return "pantry-table";
+}
+
 function renderAdditionalsSection() {
   const listEl = document.getElementById("additionalsBoardContainer");
   const statsEl = document.getElementById("additionalsProgressStats");
@@ -2742,17 +3076,20 @@ function renderAdditionalsSection() {
 
   const readyCount = list.filter(it => getItemClaimers(it).length >= Math.max(1, Number(it.targetQty) || 1)).length;
   if (statsEl) {
-    statsEl.textContent = `${readyCount} de ${list.length} básicos listos`;
+    statsEl.textContent = `${readyCount} de ${list.length} básicos listos (${pct}%)`;
   }
   if (fillEl) {
     fillEl.style.width = `${pct}%`;
   }
 
   listEl.innerHTML = "";
+  listEl.classList.add("pantry-cards-grid");
+
   list.forEach(item => {
     const claimers = getItemClaimers(item);
     const targetQty = Math.max(1, Number(item.targetQty) || 1);
     const isMet = claimers.length >= targetQty;
+    const remaining = Math.max(0, targetQty - claimers.length);
     const isMine = Boolean(
       currentUser &&
       claimers.some(c =>
@@ -2761,50 +3098,87 @@ function renderAdditionalsSection() {
       )
     );
     const canJoinExtra = allMet && isMet && !isMine;
-    const claimersText = claimers.map(c => c.name).join(" + ");
     const qtyHint = item.qtyHint || estimateConsumableFor13(item.name) || "";
+    const totalEst = estimateTotalCostMXNFor13(item.name);
+    const perPersonEst = Math.round(totalEst / Math.max(claimers.length, targetQty));
+    const themeClass = getPantryThemeClass(item.name);
 
-    const row = document.createElement("div");
-    row.className = `additional-row ${isMet ? "is-met" : (claimers.length > 0 ? "is-partial" : "")}`;
+    // Slots visuales: primero los ocupados (con robot de cada persona), luego los disponibles
+    const filledSlotsHtml = claimers.map(cl => {
+      const matchedUser = (attendeesList || []).find(a =>
+        (cl.email && a.email && a.email.toLowerCase() === cl.email.toLowerCase()) ||
+        (cl.name && a.name && a.name.toLowerCase() === cl.name.toLowerCase())
+      );
+      const isMeSlot = Boolean(
+        currentUser &&
+        ((cl.email && cl.email.toLowerCase() === currentUser.email.toLowerCase()) ||
+         (!cl.email && cl.name && cl.name.toLowerCase() === currentUser.name.toLowerCase()))
+      );
+      const avatarHtml = matchedUser && matchedUser.robot
+        ? `<span class="pantry-slot-avatar">${renderRobotSVG(matchedUser.robot, null, null, true)}</span>`
+        : `<span class="pantry-slot-initial">${(cl.name || "?").slice(0, 1).toUpperCase()}</span>`;
 
-    let actionHtml = "";
-    if (isMine) {
-      actionHtml = `
-        <button type="button" class="task-assignee is-mine-claim ${claimers.length > 1 ? "is-shared" : ""}" onclick="toggleClaimAdditional('${item.id}')" title="Clic para quitarte de este adicional">
-          <span>${claimersText}</span>
-        </button>
-      `;
-    } else if (!isMet) {
-      actionHtml = `
-        <div class="task-assignee-wrap">
-          ${claimers.length > 0 ? `<span class="additional-claimers-mini">${claimersText}</span>` : ""}
-          <button type="button" class="claim-btn" onclick="toggleClaimAdditional('${item.id}')">Yo lo llevo</button>
-        </div>
-      `;
-    } else {
-      actionHtml = `
-        <div class="task-assignee-wrap">
-          <button type="button" class="task-assignee ${claimers.length > 1 ? "is-shared" : ""}" onclick="toggleClaimAdditional('${item.id}')" title="${canJoinExtra ? 'Todos los adicionales están cubiertos: clic para sumarte.' : 'Cupo completo. Cubre primero los adicionales faltantes.'}">
-            <span>${claimersText}</span>
+      if (isMeSlot) {
+        return `
+          <button type="button" class="pantry-slot pantry-slot-filled is-mine" onclick="toggleClaimAdditional('${item.id}')" title="Clic para soltar este básico">
+            ${avatarHtml}
+            <span class="pantry-slot-name">${matchedUser ? matchedUser.name : cl.name}</span>
+            <span class="pantry-slot-x" aria-hidden="true">&times;</span>
           </button>
-          ${canJoinExtra ? `<button type="button" class="task-join-btn" onclick="toggleClaimAdditional('${item.id}')">+ Sumarme</button>` : ""}
+        `;
+      }
+      return `
+        <div class="pantry-slot pantry-slot-filled" title="${matchedUser ? matchedUser.name : cl.name} lleva esto">
+          ${avatarHtml}
+          <span class="pantry-slot-name">${matchedUser ? matchedUser.name : cl.name}</span>
         </div>
+      `;
+    }).join("");
+
+    let openSlotsHtml = "";
+    for (let i = 0; i < remaining; i++) {
+      const label = i === 0 && !isMine ? "+ Yo lo llevo" : "Disponible";
+      openSlotsHtml += `
+        <button type="button" class="pantry-slot pantry-slot-open ${i === 0 && !isMine ? "is-cta" : ""}" onclick="toggleClaimAdditional('${item.id}')" title="Apartar este cupo">
+          <span class="pantry-slot-plus">+</span>
+          <span>${label}</span>
+        </button>
       `;
     }
 
-    row.innerHTML = `
-      <div class="additional-row-info">
-        <div class="additional-title-line">
-          <span class="additional-name">${item.name}</span>
-          <span class="additional-qty-badge ${isMet ? "met" : ""}">${claimers.length}/${targetQty}</span>
+    if (canJoinExtra) {
+      openSlotsHtml += `
+        <button type="button" class="pantry-slot pantry-slot-open is-extra" onclick="toggleClaimAdditional('${item.id}')" title="Todos los básicos están cubiertos: puedes sumarte">
+          <span class="pantry-slot-plus">+</span>
+          <span>Sumarme</span>
+        </button>
+      `;
+    }
+
+    const statusBadgeHtml = isMet
+      ? `<span class="pantry-status-pill is-ready">Listo &bull; ${claimers.length}/${targetQty}</span>`
+      : `<span class="pantry-status-pill is-needed">Falta${remaining === 1 ? "" : "n"} ${remaining}</span>`;
+
+    const card = document.createElement("div");
+    card.className = `pantry-card ${themeClass} ${isMet ? "is-met" : (claimers.length > 0 ? "is-partial" : "is-open")}`;
+    card.innerHTML = `
+      <div class="pantry-card-top">
+        <div class="pantry-icon-tile">${getItemVisualIconSvg(item.name, "additional")}</div>
+        <div class="pantry-card-badges">
+          ${statusBadgeHtml}
+          <span class="pantry-cost-chip">~$${perPersonEst} MXN c/u</span>
         </div>
-        ${qtyHint ? `<span class="portion-hint-badge">${qtyHint}</span>` : ""}
       </div>
-      <div class="additional-row-action">
-        ${actionHtml}
+      <div class="pantry-card-body">
+        <h4 class="pantry-card-title">${item.name}</h4>
+        ${qtyHint ? `<p class="pantry-card-hint">${qtyHint}</p>` : ""}
+      </div>
+      <div class="pantry-slots-row">
+        ${filledSlotsHtml}
+        ${openSlotsHtml}
       </div>
     `;
-    listEl.appendChild(row);
+    listEl.appendChild(card);
   });
 }
 
@@ -3432,12 +3806,43 @@ function renderDynamicTimeline() {
       const items = collab.items || [];
       const claimedCount = items.filter(i => getItemClaimers(i).length > 0).length;
       const totalCount = items.length;
+      const pct = totalCount > 0 ? Math.round((claimedCount / totalCount) * 100) : 0;
       const isComplete = totalCount > 0 && claimedCount === totalCount;
       const isPromoted = claimedCount > 0;
-      const statusLabel = isComplete ? "Listo" : (isPromoted ? "En marcha" : "Por empezar");
+      const statusLabel = isComplete ? "Listo" : (isPromoted ? `${pct}% cubierto` : "Por empezar");
+
+      const isFood = (collab.category || "").toLowerCase().includes("comida") || (collab.category || "").toLowerCase().includes("bebida");
+      const kind = isFood ? "food" : "activity";
+
+      // Recolectar participantes únicos que apartaron insumos en esta actividad
+      const uniqueClaimers = [];
+      const seenKeys = new Set();
+      items.forEach(it => {
+        getItemClaimers(it).forEach(cl => {
+          const k = (cl.email || cl.name || "").toLowerCase();
+          if (!k || seenKeys.has(k)) return;
+          seenKeys.add(k);
+          const matched = (attendeesList || []).find(a =>
+            (cl.email && a.email && a.email.toLowerCase() === cl.email.toLowerCase()) ||
+            (cl.name && a.name && a.name.toLowerCase() === cl.name.toLowerCase())
+          );
+          uniqueClaimers.push({ name: matched ? matched.name : cl.name, robot: matched ? matched.robot : null });
+        });
+      });
+
+      const avatarsHtml = uniqueClaimers.length > 0
+        ? `<div class="tl-avatars-stack" title="Participan: ${uniqueClaimers.map(u => u.name).join(", ")}">
+            ${uniqueClaimers.slice(0, 4).map(u =>
+              u.robot
+                ? `<span class="tl-mini-bot">${renderRobotSVG(u.robot, null, null, true)}</span>`
+                : `<span class="tl-mini-init">${(u.name || "?").slice(0, 1).toUpperCase()}</span>`
+            ).join("")}
+            ${uniqueClaimers.length > 4 ? `<span class="tl-mini-more">+${uniqueClaimers.length - 4}</span>` : ""}
+          </div>`
+        : "";
 
       const row = document.createElement("div");
-      row.className = `timeline-plan-row timeline-draggable-card ${isComplete ? 'is-complete' : (isPromoted ? 'is-promoted' : '')}`;
+      row.className = `timeline-plan-row timeline-draggable-card tl-atmo-card is-${kind} ${isComplete ? "is-complete" : (isPromoted ? "is-promoted" : "")}`;
       row.draggable = true;
       row.ondragstart = (ev) => handleTimelineDragStart(ev, collab.id);
       row.ondragend = (ev) => handleTimelineDragEnd(ev);
@@ -3450,16 +3855,24 @@ function renderDynamicTimeline() {
             <circle cx="5" cy="12.5" r="1.4"/><circle cx="11" cy="12.5" r="1.4"/>
           </svg>
         </div>
+        <div class="tl-atmo-icon">${getItemVisualIconSvg(collab.title, kind)}</div>
         <div class="timeline-plan-info">
-          <span class="timeline-plan-title">${collab.title}</span>
-          <span class="timeline-plan-meta">${collab.category} &bull; ${collab.author}</span>
+          <div class="tl-title-row">
+            <span class="timeline-plan-title">${collab.title}</span>
+            <span class="tl-cat-tag is-${kind}">${isFood ? "Comida" : "Dinámica"}</span>
+          </div>
+          <div class="tl-meta-row">
+            <span class="timeline-plan-meta">Propuesto por ${collab.author}${totalCount > 0 ? ` &bull; ${claimedCount}/${totalCount} insumos` : ""}</span>
+            ${avatarsHtml}
+          </div>
+          ${totalCount > 0 ? `<div class="tl-progress-track"><div class="tl-progress-fill" style="width:${pct}%;"></div></div>` : ""}
         </div>
         <div class="timeline-plan-controls">
-          <span class="timeline-plan-pill ${isComplete ? 'complete-badge' : (isPromoted ? 'promoted-badge' : '')}">${statusLabel}</span>
+          <span class="timeline-plan-pill ${isComplete ? "complete-badge" : (isPromoted ? "promoted-badge" : "")}">${statusLabel}</span>
           <select class="timeline-stage-quick-select" aria-label="Cambiar horario" title="Mover a otro horario" onchange="changeCollabStageQuick(${collab.id}, this.value)">
-            <option value="stage1" ${stageKey === 'stage1' ? 'selected' : ''}>Sáb. Tarde</option>
-            <option value="stage2" ${stageKey === 'stage2' ? 'selected' : ''}>Sáb. Noche</option>
-            <option value="stage3" ${stageKey === 'stage3' ? 'selected' : ''}>Dom. Mañana</option>
+            <option value="stage1" ${stageKey === "stage1" ? "selected" : ""}>Sáb. Tarde</option>
+            <option value="stage2" ${stageKey === "stage2" ? "selected" : ""}>Sáb. Noche</option>
+            <option value="stage3" ${stageKey === "stage3" ? "selected" : ""}>Dom. Mañana</option>
           </select>
         </div>
       `;
