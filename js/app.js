@@ -184,6 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupEventListeners();
   setupModernHueWheel();
   setupMobileTabs();
+  initQuickNavScrollSpy();
   initSupabaseAuth();
   initChelemWeather();
 });
@@ -576,6 +577,145 @@ async function initChelemWeather() {
   }
 }
 
+const FINAL_GOOGLE_AUTH_EPOCH = "posada_final_google_login_v20261123";
+const TEN_YEARS_SECONDS = 315360000; // 10 años
+let isExplicitUserSignOut = false;
+
+function isFinalGoogleAuthCompleted() {
+  try {
+    if (localStorage.getItem(FINAL_GOOGLE_AUTH_EPOCH) === "1") return true;
+  } catch (e) {}
+  try {
+    const m = document.cookie.match(new RegExp(`(?:^|;\\s*)${FINAL_GOOGLE_AUTH_EPOCH}=([^;]+)`));
+    if (m && m[1] === "1") return true;
+  } catch (e) {}
+  return false;
+}
+
+function isGoogleOAuthInFlight() {
+  try {
+    if (localStorage.getItem("posada_google_oauth_in_flight") === "1") return true;
+  } catch (e) {}
+  try {
+    if (/(?:^|;\s*)posada_google_oauth_in_flight=1/.test(document.cookie)) return true;
+  } catch (e) {}
+  const h = window.location.hash || "";
+  const s = window.location.search || "";
+  return h.includes("access_token=") || h.includes("refresh_token=") || s.includes("code=");
+}
+
+function clearGoogleOAuthInFlight() {
+  try {
+    localStorage.removeItem("posada_google_oauth_in_flight");
+  } catch (e) {}
+  try {
+    document.cookie = "posada_google_oauth_in_flight=; path=/; max-age=0; SameSite=Lax";
+  } catch (e) {}
+}
+
+function writeSessionToIndexedDBVault(sessionRecord) {
+  try {
+    if (typeof indexedDB === "undefined") return;
+    const req = indexedDB.open("posada_auth_vault_v1", 1);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains("session")) {
+        db.createObjectStore("session");
+      }
+    };
+    req.onsuccess = () => {
+      try {
+        const db = req.result;
+        const tx = db.transaction("session", "readwrite");
+        const store = tx.objectStore("session");
+        if (sessionRecord) {
+          store.put(sessionRecord, "permanent_user");
+        } else {
+          store.delete("permanent_user");
+        }
+      } catch (e) {}
+    };
+  } catch (e) {}
+}
+
+function restoreSessionFromIndexedDBVault() {
+  try {
+    if (typeof indexedDB === "undefined") return;
+    const req = indexedDB.open("posada_auth_vault_v1", 1);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains("session")) {
+        db.createObjectStore("session");
+      }
+    };
+    req.onsuccess = () => {
+      try {
+        const db = req.result;
+        const tx = db.transaction("session", "readonly");
+        const store = tx.objectStore("session");
+        const getReq = store.get("permanent_user");
+        getReq.onsuccess = () => {
+          const rec = getReq.result;
+          if (rec && rec.email && rec.epoch === FINAL_GOOGLE_AUTH_EPOCH) {
+            try {
+              localStorage.setItem(FINAL_GOOGLE_AUTH_EPOCH, "1");
+            } catch (e) {}
+            setSavedSessionEmail(rec.email);
+            if (!currentUser) {
+              const found = (attendeesList || []).find(u =>
+                (rec.authUserId && u.authUserId === rec.authUserId) ||
+                (u.email && u.email.toLowerCase() === rec.email.toLowerCase())
+              );
+              if (found) {
+                currentUser = found;
+                renderAll();
+              }
+            }
+          }
+        };
+      } catch (e) {}
+    };
+  } catch (e) {}
+}
+
+function persistPermanentGoogleSession(attendee, authUser = null) {
+  if (!attendee || !attendee.email) return;
+  const cleanEmail = attendee.email.trim().toLowerCase();
+  const authId = (authUser && authUser.id) || attendee.authUserId || null;
+
+  try {
+    localStorage.setItem(FINAL_GOOGLE_AUTH_EPOCH, "1");
+    localStorage.setItem("posada_permanent_user_v1", JSON.stringify({
+      email: cleanEmail,
+      authUserId: authId,
+      name: attendee.name,
+      epoch: FINAL_GOOGLE_AUTH_EPOCH,
+      savedAt: Date.now()
+    }));
+  } catch (e) {}
+
+  try {
+    document.cookie = `${FINAL_GOOGLE_AUTH_EPOCH}=1; path=/; max-age=${TEN_YEARS_SECONDS}; SameSite=Lax`;
+  } catch (e) {}
+
+  setSavedSessionEmail(cleanEmail);
+  clearGoogleOAuthInFlight();
+
+  writeSessionToIndexedDBVault({
+    email: cleanEmail,
+    authUserId: authId,
+    name: attendee.name,
+    epoch: FINAL_GOOGLE_AUTH_EPOCH,
+    savedAt: Date.now()
+  });
+
+  try {
+    if (navigator.storage && typeof navigator.storage.persist === "function") {
+      navigator.storage.persist().catch(() => {});
+    }
+  } catch (e) {}
+}
+
 async function handleGoogleSignIn() {
   const errEl = document.getElementById("authErrorMsg");
   const googleBtn = document.getElementById("btnGoogleLogin");
@@ -589,15 +729,24 @@ async function handleGoogleSignIn() {
     return;
   }
 
+  try {
+    localStorage.setItem("posada_google_oauth_in_flight", "1");
+    document.cookie = "posada_google_oauth_in_flight=1; path=/; max-age=3600; SameSite=Lax";
+  } catch (e) {}
+
   if (googleBtn) googleBtn.disabled = true;
   try {
     const { error } = await supabaseClient.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: window.location.origin + window.location.pathname
+        redirectTo: window.location.origin + window.location.pathname,
+        queryParams: {
+          access_type: "offline"
+        }
       }
     });
     if (error) {
+      clearGoogleOAuthInFlight();
       if (errEl) {
         errEl.textContent = error.message || "No se pudo iniciar sesión con Google.";
         errEl.style.display = "block";
@@ -605,6 +754,7 @@ async function handleGoogleSignIn() {
       if (googleBtn) googleBtn.disabled = false;
     }
   } catch (err) {
+    clearGoogleOAuthInFlight();
     if (errEl) {
       errEl.textContent = "Error al conectar con Google OAuth.";
       errEl.style.display = "block";
@@ -655,7 +805,7 @@ function linkSupabaseUserToAttendee(authUser, preferredName = "", allowCreate = 
       mutated = true;
     }
     currentUser = existing;
-    setSavedSessionEmail(existing.email);
+    persistPermanentGoogleSession(existing, authUser);
     if (mutated) saveState(true);
     return existing;
   }
@@ -678,12 +828,38 @@ function linkSupabaseUserToAttendee(authUser, preferredName = "", allowCreate = 
   };
   attendeesList.push(newUser);
   currentUser = newUser;
-  setSavedSessionEmail(newUser.email);
+  persistPermanentGoogleSession(newUser, authUser);
   saveState(true);
   return newUser;
 }
 
 async function initSupabaseAuth() {
+  const returningFromOAuth = isGoogleOAuthInFlight();
+  const alreadyCompletedFinalAuth = isFinalGoogleAuthCompleted();
+
+  // Si aún NO ha hecho el último inicio de sesión con Google y NO viene regresando del callback de Google:
+  // solicitarle una última vez iniciar sesión con Google y limpiar sesión previa no migrada.
+  if (!alreadyCompletedFinalAuth && !returningFromOAuth) {
+    currentUser = null;
+    supabaseAuthUser = null;
+    setSavedSessionEmail("");
+    if (supabaseClient) {
+      try {
+        isExplicitUserSignOut = true;
+        await supabaseClient.auth.signOut();
+      } catch (e) {} finally {
+        isExplicitUserSignOut = false;
+      }
+    }
+    renderAll();
+    setTimeout(() => {
+      openModal("modalAuth");
+    }, 180);
+  } else {
+    // Restaurar también desde IndexedDB en caso de que el navegador móvil haya limpiado localStorage
+    restoreSessionFromIndexedDBVault();
+  }
+
   if (!supabaseClient) return;
   try {
     const { data, error } = await supabaseClient.auth.getSession();
@@ -691,9 +867,16 @@ async function initSupabaseAuth() {
       supabaseAuthUser = data.session.user;
       await syncFetchFromCloud();
       const pendingName = localStorage.getItem("posada_pending_signup_name") || "";
-      linkSupabaseUserToAttendee(supabaseAuthUser, pendingName, true);
+      const linked = linkSupabaseUserToAttendee(supabaseAuthUser, pendingName, true);
       if (pendingName) localStorage.removeItem("posada_pending_signup_name");
+      if (linked) {
+        persistPermanentGoogleSession(linked, supabaseAuthUser);
+      }
+      closeModal("modalAuth");
       renderAll();
+      if (returningFromOAuth) {
+        showToast(`¡Sesión permanente activada para ${linked ? linked.name : supabaseAuthUser.email}!`);
+      }
     }
   } catch (err) {
     console.warn("Supabase Auth getSession error:", err);
@@ -702,23 +885,32 @@ async function initSupabaseAuth() {
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
     if (session && session.user) {
       supabaseAuthUser = session.user;
-      if (event === "SIGNED_IN") {
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") {
         await syncFetchFromCloud();
         const pendingName = localStorage.getItem("posada_pending_signup_name") || "";
-        linkSupabaseUserToAttendee(supabaseAuthUser, pendingName, true);
+        const linked = linkSupabaseUserToAttendee(supabaseAuthUser, pendingName, true);
         if (pendingName) localStorage.removeItem("posada_pending_signup_name");
+        if (linked) {
+          persistPermanentGoogleSession(linked, supabaseAuthUser);
+        }
+        closeModal("modalAuth");
         renderAll();
       }
     } else if (event === "SIGNED_OUT") {
-      supabaseAuthUser = null;
-      currentUser = null;
-      setSavedSessionEmail("");
-      renderAll();
+      // IMPORTANTE: Nunca cerrar la sesión permanente del usuario por expiración de token en segundo plano.
+      // Solo cerrar si el usuario pulsó explícitamente "Cerrar sesión".
+      if (isExplicitUserSignOut) {
+        supabaseAuthUser = null;
+        currentUser = null;
+        setSavedSessionEmail("");
+        renderAll();
+      }
     }
   });
 }
 
 async function handleSignOut() {
+  isExplicitUserSignOut = true;
   if (supabaseClient) {
     try {
       await supabaseClient.auth.signOut();
@@ -729,6 +921,13 @@ async function handleSignOut() {
   supabaseAuthUser = null;
   currentUser = null;
   setSavedSessionEmail("");
+  try {
+    localStorage.removeItem(FINAL_GOOGLE_AUTH_EPOCH);
+    localStorage.removeItem("posada_permanent_user_v1");
+    document.cookie = `${FINAL_GOOGLE_AUTH_EPOCH}=; path=/; max-age=0; SameSite=Lax`;
+  } catch (e) {}
+  writeSessionToIndexedDBVault(null);
+  isExplicitUserSignOut = false;
   closeModal("modalUserSummary");
   renderAll();
   showToast("Sesión cerrada");
@@ -739,9 +938,17 @@ let lastLocalMutationAt = 0;
 let pendingCloudPush = false;
 
 function getSavedSessionEmail() {
+  if (!isFinalGoogleAuthCompleted()) return null;
   try {
     const ls = localStorage.getItem("posada_active_email_v10");
     if (ls && ls.trim()) return ls.trim();
+  } catch (e) {}
+  try {
+    const permRaw = localStorage.getItem("posada_permanent_user_v1");
+    if (permRaw) {
+      const parsed = JSON.parse(permRaw);
+      if (parsed && parsed.email) return parsed.email.trim();
+    }
   } catch (e) {}
   try {
     const match = document.cookie.match(/(?:^|;\s*)posada_session_email=([^;]+)/);
@@ -758,7 +965,7 @@ function setSavedSessionEmail(email) {
   } catch (e) {}
   try {
     if (clean) {
-      document.cookie = `posada_session_email=${encodeURIComponent(clean)}; path=/; max-age=31536000; SameSite=Lax`;
+      document.cookie = `posada_session_email=${encodeURIComponent(clean)}; path=/; max-age=${TEN_YEARS_SECONDS}; SameSite=Lax`;
     } else {
       document.cookie = "posada_session_email=; path=/; max-age=0; SameSite=Lax";
     }
@@ -1129,17 +1336,81 @@ function renderAll() {
   renderQuickNavBar();
 }
 
+function setActiveQuickNavTarget(targetId) {
+  document.querySelectorAll("#quickNavBar .quick-nav-pill").forEach(pill => {
+    pill.classList.toggle("active", pill.getAttribute("data-nav-target") === targetId);
+  });
+}
+
+function initQuickNavScrollSpy() {
+  if (typeof IntersectionObserver === "undefined") return;
+  const targets = [
+    "colAttendees",
+    "equityBoardSection",
+    "plansIntroAnchor",
+    "additionalsSection",
+    "timelineSectionAnchor"
+  ];
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && entry.target && entry.target.id) {
+        setActiveQuickNavTarget(entry.target.id);
+      }
+    });
+  }, {
+    rootMargin: "-130px 0px -58% 0px",
+    threshold: 0.05
+  });
+
+  targets.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+}
+
 function jumpToSection(elementId) {
+  if (window.innerWidth <= 1024) {
+    if (elementId === "colAttendees") {
+      const tabBtn = document.querySelector('[data-mobile-tab="tab-attendees"]');
+      if (tabBtn) tabBtn.click();
+    } else if (elementId === "colTransport") {
+      const tabBtn = document.querySelector('[data-mobile-tab="tab-transport"]');
+      if (tabBtn) tabBtn.click();
+    } else if (elementId === "colPusio") {
+      const tabBtn = document.querySelector('[data-mobile-tab="tab-pusio"]');
+      if (tabBtn) tabBtn.click();
+    }
+  }
   const el = document.getElementById(elementId);
   if (!el) return;
-  if (elementId === "colAttendees" && window.innerWidth <= 900) {
-    const tabBtn = document.querySelector('[data-mobile-tab="tab-attendees"]');
-    if (tabBtn) tabBtn.click();
-  }
+  setActiveQuickNavTarget(elementId);
   el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function focusPusioWithPrompt(prefix = "") {
+  if (window.innerWidth <= 1024) {
+    const tabBtn = document.querySelector('[data-mobile-tab="tab-pusio"]');
+    if (tabBtn) tabBtn.click();
+  }
+  const pusioCard = document.getElementById("colPusio");
+  const input = document.getElementById("agendaProposalInput");
+  if (pusioCard) {
+    pusioCard.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+  setTimeout(() => {
+    if (input) {
+      if (prefix && !input.value.trim()) {
+        input.value = prefix;
+      }
+      input.focus();
+    }
+  }, 260);
+}
+
 function jumpToPlanFromTimeline(collabId) {
+  if (agendaBoardView !== "all") {
+    setAgendaBoardView("all");
+  }
   expandedPlanIds.add(collabId);
   renderAgendaBoards();
   const el = document.getElementById(`planCard_${collabId}`);
@@ -1156,10 +1427,14 @@ function renderQuickNavBar() {
   const eqEl = document.getElementById("qnEquityPct");
   const plansEl = document.getElementById("qnPlansCount");
   const basicsEl = document.getElementById("qnBasicsCount");
+  const mobAttBadge = document.getElementById("mobTabAttendBadge");
+  const mobCarsBadge = document.getElementById("mobTabCarsBadge");
 
   const totalAtt = (attendeesList || []).length;
   const confirmedAtt = (attendeesList || []).filter(u => u.attendance === "confirmed").length;
   if (attEl) attEl.textContent = `${confirmedAtt}/${totalAtt || 13}`;
+  if (mobAttBadge) mobAttBadge.textContent = `${confirmedAtt}/${totalAtt || 13}`;
+  if (mobCarsBadge) mobCarsBadge.textContent = `${(carsList || []).length}/4`;
 
   if (plansEl) plansEl.textContent = String((collaborations || []).length);
 
@@ -1704,10 +1979,21 @@ function confirmPendingProposal() {
   showToast(`¡Añadido a ${isFood ? 'Comidas' : 'Actividades'}!`);
 }
 
+let attendeeFilter = "all";
+
+function setAttendeeFilter(mode) {
+  attendeeFilter = mode || "all";
+  renderSummaryPanel();
+}
+
 function renderSummaryPanel() {
-  // Sincronizar barra de confirmación rápida del usuario activo
+  // Sincronizar barra de confirmación rápida del usuario activo vs CTA de invitado
   const myActionBox = document.getElementById("attendeeStatusActionBox");
+  const guestCta = document.getElementById("guestAttendanceCta");
   const myBadge = document.getElementById("myAttendanceBadge");
+  if (guestCta) {
+    guestCta.style.display = currentUser ? "none" : "flex";
+  }
   if (myActionBox && myBadge) {
     if (currentUser) {
       myActionBox.style.display = "block";
@@ -1731,11 +2017,34 @@ function renderSummaryPanel() {
     }
   }
 
+  const filterWrap = document.getElementById("attendeeFilterPills");
+  if (filterWrap) {
+    const confCount = (attendeesList || []).filter(u => u.attendance === "confirmed").length;
+    const pendCount = (attendeesList || []).filter(u => u.attendance !== "confirmed" && u.attendance !== "declined").length;
+    filterWrap.querySelectorAll(".mini-filter-pill").forEach(btn => {
+      const f = btn.getAttribute("data-att-filter");
+      btn.classList.toggle("active", f === attendeeFilter);
+      if (f === "all") btn.textContent = `Todos (${(attendeesList || []).length})`;
+      if (f === "confirmed") btn.textContent = `Confirmados (${confCount})`;
+      if (f === "pending") btn.textContent = `Por confirmar (${pendCount})`;
+    });
+  }
+
   // 1. Lado izquierdo: Avatares con estados de color (azul/visto al entrar, verde/amarillo/rojo por asistencia, dorado VIP)
   const avatarsGrid = document.getElementById("summaryAvatarsGrid");
   if (avatarsGrid) {
     avatarsGrid.innerHTML = "";
-    attendeesList.forEach(person => {
+    const filteredAttendees = (attendeesList || []).filter(person => {
+      if (attendeeFilter === "confirmed") return person.attendance === "confirmed";
+      if (attendeeFilter === "pending") return person.attendance !== "confirmed" && person.attendance !== "declined";
+      return true;
+    });
+
+    if (filteredAttendees.length === 0) {
+      avatarsGrid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:18px 10px; font-size:0.78rem; color:var(--ink-secondary); border:1px dashed var(--border-hover); border-radius:12px;">Nadie en este filtro todavía. <button type="button" class="btn btn-secondary btn-sm" style="margin-left:6px; padding:3px 10px; font-size:0.72rem;" onclick="setAttendeeFilter('all')">Ver todos</button></div>`;
+    }
+
+    filteredAttendees.forEach(person => {
       const isMe = currentUser && currentUser.email.toLowerCase() === person.email.toLowerCase();
       const hasSession = Boolean(person.pinHash || person.authUserId);
       const isVIP = person.puedo_dar_coche === 1;
@@ -2873,9 +3182,15 @@ function renderEquityBoard() {
     const avgCost = Math.round(totalEstPosada / activeCnt);
 
     kpiStrip.innerHTML = `
-      <div class="eq-kpi-chip"><span>Confirmados</span><strong>${confirmedCount}/${(attendeesList || []).length || 13}</strong></div>
-      <div class="eq-kpi-chip"><span>Asientos auto</span><strong>${totalSeats}/13</strong></div>
-      <div class="eq-kpi-chip"><span>Promedio est.</span><strong>~$${avgCost} MXN</strong></div>
+      <button type="button" class="eq-kpi-chip is-action" onclick="jumpToSection('colAttendees')" title="Ver lista de asistencia">
+        <span>Confirmados</span><strong>${confirmedCount}/${(attendeesList || []).length || 13} &rarr;</strong>
+      </button>
+      <button type="button" class="eq-kpi-chip is-action" onclick="jumpToSection('colTransport')" title="Ver autos y lugares disponibles">
+        <span>Asientos auto</span><strong>${totalSeats}/13 &rarr;</strong>
+      </button>
+      <button type="button" class="eq-kpi-chip is-action" onclick="currentUser ? openModal('modalUserSummary') : openModal('modalAuth')" title="Ver tu balance estimado">
+        <span>Promedio est.</span><strong>~$${avgCost} MXN</strong>
+      </button>
       <button type="button" class="eq-kpi-chip is-action ${missingSlots > 0 ? "is-alert" : "is-done"}" onclick="setAdditionalsFilter('missing'); jumpToSection('additionalsSection')">
         <span>${missingSlots > 0 ? "Por cubrir" : "Todo cubierto"}</span>
         <strong>${missingSlots > 0 ? `${missingSlots} cupos →` : "100%"}</strong>
@@ -2897,7 +3212,7 @@ function renderEquityBoard() {
 
   const membersWithScore = membersRaw.map(({ user, count, cats }) => {
     const ratio = count === 0 ? 0 : Math.min(100, Math.max(18, Math.round((count / scaleMax) * 100)));
-    let badgeText = "Observador";
+    let badgeText = "Sin aportes";
     let tierClass = "eq-tier-none";
     if (count > 0 && count === maxCount && maxCount >= 2) {
       badgeText = "Líder";
@@ -2926,29 +3241,67 @@ function renderEquityBoard() {
     if (cats.activity > 0) catPills.push(`<span class="eq-mini-pill is-activity" title="${cats.activity} de Juegos/Dinámicas">${cats.activity} Jueg.</span>`);
     if (cats.additional > 0) catPills.push(`<span class="eq-mini-pill is-additional" title="${cats.additional} de Básicos">${cats.additional} Bás.</span>`);
 
-    const catsHtml = catPills.length > 0
-      ? `<div class="equity-member-cats">${catPills.join("")}</div>`
-      : `<div class="equity-member-cats"><span class="eq-mini-empty">Sin aportes aún</span></div>`;
+    const isCompactObserver = count === 0;
+    const detailsHtml = !isCompactObserver
+      ? `
+        <div class="equity-member-cats">${catPills.join("")}</div>
+        <div class="equity-member-bar">
+          <div class="equity-member-bar-fill" style="width:${ratio}%;"></div>
+        </div>
+      `
+      : "";
 
     return `
-      <button type="button" class="equity-member-card ${tierClass} ${isMe ? "is-me" : ""} ${isSelected ? "is-selected" : ""}" onclick="toggleEquityMemberSpotlight('${emailLow.replace(/'/g, "\\'")}')" aria-expanded="${isSelected ? "true" : "false"}">
+      <button type="button" class="equity-member-card ${tierClass} ${isCompactObserver ? "is-compact-observer" : ""} ${isMe ? "is-me" : ""} ${isSelected ? "is-selected" : ""}" onclick="toggleEquityMemberSpotlight('${emailLow.replace(/'/g, "\\'")}')" aria-expanded="${isSelected ? "true" : "false"}" title="Toca para ver el detalle de ${user.name}">
         <div class="equity-member-top">
           <span class="equity-member-avatar">${miniSvg}</span>
           <div class="equity-member-info">
             <span class="equity-member-name">${user.name}${isMe ? " (Tú)" : ""}</span>
-            <span class="equity-member-badge">${badgeText}</span>
+            <span class="equity-member-badge">${count > 0 ? `${badgeText} · ${count}` : badgeText}</span>
           </div>
           <span class="equity-member-chevron" aria-hidden="true">${isSelected ? "▾" : "▸"}</span>
         </div>
-        ${catsHtml}
-        <div class="equity-member-bar">
-          <div class="equity-member-bar-fill" style="width:${ratio}%;"></div>
-        </div>
+        ${detailsHtml}
       </button>
     `;
   }).join("");
 
   renderEquityMemberSpotlight(membersWithScore);
+}
+
+let agendaBoardView = "all";
+
+function setAgendaBoardView(view) {
+  agendaBoardView = view || "all";
+  const bar = document.getElementById("agendaViewFilterBar");
+  if (bar) {
+    bar.querySelectorAll(".agenda-view-pill").forEach(btn => {
+      btn.classList.toggle("active", btn.getAttribute("data-board-view") === agendaBoardView);
+    });
+  }
+  const grid = document.getElementById("agendaColumnsGrid");
+  const colFood = document.getElementById("agendaColFood");
+  const colAct = document.getElementById("agendaColActivity");
+  if (grid) {
+    grid.classList.toggle("view-single-col", agendaBoardView !== "all");
+  }
+  if (colFood) {
+    colFood.classList.toggle("is-hidden-col", agendaBoardView === "activity");
+  }
+  if (colAct) {
+    colAct.classList.toggle("is-hidden-col", agendaBoardView === "food");
+  }
+}
+
+function toggleActivitiesGuideDrawer() {
+  const drawer = document.getElementById("activitiesGuideDrawer");
+  const btn = document.getElementById("btnToggleGuideDrawer");
+  if (!drawer) return;
+  const isNowCollapsed = drawer.classList.toggle("is-collapsed");
+  if (btn) {
+    btn.classList.toggle("active", !isNowCollapsed);
+    btn.setAttribute("aria-expanded", isNowCollapsed ? "false" : "true");
+  }
 }
 
 function renderAgendaBoards() {
@@ -2971,11 +3324,35 @@ function renderAgendaBoards() {
   if (badgeActivity) badgeActivity.textContent = String(activityPlans.length);
 
   foodContainer.innerHTML = foodPlans.length === 0
-    ? `<div class="empty-column-notice">Sin propuestas de comida o bebida aún.</div>`
+    ? `<div class="empty-column-interactive">
+        <div class="empty-col-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18"/><path d="M5 12a7 7 0 0 1 14 0"/><path d="M12 5V3"/><path d="M4 16h16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg>
+        </div>
+        <h4>A&uacute;n no hay platillos en la mesa</h4>
+        <p>Toca una idea r&aacute;pida para que <strong>pus.io</strong> arme la lista de ingredientes para los 13:</p>
+        <div class="empty-quick-chips">
+          <button type="button" class="empty-quick-chip" onclick="handlePusioMessage('Tacos al pastor / Taquiza')">+ Taquiza al pastor</button>
+          <button type="button" class="empty-quick-chip" onclick="handlePusioMessage('Carne asada en la terraza')">+ Carne asada</button>
+          <button type="button" class="empty-quick-chip" onclick="handlePusioMessage('Preparar ceviche playero y botanas de marisco frente al mar')">+ Ceviche playero</button>
+          <button type="button" class="empty-quick-chip" onclick="handlePusioMessage('Hamburguesas al carbón')">+ Hamburguesas</button>
+        </div>
+      </div>`
     : "";
 
   activityContainer.innerHTML = activityPlans.length === 0
-    ? `<div class="empty-column-notice">Sin dinámicas propuestas aún.</div>`
+    ? `<div class="empty-column-interactive">
+        <div class="empty-col-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="3"/><line x1="7" y1="12" x2="11" y2="12"/><line x1="9" y1="10" x2="9" y2="14"/><circle cx="15.5" cy="11" r="1"/><circle cx="17.5" cy="13" r="1"/></svg>
+        </div>
+        <h4>Sin din&aacute;micas registradas todav&iacute;a</h4>
+        <p>Inicia una actividad o torneo en 1 clic para que todos se sumen con lo necesario:</p>
+        <div class="empty-quick-chips">
+          <button type="button" class="empty-quick-chip" onclick="handlePusioMessage('Torneo de Super Smash Bros')">+ Torneo Smash Bros</button>
+          <button type="button" class="empty-quick-chip" onclick="handlePusioMessage('Fogata playera nocturna con malvaviscos y música acústica')">+ Fogata nocturna</button>
+          <button type="button" class="empty-quick-chip" onclick="handlePusioMessage('Intercambio de regalos chuscos estilo elefante blanco')">+ Intercambio</button>
+          <button type="button" class="empty-quick-chip" onclick="handlePusioMessage('Armar mesa y retas de beer pong con vasos rojos y pelotas')">+ Beer Pong</button>
+        </div>
+      </div>`
     : "";
 
   foodPlans.forEach(plan => {
@@ -3067,62 +3444,57 @@ function renderAdditionalsSection() {
     const perPersonEst = Math.round(totalEst / Math.max(claimers.length, targetQty));
     const themeClass = getPantryThemeClass(item.name);
 
-    // Slots visuales: primero los ocupados (con robot de cada persona), luego los disponibles
-    const filledSlotsHtml = claimers.map(cl => {
-      const matchedUser = (attendeesList || []).find(a =>
-        (cl.email && a.email && a.email.toLowerCase() === cl.email.toLowerCase()) ||
-        (cl.name && a.name && a.name.toLowerCase() === cl.name.toLowerCase())
-      );
-      const isMeSlot = Boolean(
-        currentUser &&
-        ((cl.email && cl.email.toLowerCase() === currentUser.email.toLowerCase()) ||
-         (!cl.email && cl.name && cl.name.toLowerCase() === currentUser.name.toLowerCase()))
-      );
-      const avatarHtml = matchedUser && matchedUser.robot
-        ? `<span class="pantry-slot-avatar">${renderRobotSVG(matchedUser.robot, null, null, true)}</span>`
-        : `<span class="pantry-slot-initial">${(cl.name || "?").slice(0, 1).toUpperCase()}</span>`;
+    // Avatares de quienes ya apartaron este básico + 1 solo botón CTA limpio
+    const filledSlotsHtml = claimers.length > 0
+      ? claimers.map(cl => {
+          const matchedUser = (attendeesList || []).find(a =>
+            (cl.email && a.email && a.email.toLowerCase() === cl.email.toLowerCase()) ||
+            (cl.name && a.name && a.name.toLowerCase() === cl.name.toLowerCase())
+          );
+          const isMeSlot = Boolean(
+            currentUser &&
+            ((cl.email && cl.email.toLowerCase() === currentUser.email.toLowerCase()) ||
+             (!cl.email && cl.name && cl.name.toLowerCase() === currentUser.name.toLowerCase()))
+          );
+          const avatarHtml = matchedUser && matchedUser.robot
+            ? `<span class="pantry-slot-avatar">${renderRobotSVG(matchedUser.robot, null, null, true)}</span>`
+            : `<span class="pantry-slot-initial">${(cl.name || "?").slice(0, 1).toUpperCase()}</span>`;
+          const targetKey = ((matchedUser && matchedUser.email) || cl.email || cl.name || "").replace(/'/g, "\\'");
 
-      if (isMeSlot) {
-        return `
-          <button type="button" class="pantry-slot pantry-slot-filled is-mine" onclick="toggleClaimAdditional('${item.id}')" title="Clic para soltar este básico">
-            ${avatarHtml}
-            <span class="pantry-slot-name">${matchedUser ? matchedUser.name : cl.name}</span>
-            <span class="pantry-slot-x" aria-hidden="true">&times;</span>
-          </button>
-        `;
-      }
-      const targetKey = ((matchedUser && matchedUser.email) || cl.email || cl.name || "").replace(/'/g, "\\'");
-      return `
-        <button type="button" class="pantry-slot pantry-slot-filled is-inspectable" onclick="openMemberSummaryModal('${targetKey}')" title="Ver qué más lleva ${matchedUser ? matchedUser.name : cl.name}">
-          ${avatarHtml}
-          <span class="pantry-slot-name">${matchedUser ? matchedUser.name : cl.name}</span>
+          return `
+            <button type="button" class="pantry-slot pantry-slot-filled is-inspectable ${isMeSlot ? "is-mine" : ""}" onclick="openMemberSummaryModal('${targetKey}')" title="Ver resumen de ${matchedUser ? matchedUser.name : cl.name}">
+              ${avatarHtml}
+              <span class="pantry-slot-name">${matchedUser ? matchedUser.name : cl.name}${isMeSlot ? " (Tú)" : ""}</span>
+            </button>
+          `;
+        }).join("")
+      : `<span class="pantry-no-claimers">Sin asignar aún</span>`;
+
+    let primaryCtaHtml = "";
+    if (isMine) {
+      primaryCtaHtml = `
+        <button type="button" class="pantry-cta-btn is-release" onclick="toggleClaimAdditional('${item.id}')" title="Clic para liberar tu lugar en este básico">
+          <span>✓ Lo llevas tú</span>
+          <span aria-hidden="true">&times;</span>
         </button>
       `;
-    }).join("");
-
-    let openSlotsHtml = "";
-    for (let i = 0; i < remaining; i++) {
-      const label = i === 0 && !isMine ? "+ Yo lo llevo" : "Disponible";
-      openSlotsHtml += `
-        <button type="button" class="pantry-slot pantry-slot-open ${i === 0 && !isMine ? "is-cta" : ""}" onclick="toggleClaimAdditional('${item.id}')" title="Apartar este cupo">
-          <span class="pantry-slot-plus">+</span>
-          <span>${label}</span>
+    } else if (!isMet) {
+      primaryCtaHtml = `
+        <button type="button" class="pantry-cta-btn is-primary-claim" onclick="toggleClaimAdditional('${item.id}')" title="Apartar 1 cupo de este básico">
+          <span>+ Yo lo llevo</span>
         </button>
       `;
-    }
-
-    if (canJoinExtra) {
-      openSlotsHtml += `
-        <button type="button" class="pantry-slot pantry-slot-open is-extra" onclick="toggleClaimAdditional('${item.id}')" title="Todos los básicos están cubiertos: puedes sumarte">
-          <span class="pantry-slot-plus">+</span>
-          <span>Sumarme</span>
+    } else if (canJoinExtra) {
+      primaryCtaHtml = `
+        <button type="button" class="pantry-cta-btn is-extra-join" onclick="toggleClaimAdditional('${item.id}')" title="Todos los básicos están cubiertos: súmate a este">
+          <span>+ Sumarme</span>
         </button>
       `;
     }
 
     const statusBadgeHtml = isMet
-      ? `<span class="pantry-status-pill is-ready">Listo &bull; ${claimers.length}/${targetQty}</span>`
-      : `<span class="pantry-status-pill is-needed">Falta${remaining === 1 ? "" : "n"} ${remaining}</span>`;
+      ? `<span class="pantry-status-pill is-ready">Cubierto &bull; ${claimers.length}/${targetQty}</span>`
+      : `<span class="pantry-status-pill is-needed">Falta${remaining === 1 ? "" : "n"} ${remaining} de ${targetQty}</span>`;
 
     const card = document.createElement("div");
     card.className = `pantry-card ${themeClass} ${isMet ? "is-met" : (claimers.length > 0 ? "is-partial" : "is-open")}`;
@@ -3138,9 +3510,11 @@ function renderAdditionalsSection() {
         <h4 class="pantry-card-title">${item.name}</h4>
         ${qtyHint ? `<p class="pantry-card-hint">${qtyHint}</p>` : ""}
       </div>
-      <div class="pantry-slots-row">
-        ${filledSlotsHtml}
-        ${openSlotsHtml}
+      <div class="pantry-footer-row">
+        <div class="pantry-claimers-wrap">
+          ${filledSlotsHtml}
+        </div>
+        ${primaryCtaHtml}
       </div>
     `;
     listEl.appendChild(card);
@@ -3610,9 +3984,10 @@ function createPlanCardElement(collab, catClass) {
         <div class="plan-progress-dots">
           ${dotsHtml}
         </div>
-        <button type="button" class="plan-toggle-expand-btn" aria-label="Expandir o contraer">
-          <svg class="chevron-expand-icon ${isExpanded ? 'rotated' : ''}" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
+        <span class="plan-expand-cta-pill">
+          <span>${isExpanded ? "Ocultar" : `Insumos (${totalCount})`}</span>
+          <svg class="chevron-expand-icon ${isExpanded ? 'rotated' : ''}" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </span>
       </div>
     </div>
 
@@ -3754,16 +4129,34 @@ function renderDynamicTimeline() {
 
   const containers = { stage1: s1, stage2: s2, stage3: s3 };
   const emptyHints = {
-    stage1: "Arrastra aquí actividades para el Sábado por la tarde",
-    stage2: "Arrastra aquí planes para el Sábado por la noche",
-    stage3: "Arrastra aquí desayuno o planes del Domingo"
+    stage1: {
+      text: "Arrastra aquí actividades para el Sábado por la tarde",
+      cta: "+ Proponer plan de playa / llegada",
+      prompt: "Ceviche frente al mar"
+    },
+    stage2: {
+      text: "Arrastra aquí planes para el Sábado por la noche",
+      cta: "+ Proponer cena o dinámica nocturna",
+      prompt: "Tacos al pastor / Taquiza"
+    },
+    stage3: {
+      text: "Arrastra aquí desayuno o planes del Domingo",
+      cta: "+ Proponer desayuno del domingo",
+      prompt: "Chilaquiles y café para desayuno del domingo"
+    }
   };
 
   Object.keys(buckets).forEach(stageKey => {
     const list = buckets[stageKey].sort((a, b) => a.order - b.order);
     const container = containers[stageKey];
     if (list.length === 0) {
-      container.innerHTML = `<div class="empty-stage-hint">${emptyHints[stageKey]}</div>`;
+      const h = emptyHints[stageKey];
+      container.innerHTML = `
+        <div class="empty-stage-hint is-interactive-stage-empty">
+          <span>${h.text}</span>
+          <button type="button" class="btn-stage-empty-cta" onclick="handlePusioMessage('${h.prompt.replace(/'/g, "\\'")}')">${h.cta}</button>
+        </div>
+      `;
       return;
     }
 
@@ -5427,3 +5820,14 @@ window.setStudioAttendance = setStudioAttendance;
 window.submitRewardIdea = submitRewardIdea;
 window.submitCurrentPusioToContest = submitCurrentPusioToContest;
 window.votePusioDesign = votePusioDesign;
+window.setAttendeeFilter = setAttendeeFilter;
+window.setAgendaBoardView = setAgendaBoardView;
+window.toggleActivitiesGuideDrawer = toggleActivitiesGuideDrawer;
+window.focusPusioWithPrompt = focusPusioWithPrompt;
+window.jumpToSection = jumpToSection;
+window.jumpToPlanFromTimeline = jumpToPlanFromTimeline;
+window.setAdditionalsFilter = setAdditionalsFilter;
+window.openMemberSummaryModal = openMemberSummaryModal;
+window.stepMemberSummaryModal = stepMemberSummaryModal;
+window.toggleEquityMemberSpotlight = toggleEquityMemberSpotlight;
+window.stepEquityMemberSpotlight = stepEquityMemberSpotlight;
